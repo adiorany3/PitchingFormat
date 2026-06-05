@@ -11,6 +11,20 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
 from pptx.util import Inches, Pt
 
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import cm
+from reportlab.platypus import (
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table as RLTable,
+    TableStyle,
+)
+
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -1645,6 +1659,566 @@ def add_insight_slide(prs, data, page):
     )
 
 
+
+# ==============================
+# PDF Pitch Scenario Guide
+# ==============================
+def pdf_escape(value: Any) -> str:
+    """Escape text for ReportLab Paragraph while preserving simple line breaks."""
+    safe = html.escape(str(value or "").strip())
+    safe = re.sub(r"\s*→\s*", " -> ", safe)
+    safe = safe.replace("&quot;", "'")
+    return safe.replace("\n", "<br/>")
+
+
+def pdf_bullets(items: list[Any], limit: int = 5) -> str:
+    cleaned = []
+
+    for item in items[:limit]:
+        value = truncate_text(str(item or "").strip(), 260)
+        if value:
+            cleaned.append(f"- {pdf_escape(value)}")
+
+    if not cleaned:
+        cleaned = ["- Lengkapi bagian ini sebelum latihan pitching."]
+
+    return "<br/>".join(cleaned)
+
+
+def scenario_slide_items(data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Create a scenario guide that mirrors the generated PPTX order."""
+    competitors = normalize_competitors(data)
+    milestones = normalize_milestones(data)
+    insights = generate_investor_insights(data)
+    competitor_chunks = chunk_items(competitors, 5) or [[]]
+    milestone_chunks = chunk_items(milestones, 3)
+
+    items: list[dict[str, Any]] = []
+
+    def add(
+        title: str,
+        purpose: str,
+        key_data: list[str],
+        talk_track: list[str],
+        transition: str,
+        questions: list[str] | None = None,
+        timing: str = "45-60 detik",
+    ):
+        items.append(
+            {
+                "title": title,
+                "purpose": purpose,
+                "key_data": key_data,
+                "talk_track": talk_track,
+                "transition": transition,
+                "questions": questions or [],
+                "timing": timing,
+            }
+        )
+
+    add(
+        "Cover",
+        "Membuka konteks: siapa startupnya, apa yang dilakukan, tahap pendanaan, dan siapa presenter.",
+        [
+            f"Company: {data.get('company', '')}",
+            f"One-liner: {data.get('one_liner', '')}",
+            f"Round: {data.get('round', '')}",
+            f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))}",
+        ],
+        [
+            "Buka dengan satu kalimat tajam: customer, pain, solusi, dan hasil bisnis.",
+            "Jangan mulai dari sejarah panjang perusahaan. Mulai dari kenapa masalah ini penting sekarang.",
+        ],
+        "Masuk ke problem agar investor memahami urgency sebelum melihat produk.",
+        ["Apakah one-liner langsung menjawab customer dan masalah utama?"],
+        "30-45 detik",
+    )
+
+    add(
+        "Problem",
+        "Membuktikan bahwa masalah customer nyata, sering terjadi, mahal, dan cukup besar untuk didanai.",
+        lines(data.get("problem", ""), 5) + [f"Evidence: {data.get('problem_evidence', '')}"],
+        [
+            "Ceritakan kondisi customer sebelum memakai produk.",
+            "Tekankan frekuensi masalah, biaya masalah, dan konsekuensi jika masalah tidak diselesaikan.",
+            "Gunakan evidence singkat: interview, pilot, waiting list, data internal, atau observasi market.",
+        ],
+        "Setelah pain terasa jelas, lanjutkan ke solusi yang langsung menghilangkan pain tersebut.",
+        [
+            "Seberapa sering masalah ini terjadi?",
+            "Berapa biaya ekonomi atau operasional dari masalah ini?",
+            "Kenapa solusi lama belum cukup?",
+        ],
+    )
+
+    add(
+        "Solution",
+        "Menunjukkan cara baru yang lebih sederhana, lebih cepat, atau lebih efektif untuk menyelesaikan problem.",
+        lines(data.get("solution", ""), 5) + [f"Value proposition: {data.get('value_prop', '')}"],
+        [
+            "Jelaskan perubahan before-after: dari workflow lama ke workflow baru.",
+            "Fokus pada outcome, bukan daftar fitur teknis.",
+            "Pastikan value proposition terdengar spesifik dan terukur.",
+        ],
+        "Lanjutkan ke Product untuk menunjukkan bagaimana solusi tersebut benar-benar bekerja.",
+        [
+            "Apa yang membuat solusi ini 10x lebih baik?",
+            "Bagian mana dari solusi yang paling sulit ditiru?",
+        ],
+    )
+
+    add(
+        "Product",
+        "Memperlihatkan mekanisme produk sehingga investor paham flow dan value creation dalam waktu singkat.",
+        [
+            f"Product flow: {data.get('product_flow', '')}",
+            f"Benefit: {data.get('product_benefit', '')}",
+        ] + lines(data.get("features", ""), 5),
+        [
+            "Jelaskan flow: input -> proses -> output -> dampak untuk customer.",
+            "Jika ada mockup, arahkan investor ke bagian yang menunjukkan value paling kuat.",
+            "Hindari menjelaskan semua tombol. Pilih satu use case utama.",
+        ],
+        "Setelah produk dipahami, tunjukkan bahwa market-nya cukup besar dan entry wedge-nya jelas.",
+        [
+            "Apa core workflow yang membuat user kembali memakai produk?",
+            "Apakah produk sudah dipakai customer nyata atau masih prototype?",
+        ],
+        "60-90 detik",
+    )
+
+    add(
+        "Market",
+        "Menunjukkan peluang pasar besar, tetapi tetap dengan fokus segmen awal yang realistis dimenangkan.",
+        [
+            f"TAM: {data.get('tam', '')}",
+            f"SAM: {data.get('sam', '')}",
+            f"SOM: {data.get('som', '')}",
+        ] + lines(data.get("market_notes", ""), 5),
+        [
+            "Jelaskan definisi TAM, SAM, dan SOM secara sederhana.",
+            "Tekankan wedge awal: customer mana yang paling sakit dan paling cepat diakuisisi.",
+            "Sebutkan potensi ekspansi setelah segmen awal terbukti.",
+        ],
+        "Setelah pasar terlihat menarik, jelaskan bagaimana startup menghasilkan revenue dari pasar tersebut.",
+        [
+            "Sumber perhitungan market size dari mana?",
+            "Kenapa segmen awal ini paling tepat?",
+        ],
+    )
+
+    add(
+        "Business Model",
+        "Menjelaskan cara startup menghasilkan uang dan apakah unit economics punya potensi scalable.",
+        [
+            f"ARPU: {data.get('arpu', '')}",
+            f"Gross margin: {data.get('gross_margin', '')}",
+            f"CAC: {data.get('cac', '')}",
+            f"Payback: {data.get('payback', '')}",
+        ] + lines(data.get("business_model", ""), 5),
+        [
+            "Jelaskan siapa yang membayar, berapa, kapan, dan kenapa mereka bersedia membayar.",
+            "Hubungkan ARPU, CAC, gross margin, dan payback ke kualitas bisnis.",
+            "Sebutkan potensi expansion revenue jika ada.",
+        ],
+        "Setelah model revenue jelas, tunjukkan bukti bahwa market mulai merespons.",
+        [
+            "Apakah pricing sudah diuji?",
+            "Berapa CAC by channel?",
+            "Bagaimana margin membaik saat scale?",
+        ],
+    )
+
+    add(
+        "Traction",
+        "Membuktikan demand awal: pengguna, revenue, growth, retention, pilot, LOI, pipeline, atau partnership.",
+        [
+            f"Users/customers: {data.get('users', '')}",
+            f"Revenue/GMV: {data.get('revenue', '')}",
+            f"Growth: {data.get('growth', '')}",
+            f"Retention: {data.get('retention', '')}",
+        ] + lines(data.get("traction_notes", ""), 5),
+        [
+            "Mulai dari metrik paling kuat: revenue, retention, active usage, atau paid pilot.",
+            "Bedakan traction nyata dari vanity metrics.",
+            "Jika growth masih awal, jelaskan leading indicators yang kredibel.",
+        ],
+        "Setelah demand terbukti, jelaskan bagaimana customer acquisition akan dibuat berulang.",
+        [
+            "Apa metrik traction paling investor-grade?",
+            "Retention dihitung dari definisi apa?",
+            "Apakah growth berasal dari channel yang repeatable?",
+        ],
+    )
+
+    add(
+        "Go-To-Market",
+        "Menjelaskan mesin akuisisi customer: ICP, channel utama, conversion motion, dan alasan channel bisa scale.",
+        [
+            f"ICP: {data.get('icp', '')}",
+            f"Primary channel: {data.get('channel', '')}",
+        ] + lines(data.get("gtm", ""), 5),
+        [
+            "Jelaskan siapa customer pertama yang paling tepat diburu.",
+            "Tunjukkan channel yang sudah diuji atau paling masuk akal berdasarkan perilaku customer.",
+            "Hubungkan GTM dengan CAC dan payback.",
+        ],
+        "Setelah channel jelas, bandingkan dengan alternatif yang sudah dipakai customer hari ini.",
+        [
+            "Channel mana yang sudah terbukti?",
+            "Apa bottleneck GTM terbesar?",
+            "Bagaimana sales cycle dan conversion rate?",
+        ],
+    )
+
+    for index, chunk in enumerate(competitor_chunks, 1):
+        key_data = []
+        for row in chunk:
+            key_data.append(
+                f"{row.get('name', 'Alternative')} ({row.get('category', 'Alternative')}): weakness = {row.get('weakness', '')}; why we win = {row.get('advantage', '')}"
+            )
+
+        title = "Competition" if len(competitor_chunks) == 1 else f"Competition {index}/{len(competitor_chunks)}"
+        add(
+            title,
+            "Menunjukkan bahwa founder memahami medan kompetisi dan punya alasan kuat untuk menang.",
+            key_data + [f"Narrative advantage: {data.get('competition_summary', '')}"],
+            [
+                "Jangan mengatakan tidak ada kompetitor. Status quo juga kompetitor.",
+                "Jelaskan customer sekarang memakai apa, kenapa itu kurang, dan kenapa produk Anda lebih tepat.",
+                "Gunakan why we win yang spesifik: distribusi, workflow, data, speed, cost, atau domain expertise.",
+            ],
+            "Setelah positioning jelas, masuk ke financials untuk menunjukkan rencana scale dan penggunaan dana.",
+            [
+                "Apa moat atau unfair advantage?",
+                "Bagaimana defensibility jika kompetitor besar masuk?",
+                "Apakah positioning Anda cukup tajam untuk segmen awal?",
+            ],
+        )
+
+    add(
+        "Financials",
+        "Menghubungkan proyeksi revenue, cost, profit, runway, dan milestone agar ask funding terlihat logis.",
+        [
+            f"Revenue Y1/Y2/Y3: {money(data.get('rev1', 0), data.get('currency', 'Rp'))} / {money(data.get('rev2', 0), data.get('currency', 'Rp'))} / {money(data.get('rev3', 0), data.get('currency', 'Rp'))}",
+            f"Cost Y1/Y2/Y3: {money(data.get('cost1', 0), data.get('currency', 'Rp'))} / {money(data.get('cost2', 0), data.get('currency', 'Rp'))} / {money(data.get('cost3', 0), data.get('currency', 'Rp'))}",
+            f"Profit Y1/Y2/Y3: {money(data.get('profit1', 0), data.get('currency', 'Rp'))} / {money(data.get('profit2', 0), data.get('currency', 'Rp'))} / {money(data.get('profit3', 0), data.get('currency', 'Rp'))}",
+            f"Runway: {data.get('runway', '')} bulan",
+            f"Next milestone: {milestone_headline(data)}",
+        ],
+        [
+            "Jangan hanya membacakan tabel. Jelaskan 2-3 asumsi utama yang menggerakkan revenue dan cost.",
+            "Hubungkan ask funding dengan runway dan milestone berikutnya.",
+            "Akui bahwa proyeksi seed adalah asumsi, lalu jelaskan asumsi mana yang akan divalidasi.",
+        ],
+        "Setelah angka utama jelas, uraikan milestone eksekusi yang akan dicapai dengan pendanaan.",
+        [
+            "Apa asumsi revenue paling sensitif?",
+            "Berapa burn bulanan?",
+            "Kapan perlu raise round berikutnya?",
+        ],
+        "60-90 detik",
+    )
+
+    for index, chunk in enumerate(milestone_chunks, 1):
+        title = "Milestones" if len(milestone_chunks) == 1 else f"Milestones {index}/{len(milestone_chunks)}"
+        add(
+            title,
+            "Membuat pendanaan terasa konkret: dana digunakan untuk mencapai target yang measurable.",
+            [
+                f"{row.get('period', 'Next')}: {row.get('target', '')} | Metric: {row.get('metric', '')} | Owner: {row.get('owner', '')}"
+                for row in chunk
+            ],
+            [
+                "Baca milestone sebagai timeline eksekusi, bukan daftar keinginan.",
+                "Setiap milestone harus punya metric keberhasilan dan owner.",
+                "Tekankan milestone yang membuka peluang next round atau inflection point berikutnya.",
+            ],
+            "Setelah milestone, gunakan investor readiness sebagai cek internal sebelum menutup dengan team dan ask.",
+            [
+                "Milestone mana yang paling berisiko?",
+                "Apa leading indicator sebelum milestone tercapai?",
+            ],
+        )
+
+    if data.get("include_insight_slide", True):
+        add(
+            "Investor Readiness",
+            "Slide internal/opsional untuk memahami kekuatan, risiko, dan rekomendasi dari data deck.",
+            [
+                insights.get("headline", ""),
+                f"Growth Y1-Y2: {insights['metrics']['growth_y2']}",
+                f"Estimated runway: {insights['metrics']['estimated_runway']}",
+                f"Margin Y3: {insights['metrics']['year3_profit_margin']}",
+            ],
+            [
+                "Gunakan bagian ini untuk latihan internal sebelum meeting investor.",
+                "Ambil 1-2 risiko terbesar dan siapkan jawaban singkat berbasis data.",
+                "Slide ini boleh dihapus dari deck investor jika ingin deck lebih ringkas.",
+            ],
+            "Setelah insight internal, masuk ke Team untuk menunjukkan kemampuan eksekusi.",
+            insights.get("risks", []),
+        )
+
+    add(
+        "Team",
+        "Meyakinkan investor bahwa tim punya founder-market fit dan kemampuan eksekusi untuk menang.",
+        lines(data.get("team", ""), 5) + [f"Founder-market fit: {data.get('founder_fit', '')}"],
+        [
+            "Hubungkan pengalaman tim dengan problem, produk, dan market.",
+            "Tunjukkan unfair advantage: domain expertise, akses customer, technical edge, atau distribusi.",
+            "Jika ada gap tim, jelaskan hiring plan dari funding.",
+        ],
+        "Setelah tim dipercaya, tutup dengan ask yang jelas dan next milestone.",
+        [
+            "Kenapa tim ini yang paling tepat?",
+            "Role kunci apa yang masih perlu direkrut?",
+        ],
+    )
+
+    add(
+        "Fundraising Ask",
+        "Menutup dengan jumlah dana, penggunaan dana, runway, milestone, dan logic menuju round berikutnya.",
+        [
+            f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))} {data.get('round', '')}",
+            f"Runway: {data.get('runway', '')} bulan",
+            f"Next milestone: {milestone_headline(data)}",
+        ] + lines(data.get("use_of_funds", ""), 5) + [f"Next round logic: {data.get('next_round', '')}"],
+        [
+            "Nyatakan ask dengan percaya diri dan spesifik.",
+            "Jelaskan penggunaan dana dalam 3-4 kategori utama.",
+            "Hubungkan funding ke milestone yang membuat startup layak raise round berikutnya.",
+        ],
+        "Akhiri dengan closing line, ajakan follow-up, demo, data room, atau meeting berikutnya.",
+        [
+            "Apakah ask cukup untuk 12-18 bulan?",
+            "Milestone apa yang membuat round berikutnya lebih kuat?",
+            "Apa penggunaan dana terbesar dan kenapa?",
+        ],
+        "60 detik",
+    )
+
+    add(
+        "Closing",
+        "Mengakhiri pitch dengan visi besar dan ajakan tindak lanjut yang jelas.",
+        [f"Closing line: {data.get('closing', '')}", f"Contact: {data.get('contact', '')}"],
+        [
+            "Rangkum visi besar dalam satu kalimat.",
+            "Sampaikan ajakan jelas: demo, follow-up call, data room, atau term discussion.",
+            "Berhenti dengan percaya diri dan buka sesi tanya jawab.",
+        ],
+        "Q&A: siapkan jawaban untuk market size, CAC, retention, competition, runway, dan assumptions.",
+        [
+            "Apa satu pesan yang harus investor ingat setelah meeting?",
+            "Apa next step yang diminta dari investor?",
+        ],
+        "30 detik",
+    )
+
+    return items
+
+
+def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
+    """Build a PDF speaker guide that teaches the pitch scenario order."""
+    output = BytesIO()
+    doc = SimpleDocTemplate(
+        output,
+        pagesize=A4,
+        rightMargin=1.45 * cm,
+        leftMargin=1.45 * cm,
+        topMargin=1.3 * cm,
+        bottomMargin=1.55 * cm,
+        title=f"{data.get('company', 'Startup')} - Pitch Scenario Guide",
+        author=DEVELOPER_FOOTER,
+    )
+
+    base_styles = getSampleStyleSheet()
+    styles = {
+        "cover_title": ParagraphStyle(
+            "CoverTitle",
+            parent=base_styles["Title"],
+            fontName="Helvetica-Bold",
+            fontSize=24,
+            leading=30,
+            textColor=colors.HexColor("#0f172a"),
+            spaceAfter=14,
+        ),
+        "cover_subtitle": ParagraphStyle(
+            "CoverSubtitle",
+            parent=base_styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=11,
+            leading=16,
+            textColor=colors.HexColor("#475569"),
+            spaceAfter=10,
+        ),
+        "section_title": ParagraphStyle(
+            "SectionTitle",
+            parent=base_styles["Heading2"],
+            fontName="Helvetica-Bold",
+            fontSize=15,
+            leading=19,
+            textColor=colors.HexColor("#0f172a"),
+            spaceBefore=4,
+            spaceAfter=8,
+        ),
+        "label": ParagraphStyle(
+            "Label",
+            parent=base_styles["BodyText"],
+            fontName="Helvetica-Bold",
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor("#2563eb"),
+            spaceAfter=2,
+        ),
+        "body": ParagraphStyle(
+            "Body",
+            parent=base_styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=9.2,
+            leading=13.2,
+            textColor=colors.HexColor("#1e293b"),
+            spaceAfter=6,
+        ),
+        "small": ParagraphStyle(
+            "Small",
+            parent=base_styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=8,
+            leading=11,
+            textColor=colors.HexColor("#64748b"),
+        ),
+        "center": ParagraphStyle(
+            "Center",
+            parent=base_styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=9,
+            leading=12,
+            textColor=colors.HexColor("#64748b"),
+            alignment=TA_CENTER,
+        ),
+    }
+
+    story = []
+    company = data.get("company", "Startup")
+    one_liner = data.get("one_liner", "")
+    insights = generate_investor_insights(data)
+    scenario_items = scenario_slide_items(data)
+
+    def add_footer_canvas(canvas, doc_obj):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 7.5)
+        canvas.setFillColor(colors.HexColor("#64748b"))
+        canvas.drawString(1.45 * cm, 0.85 * cm, DEVELOPER_FOOTER)
+        canvas.drawRightString(A4[0] - 1.45 * cm, 0.85 * cm, f"Page {doc_obj.page}")
+        canvas.restoreState()
+
+    story.append(Paragraph(pdf_escape(f"{company} - Pitch Scenario Guide"), styles["cover_title"]))
+    story.append(Paragraph(pdf_escape(one_liner), styles["cover_subtitle"]))
+    story.append(Spacer(1, 0.25 * cm))
+
+    summary_rows = [
+        ["Purpose", "PDF latihan pitching berdasarkan urutan slide PPTX yang di-generate."],
+        ["Round", str(data.get("round", ""))],
+        ["Ask", money(data.get("ask", 0), data.get("currency", "Rp"))],
+        ["Readiness", f"{insights['score']}/100"],
+        ["How to use", "Latih setiap slide sesuai timing, pahami transisi, lalu siapkan jawaban untuk pertanyaan investor."],
+    ]
+    summary_table = RLTable(
+        [[Paragraph(pdf_escape(a), styles["label"]), Paragraph(pdf_escape(b), styles["body"])] for a, b in summary_rows],
+        colWidths=[3.2 * cm, 12.7 * cm],
+        hAlign="LEFT",
+    )
+    summary_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+                ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#cbd5e1")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#e2e8f0")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    story.append(summary_table)
+    story.append(Spacer(1, 0.45 * cm))
+
+    story.append(Paragraph("Recommended pitch rhythm", styles["section_title"]))
+    rhythm = [
+        "Opening: 30-45 detik untuk company, one-liner, dan ask.",
+        "Problem + Solution + Product: 3-4 menit untuk membangun urgency dan value creation.",
+        "Market + Business Model + Traction + GTM: 4-5 menit untuk membuktikan opportunity dan demand.",
+        "Competition + Financials + Milestones: 3-4 menit untuk menjawab positioning dan execution plan.",
+        "Team + Fundraising Ask + Closing: 2-3 menit untuk menutup dengan confidence dan next step.",
+    ]
+    story.append(Paragraph(pdf_bullets(rhythm, 8), styles["body"]))
+    story.append(PageBreak())
+
+    story.append(Paragraph("Slide-by-slide scenario", styles["cover_title"]))
+    story.append(Paragraph("Ikuti urutan ini saat latihan. Setiap bagian berisi tujuan slide, data yang harus disebutkan, narasi, transisi, dan pertanyaan investor yang perlu disiapkan.", styles["cover_subtitle"]))
+    story.append(Spacer(1, 0.15 * cm))
+
+    for idx, item in enumerate(scenario_items, 1):
+        story.append(Paragraph(pdf_escape(f"{idx:02d}. {item['title']}"), styles["section_title"]))
+
+        meta = RLTable(
+            [
+                [Paragraph("Timing", styles["label"]), Paragraph(pdf_escape(item.get("timing", "45-60 detik")), styles["body"])],
+                [Paragraph("Purpose", styles["label"]), Paragraph(pdf_escape(item.get("purpose", "")), styles["body"])],
+                [Paragraph("Key data to mention", styles["label"]), Paragraph(pdf_bullets(item.get("key_data", []), 7), styles["body"])],
+                [Paragraph("Talk track", styles["label"]), Paragraph(pdf_bullets(item.get("talk_track", []), 5), styles["body"])],
+                [Paragraph("Transition", styles["label"]), Paragraph(pdf_escape(item.get("transition", "")), styles["body"])],
+                [Paragraph("Investor questions", styles["label"]), Paragraph(pdf_bullets(item.get("questions", []), 5), styles["body"])],
+            ],
+            colWidths=[3.4 * cm, 12.5 * cm],
+            hAlign="LEFT",
+        )
+        meta.setStyle(
+            TableStyle(
+                [
+                    ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#eff6ff")),
+                    ("BACKGROUND", (1, 0), (1, -1), colors.white),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 7),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        story.append(meta)
+        story.append(Spacer(1, 0.28 * cm))
+
+        if idx in {5, 10, 15} and idx != len(scenario_items):
+            story.append(PageBreak())
+
+    story.append(PageBreak())
+    story.append(Paragraph("Final rehearsal checklist", styles["cover_title"]))
+    checklist = [
+        "One-liner dapat diucapkan dalam kurang dari 15 detik.",
+        "Problem memiliki bukti, bukan hanya opini.",
+        "Product demo hanya menampilkan workflow yang paling penting.",
+        "Traction memakai metrik demand, bukan vanity metrics.",
+        "Competition mencakup kompetitor langsung, tidak langsung, dan status quo.",
+        "Financials memiliki asumsi yang bisa dijelaskan.",
+        "Milestone terhubung langsung dengan jumlah funding dan runway.",
+        "Ask dinyatakan jelas: jumlah, penggunaan dana, runway, dan next milestone.",
+        "Q&A sudah disiapkan untuk CAC, retention, market size, defensibility, dan burn rate.",
+    ]
+    story.append(Paragraph(pdf_bullets(checklist, 12), styles["body"]))
+    story.append(Spacer(1, 0.35 * cm))
+    story.append(Paragraph(pdf_escape(DEVELOPER_FOOTER), styles["center"]))
+
+    doc.build(story, onFirstPage=add_footer_canvas, onLaterPages=add_footer_canvas)
+    output.seek(0)
+    return output
+
+
 # ==============================
 # Deck Generator
 # ==============================
@@ -2400,7 +2974,7 @@ with col_generate:
 with col_hint:
     st.caption(
         "Sebelum generate, cek tab Analisa untuk memastikan narasi problem, traction, financial, dan ask sudah konsisten. "
-        "PPTX akan otomatis membawa footer Developed by Galuh Adi Insani."
+        "PPTX dan PDF scenario guide akan otomatis membawa footer Developed by Galuh Adi Insani."
     )
 
 if generate:
@@ -2410,14 +2984,37 @@ if generate:
 
     image_buffer = BytesIO(product_image.read()) if product_image else None
     pptx = build_deck(data, image_buffer)
+    scenario_pdf = build_scenario_pdf(data)
 
-    st.success("Pitch deck berhasil dibuat.")
+    st.success("Pitch deck dan PDF scenario guide berhasil dibuat.")
     show_insights(generate_investor_insights(data))
 
-    st.download_button(
-        "📥 Download Seed Investor Pitch Deck (.pptx)",
-        data=pptx,
-        file_name=f"{filename(company)}-seed-investor-pitch-deck.pptx",
-        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        use_container_width=True,
+    st.markdown(
+        """
+        <div class="readable-panel">
+            <p><strong>PDF Pitch Scenario Guide</strong></p>
+            <p>PDF ini mengikuti urutan slide PPTX dan berisi tujuan slide, narasi bicara, transisi, pertanyaan investor, serta checklist latihan pitching.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
+
+    download_col1, download_col2 = st.columns(2)
+
+    with download_col1:
+        st.download_button(
+            "📥 Download Seed Investor Pitch Deck (.pptx)",
+            data=pptx,
+            file_name=f"{filename(company)}-seed-investor-pitch-deck.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            use_container_width=True,
+        )
+
+    with download_col2:
+        st.download_button(
+            "📘 Download Pitch Scenario Guide (.pdf)",
+            data=scenario_pdf,
+            file_name=f"{filename(company)}-pitch-scenario-guide.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
