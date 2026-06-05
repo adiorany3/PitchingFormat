@@ -6,12 +6,24 @@ Footer aplikasi, setiap slide PPTX, dan PDF guide:
 
 **Developed by Galuh Adi Insani**
 
+## Pembaruan Versi v7 - Istilah & Rumus Founder Baru
+
+- Ditambahkan tab **Istilah & Rumus** di aplikasi.
+- Setiap istilah startup/investor dilengkapi:
+  - arti sederhana,
+  - rumus atau cara menghitung,
+  - contoh angka,
+  - slide tempat istilah biasanya dipakai.
+- Ditambahkan pencarian dan filter kategori istilah agar founder baru lebih mudah belajar.
+- PDF **Pitch Scenario Guide** sekarang memiliki appendix **Istilah investor dan cara menghitungnya**.
+- Istilah yang dicakup antara lain TAM, SAM, SOM, MRR, ARR, GMV, ARPU, CAC, CAC Payback, Gross Margin, Retention, Churn, Runway, Burn Rate, Valuation, Dilution, Milestone, Moat, GTM, dan lainnya.
+
 ## Pembaruan Versi v6 - PDF Pitch Scenario Guide
 
 - Ditambahkan output **Pitch Scenario Guide PDF** setelah generate.
 - PDF mengikuti urutan slide PPTX yang dibuat aplikasi.
 - Jika slide **Competition** atau **Milestones** otomatis terpecah menjadi beberapa slide, PDF juga mengikuti urutan tersebut.
-- PDF berisi panduan latihan pitching untuk setiap slide:
+- PDF berisi panduan latihan pitching untuk setiap slide dan appendix istilah investor:
   - Timing yang disarankan
   - Tujuan slide
   - Data penting yang perlu disebutkan
@@ -60,7 +72,15 @@ Footer aplikasi, setiap slide PPTX, dan PDF guide:
   3. Market & Traction
   4. Financial & Funding
   5. Team & Competition
-  6. Analisa
+  6. Istilah & Rumus
+  7. Analisa
+- Kamus istilah startup dan investor dengan rumus/cara menghitung:
+  - TAM, SAM, SOM
+  - Revenue, MRR, ARR, GMV, Take Rate
+  - ARPU, Gross Margin, COGS, CAC, CAC Payback, LTV, LTV/CAC
+  - Retention, Churn, MoM Growth, Pipeline, LOI
+  - Runway, Burn Rate, Operating Cost, EBITDA/Profit, Profit Margin
+  - Valuation, Dilution, Milestone, Success Metric, Moat, Status Quo
 - Analisa otomatis:
   - Deck readiness score
   - Revenue growth Y1->Y2 dan Y2->Y3
@@ -116,10 +136,11 @@ pitch_deck_seed_generator/
 ## Cara Menggunakan PDF Scenario Guide
 
 1. Isi data pitch seperti biasa.
-2. Klik **Generate Seed Investor Pitch Deck**.
-3. Download `.pptx` untuk presentasi investor.
-4. Download `.pdf` untuk latihan skenario pitching.
-5. Latih pitch mengikuti urutan PDF: tujuan slide, talk track, transisi, dan pertanyaan investor.
+2. Buka tab **Istilah & Rumus** jika ada istilah yang belum dipahami atau angka yang belum tahu cara dihitung.
+3. Klik **Generate Seed Investor Pitch Deck**.
+4. Download `.pptx` untuk presentasi investor.
+5. Download `.pdf` untuk latihan skenario pitching.
+6. Latih pitch mengikuti urutan PDF: tujuan slide, talk track, transisi, pertanyaan investor, appendix istilah, dan checklist.
 
 ## Catatan
 

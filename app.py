@@ -424,6 +424,390 @@ def short_money(value: float, currency: str) -> str:
 
 
 # ==============================
+# Startup Pitch Glossary
+# ==============================
+STARTUP_TERMS = [
+    {
+        "category": "Fundraising",
+        "term": "Pre-Seed Round",
+        "simple": "Pendanaan paling awal untuk membuktikan problem, membangun MVP, dan mencari validasi pasar pertama.",
+        "formula": "Tidak ada rumus baku. Biasanya ditentukan dari kebutuhan dana 6-18 bulan + milestone validasi awal.",
+        "example": "Butuh Rp 600 juta untuk 12 bulan membangun MVP, pilot 20 customer, dan validasi pricing.",
+        "used_in": "Identitas, Fundraising Ask, Milestones",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Seed Round",
+        "simple": "Pendanaan untuk mempercepat produk, akuisisi pelanggan, traction awal, dan pembuktian model bisnis.",
+        "formula": "Ask seed = kebutuhan runway 12-18 bulan + biaya mencapai milestone berikutnya.",
+        "example": "Ask Rp 1,5M untuk 18 bulan sampai Rp 500 juta MRR dan 8.000 active businesses.",
+        "used_in": "Cover, Financials, Fundraising Ask",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Ask / Jumlah Pendanaan",
+        "simple": "Jumlah dana yang diminta dari investor pada round ini.",
+        "formula": "Ask = estimasi biaya bulanan x target runway + buffer eksekusi.",
+        "example": "Burn Rp 80 juta/bulan x 18 bulan = Rp 1,44M. Ask dapat dibulatkan menjadi Rp 1,5M.",
+        "used_in": "Cover, Financials, Fundraising Ask",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Use of Funds",
+        "simple": "Rencana penggunaan dana investor dalam kategori utama.",
+        "formula": "Total use of funds harus = 100% dari ask. Contoh kategori: Product, Sales & Marketing, Team, Operations.",
+        "example": "Product 40%, Sales & Marketing 35%, Customer Success 15%, Operations 10%.",
+        "used_in": "Fundraising Ask",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Runway",
+        "simple": "Berapa bulan startup bisa berjalan sebelum dana habis.",
+        "formula": "Runway = cash tersedia / net burn bulanan.",
+        "example": "Cash Rp 1,5M dan burn Rp 83 juta/bulan -> runway sekitar 18 bulan.",
+        "used_in": "Financials, Fundraising Ask",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Milestone",
+        "simple": "Target penting yang harus dicapai agar startup naik kelas atau siap fundraising berikutnya.",
+        "formula": "Milestone baik harus punya periode + target + success metric + owner.",
+        "example": "0-6 bulan: rilis MVP v2, success metric: 500 paid users, owner: Product + Growth.",
+        "used_in": "Milestones, Financials, Fundraising Ask",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Success Metric",
+        "simple": "Ukuran keberhasilan yang membuat milestone tidak subjektif.",
+        "formula": "Gunakan angka: MRR, ARR, active user, retention, CAC payback, gross margin, partnership, atau launch date.",
+        "example": "Target bukan 'marketing lebih kuat', tetapi 'CAC payback < 3 bulan dari channel komunitas'.",
+        "used_in": "Milestones",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Valuation",
+        "simple": "Nilai perusahaan yang menjadi dasar investor membeli saham.",
+        "formula": "Post-money valuation = pre-money valuation + dana masuk. Dilution = dana masuk / post-money valuation.",
+        "example": "Pre-money Rp 10M + dana Rp 2M = post-money Rp 12M. Dilution investor = 2/12 = 16,7%.",
+        "used_in": "Q&A investor, tidak selalu masuk slide seed awal",
+    },
+    {
+        "category": "Fundraising",
+        "term": "Dilution",
+        "simple": "Persentase kepemilikan founder yang berkurang karena saham baru diterbitkan untuk investor.",
+        "formula": "Dilution investor = dana masuk / post-money valuation.",
+        "example": "Investor masuk Rp 1,5M dengan post-money Rp 10M -> dilution 15%.",
+        "used_in": "Q&A investor",
+    },
+    {
+        "category": "Market",
+        "term": "TAM - Total Addressable Market",
+        "simple": "Total peluang pasar jika startup bisa melayani seluruh pasar yang relevan.",
+        "formula": "TAM = jumlah seluruh target customer x potensi revenue per customer per tahun.",
+        "example": "1 juta UMKM x Rp 1,2 juta/tahun = Rp 1,2T TAM.",
+        "used_in": "Market",
+    },
+    {
+        "category": "Market",
+        "term": "SAM - Serviceable Available Market",
+        "simple": "Bagian TAM yang realistis dijangkau oleh produk, wilayah, channel, dan model bisnis saat ini.",
+        "formula": "SAM = jumlah customer dalam segmen yang bisa dilayani x revenue per customer per tahun.",
+        "example": "150 ribu UMKM F&B yang sudah digital x Rp 1,2 juta/tahun = Rp 180M SAM.",
+        "used_in": "Market",
+    },
+    {
+        "category": "Market",
+        "term": "SOM - Serviceable Obtainable Market",
+        "simple": "Bagian SAM yang realistis dimenangkan dalam 2-5 tahun pertama.",
+        "formula": "SOM = target market share realistis x SAM.",
+        "example": "Target 5% dari SAM Rp 180M = Rp 9M SOM awal.",
+        "used_in": "Market",
+    },
+    {
+        "category": "Market",
+        "term": "ICP - Ideal Customer Profile",
+        "simple": "Profil customer yang paling cocok, paling butuh solusi, dan paling mudah dijangkau.",
+        "formula": "ICP = segmen + ukuran bisnis + masalah utama + kemampuan bayar + channel akses.",
+        "example": "UMKM F&B dengan 3-50 transaksi/hari, masih memakai spreadsheet, aktif di komunitas WhatsApp.",
+        "used_in": "Go-To-Market",
+    },
+    {
+        "category": "Market",
+        "term": "Wedge Market",
+        "simple": "Segmen awal yang kecil tetapi tajam untuk dimenangkan sebelum ekspansi ke pasar lebih besar.",
+        "formula": "Pilih segmen dengan pain tinggi, akses mudah, sales cycle pendek, dan use case jelas.",
+        "example": "Mulai dari UMKM F&B, lalu ekspansi ke ritel, jasa, dan wholesale.",
+        "used_in": "Market, GTM",
+    },
+    {
+        "category": "Revenue",
+        "term": "Revenue",
+        "simple": "Pendapatan yang benar-benar diterima atau diakui dari customer.",
+        "formula": "Revenue = jumlah customer berbayar x harga rata-rata dalam periode tertentu.",
+        "example": "500 customer x Rp 100.000/bulan = Rp 50 juta revenue bulanan.",
+        "used_in": "Traction, Financials",
+    },
+    {
+        "category": "Revenue",
+        "term": "MRR - Monthly Recurring Revenue",
+        "simple": "Pendapatan berulang per bulan, biasanya untuk subscription/SaaS.",
+        "formula": "MRR = jumlah pelanggan aktif berbayar x biaya subscription bulanan rata-rata.",
+        "example": "850 customer x Rp 100.000/bulan = Rp 85 juta MRR.",
+        "used_in": "Traction, Milestones, Financials",
+    },
+    {
+        "category": "Revenue",
+        "term": "ARR - Annual Recurring Revenue",
+        "simple": "Pendapatan berulang tahunan dari model subscription.",
+        "formula": "ARR = MRR x 12.",
+        "example": "MRR Rp 85 juta x 12 = Rp 1,02M ARR.",
+        "used_in": "Traction, Financials",
+    },
+    {
+        "category": "Revenue",
+        "term": "GMV - Gross Merchandise Value",
+        "simple": "Total nilai transaksi yang lewat platform, belum tentu menjadi revenue perusahaan.",
+        "formula": "GMV = jumlah transaksi x nilai transaksi rata-rata.",
+        "example": "10.000 transaksi x Rp 150.000 = Rp 1,5M GMV. Jika take rate 5%, revenue = Rp 75 juta.",
+        "used_in": "Traction, Marketplace model",
+    },
+    {
+        "category": "Revenue",
+        "term": "Take Rate",
+        "simple": "Persentase GMV yang menjadi revenue startup.",
+        "formula": "Take rate = revenue / GMV.",
+        "example": "Revenue Rp 75 juta dari GMV Rp 1,5M -> take rate 5%.",
+        "used_in": "Business Model",
+    },
+    {
+        "category": "Unit Economics",
+        "term": "ARPU - Average Revenue Per User",
+        "simple": "Pendapatan rata-rata dari satu user/customer dalam periode tertentu.",
+        "formula": "ARPU = total revenue / jumlah user atau customer berbayar.",
+        "example": "Revenue Rp 50 juta/bulan dari 500 customer -> ARPU Rp 100.000/bulan.",
+        "used_in": "Business Model, Market, Financials",
+    },
+    {
+        "category": "Unit Economics",
+        "term": "Gross Margin",
+        "simple": "Persentase revenue yang tersisa setelah biaya langsung melayani customer.",
+        "formula": "Gross margin = (revenue - COGS) / revenue x 100%.",
+        "example": "Revenue Rp 100 juta, COGS Rp 22 juta -> gross margin 78%.",
+        "used_in": "Business Model, Financials",
+    },
+    {
+        "category": "Unit Economics",
+        "term": "COGS - Cost of Goods Sold",
+        "simple": "Biaya langsung untuk menyediakan produk/jasa kepada customer.",
+        "formula": "COGS = biaya server, payment fee, support langsung, bahan baku, atau biaya layanan yang naik mengikuti customer.",
+        "example": "Revenue Rp 100 juta, biaya server dan payment fee Rp 10 juta, support langsung Rp 12 juta -> COGS Rp 22 juta.",
+        "used_in": "Business Model, Financials",
+    },
+    {
+        "category": "Unit Economics",
+        "term": "CAC - Customer Acquisition Cost",
+        "simple": "Biaya rata-rata untuk mendapatkan satu customer baru.",
+        "formula": "CAC = total biaya sales & marketing / jumlah customer baru.",
+        "example": "Biaya marketing Rp 14 juta menghasilkan 100 customer baru -> CAC Rp 140.000.",
+        "used_in": "Business Model, GTM, Q&A investor",
+    },
+    {
+        "category": "Unit Economics",
+        "term": "CAC Payback",
+        "simple": "Waktu yang dibutuhkan untuk mengembalikan biaya akuisisi customer dari gross profit customer tersebut.",
+        "formula": "CAC payback = CAC / (ARPU x gross margin bulanan).",
+        "example": "CAC Rp 140.000, ARPU Rp 100.000, gross margin 70% -> payback 2 bulan.",
+        "used_in": "Business Model, GTM",
+    },
+    {
+        "category": "Unit Economics",
+        "term": "LTV - Lifetime Value",
+        "simple": "Estimasi gross profit dari satu customer selama customer masih memakai produk.",
+        "formula": "LTV sederhana = ARPU bulanan x gross margin x umur customer dalam bulan.",
+        "example": "ARPU Rp 100.000, margin 70%, lifetime 12 bulan -> LTV Rp 840.000.",
+        "used_in": "Q&A investor, Unit economics",
+    },
+    {
+        "category": "Unit Economics",
+        "term": "LTV/CAC",
+        "simple": "Rasio nilai customer dibanding biaya mendapatkannya.",
+        "formula": "LTV/CAC = LTV / CAC.",
+        "example": "LTV Rp 840.000 dan CAC Rp 140.000 -> LTV/CAC = 6x.",
+        "used_in": "Business Model, Q&A investor",
+    },
+    {
+        "category": "Traction",
+        "term": "Traction",
+        "simple": "Bukti bahwa market mulai menerima produk.",
+        "formula": "Tidak satu rumus. Gunakan bukti: revenue, paid users, active usage, retention, pilot, LOI, partnership, pipeline.",
+        "example": "Rp 85 juta MRR, 1.200 active users, retention D30 72%, growth 28% MoM.",
+        "used_in": "Traction",
+    },
+    {
+        "category": "Traction",
+        "term": "Active Users",
+        "simple": "User yang benar-benar aktif memakai produk dalam periode tertentu.",
+        "formula": "DAU = daily active users, WAU = weekly active users, MAU = monthly active users.",
+        "example": "2.000 MAU berarti 2.000 user aktif minimal sekali dalam 30 hari terakhir.",
+        "used_in": "Traction",
+    },
+    {
+        "category": "Traction",
+        "term": "Retention D7 / D30",
+        "simple": "Persentase user yang kembali memakai produk setelah 7 atau 30 hari.",
+        "formula": "Retention = user yang kembali pada hari ke-N / user yang mulai pada hari pertama x 100%.",
+        "example": "100 user daftar, 72 masih aktif hari ke-30 -> D30 retention 72%.",
+        "used_in": "Traction, Q&A investor",
+    },
+    {
+        "category": "Traction",
+        "term": "Churn",
+        "simple": "Persentase customer yang berhenti memakai atau berhenti membayar.",
+        "formula": "Customer churn = customer hilang dalam periode / customer awal periode x 100%.",
+        "example": "Awal bulan 500 customer, 25 berhenti -> churn 5% per bulan.",
+        "used_in": "Traction, Q&A investor",
+    },
+    {
+        "category": "Traction",
+        "term": "MoM Growth",
+        "simple": "Pertumbuhan dari bulan ke bulan.",
+        "formula": "MoM growth = (nilai bulan ini - nilai bulan lalu) / nilai bulan lalu x 100%.",
+        "example": "MRR naik dari Rp 70 juta ke Rp 85 juta -> growth 21,4% MoM.",
+        "used_in": "Traction, Financials",
+    },
+    {
+        "category": "Traction",
+        "term": "Pipeline",
+        "simple": "Calon customer atau potensi deal yang sedang diproses sales.",
+        "formula": "Pipeline value = jumlah prospek x estimasi nilai deal x probabilitas closing.",
+        "example": "20 prospek x Rp 10 juta x peluang 40% = expected pipeline Rp 80 juta.",
+        "used_in": "Traction, GTM",
+    },
+    {
+        "category": "Traction",
+        "term": "LOI - Letter of Intent",
+        "simple": "Surat minat dari calon customer/partner yang menunjukkan niat bekerja sama atau membeli.",
+        "formula": "Tidak ada rumus. Nilainya lebih kuat jika ada jumlah, timeline, dan pihak yang jelas.",
+        "example": "5 LOI dari koperasi UMKM dengan potensi 2.000 merchant.",
+        "used_in": "Traction",
+    },
+    {
+        "category": "GTM",
+        "term": "GTM - Go-To-Market",
+        "simple": "Strategi mendapatkan, mengonversi, dan mempertahankan customer secara berulang.",
+        "formula": "GTM = ICP + channel + pesan utama + funnel + conversion + CAC + retention motion.",
+        "example": "Lead dari komunitas UMKM -> webinar -> trial -> onboarding WhatsApp -> paid subscription.",
+        "used_in": "Go-To-Market",
+    },
+    {
+        "category": "GTM",
+        "term": "Conversion Rate",
+        "simple": "Persentase orang/prospek yang berpindah dari satu tahap funnel ke tahap berikutnya.",
+        "formula": "Conversion rate = jumlah yang berhasil lanjut / jumlah awal x 100%.",
+        "example": "1.000 leads, 120 trial -> conversion lead-to-trial 12%.",
+        "used_in": "GTM, Traction",
+    },
+    {
+        "category": "Financials",
+        "term": "Operating Cost",
+        "simple": "Biaya menjalankan startup, seperti tim, marketing, sales, tools, legal, operasional, dan kantor.",
+        "formula": "Operating cost = payroll + marketing + sales + product/engineering + tools + operations + legal/admin.",
+        "example": "Payroll Rp 80 juta + marketing Rp 30 juta + tools Rp 10 juta = operating cost Rp 120 juta/bulan.",
+        "used_in": "Financials",
+    },
+    {
+        "category": "Financials",
+        "term": "Burn Rate / Net Burn",
+        "simple": "Jumlah uang yang habis setiap bulan setelah memperhitungkan revenue.",
+        "formula": "Net burn = cash keluar bulanan - cash masuk bulanan.",
+        "example": "Biaya Rp 120 juta/bulan, revenue Rp 40 juta/bulan -> net burn Rp 80 juta/bulan.",
+        "used_in": "Financials, Runway",
+    },
+    {
+        "category": "Financials",
+        "term": "EBITDA / Profit",
+        "simple": "Indikasi laba operasional sebelum beberapa komponen akuntansi; di aplikasi ini dipakai sebagai estimasi profit/loss sederhana.",
+        "formula": "Profit sederhana = revenue - operating cost. EBITDA lebih detail mengecualikan interest, tax, depreciation, amortization.",
+        "example": "Revenue Rp 1,2M, cost Rp 2M -> profit/loss Rp -800 juta.",
+        "used_in": "Financials",
+    },
+    {
+        "category": "Financials",
+        "term": "Profit Margin",
+        "simple": "Persentase profit dibanding revenue.",
+        "formula": "Profit margin = profit / revenue x 100%.",
+        "example": "Profit Rp 3,5M dari revenue Rp 13,5M -> margin 25,9%.",
+        "used_in": "Investor Readiness, Financials",
+    },
+    {
+        "category": "Competition",
+        "term": "Direct Competitor",
+        "simple": "Produk/perusahaan yang menyelesaikan masalah serupa untuk customer yang sama.",
+        "formula": "Tidak ada rumus. Bandingkan berdasarkan target customer, use case, pricing, channel, dan workflow.",
+        "example": "Aplikasi akuntansi lain yang juga menargetkan UMKM.",
+        "used_in": "Competition",
+    },
+    {
+        "category": "Competition",
+        "term": "Indirect Competitor",
+        "simple": "Alternatif yang menyelesaikan sebagian masalah dengan cara berbeda.",
+        "formula": "Tidak ada rumus. Cari alat atau proses yang dipakai customer saat ini walaupun bukan kategori produk yang sama.",
+        "example": "Spreadsheet, jasa admin, atau POS tanpa modul analitik.",
+        "used_in": "Competition",
+    },
+    {
+        "category": "Competition",
+        "term": "Status Quo",
+        "simple": "Cara lama yang tetap dipakai customer jika mereka tidak membeli solusi baru.",
+        "formula": "Tidak ada rumus. Identifikasi workflow manual, kebiasaan, atau keputusan 'tidak melakukan apa-apa'.",
+        "example": "Owner tetap mencatat transaksi di buku tulis karena belum percaya software.",
+        "used_in": "Competition",
+    },
+    {
+        "category": "Competition",
+        "term": "Moat / Defensibility",
+        "simple": "Alasan bisnis sulit ditiru atau dikalahkan ketika sudah tumbuh.",
+        "formula": "Bisa berasal dari data, network effect, switching cost, distribution advantage, brand, regulasi, atau operational know-how.",
+        "example": "Data transaksi UMKM yang makin akurat membuat rekomendasi produk makin sulit ditiru.",
+        "used_in": "Competition, Q&A investor",
+    },
+]
+
+
+def glossary_categories() -> list[str]:
+    categories = []
+    for item in STARTUP_TERMS:
+        category = item.get("category", "Lainnya")
+        if category not in categories:
+            categories.append(category)
+    return categories
+
+
+def filter_glossary(search: str = "", category: str = "Semua") -> list[dict[str, str]]:
+    search_clean = (search or "").strip().lower()
+    result = []
+
+    for item in STARTUP_TERMS:
+        haystack = " ".join(str(v) for v in item.values()).lower()
+        if category != "Semua" and item.get("category") != category:
+            continue
+        if search_clean and search_clean not in haystack:
+            continue
+        result.append(item)
+
+    return result
+
+
+def term_by_name(term_name: str) -> dict[str, str] | None:
+    target = term_name.lower().strip()
+    for item in STARTUP_TERMS:
+        if item["term"].lower().startswith(target) or target in item["term"].lower():
+            return item
+    return None
+
+
+
+# ==============================
 # Layout Safety Helpers
 # ==============================
 def estimate_text_capacity(w: float, h: float, size: float) -> int:
@@ -861,6 +1245,91 @@ def show_insights(insights: dict[str, Any]):
 
     with c3:
         render_insight_card("Rekomendasi Pitching", insights["recommendations"])
+
+
+def render_glossary_section():
+    st.subheader("📚 Istilah Startup & Cara Menghitung")
+    st.caption(
+        "Gunakan bagian ini sebagai mini-kamus saat mengisi deck. Setiap istilah dijelaskan dengan bahasa sederhana, "
+        "rumus praktis, contoh angka, dan slide tempat istilah itu biasanya dipakai."
+    )
+
+    guide(
+        "Cara memakai kamus istilah",
+        "Cari istilah yang belum dipahami, baca definisi sederhananya, lalu gunakan rumus dan contoh untuk mengisi field terkait. "
+        "Untuk founder baru, prioritaskan memahami TAM/SAM/SOM, MRR, ARPU, CAC, gross margin, retention, runway, burn rate, dan milestone.",
+    )
+
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        search = st.text_input(
+            "Cari istilah",
+            "",
+            placeholder="Contoh: CAC, runway, TAM, retention, MRR",
+            help="Ketik istilah, rumus, contoh, atau slide yang ingin dicari.",
+        )
+    with col2:
+        category = st.selectbox(
+            "Kategori",
+            ["Semua"] + glossary_categories(),
+            help="Filter istilah berdasarkan topik agar lebih mudah dipelajari.",
+        )
+
+    terms = filter_glossary(search, category)
+    st.caption(f"Menampilkan {len(terms)} dari {len(STARTUP_TERMS)} istilah.")
+
+    priority_names = [
+        "TAM - Total Addressable Market",
+        "SAM - Serviceable Available Market",
+        "SOM - Serviceable Obtainable Market",
+        "MRR - Monthly Recurring Revenue",
+        "ARPU - Average Revenue Per User",
+        "CAC - Customer Acquisition Cost",
+        "Gross Margin",
+        "Retention D7 / D30",
+        "Runway",
+        "Burn Rate / Net Burn",
+        "Milestone",
+        "CAC Payback",
+    ]
+
+    if not search and category == "Semua":
+        st.markdown("### Istilah prioritas untuk pitch deck seed")
+        cols = st.columns(3)
+        for idx, name in enumerate(priority_names):
+            term = next((item for item in STARTUP_TERMS if item["term"] == name), None)
+            if not term:
+                continue
+            with cols[idx % 3]:
+                st.markdown(
+                    f"""
+                    <div class="insight-card">
+                        <h4>{html.escape(term['term'])}</h4>
+                        <p><strong>Arti:</strong> {html.escape(term['simple'])}</p>
+                        <p><strong>Rumus:</strong> {html.escape(term['formula'])}</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    st.markdown("### Semua istilah")
+    if not terms:
+        st.warning("Istilah tidak ditemukan. Coba kata kunci lain seperti revenue, market, funding, retention, atau CAC.")
+        return
+
+    for item in terms:
+        with st.expander(f"{item['term']} — {item['category']}"):
+            c1, c2 = st.columns(2)
+            with c1:
+                st.markdown("**Arti sederhana**")
+                st.write(item["simple"])
+                st.markdown("**Dipakai di slide**")
+                st.write(item["used_in"])
+            with c2:
+                st.markdown("**Rumus / cara menghitung**")
+                st.code(item["formula"], language="text")
+                st.markdown("**Contoh**")
+                st.info(item["example"])
 
 
 # ==============================
@@ -2198,6 +2667,52 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
             story.append(PageBreak())
 
     story.append(PageBreak())
+    story.append(Paragraph("Istilah investor dan cara menghitungnya", styles["cover_title"]))
+    story.append(
+        Paragraph(
+            "Appendix ini membantu founder baru memahami istilah yang muncul di form, slide, dan Q&A investor. "
+            "Gunakan rumus sebagai pendekatan praktis; sesuaikan dengan jenis bisnis dan kualitas data yang tersedia.",
+            styles["cover_subtitle"],
+        )
+    )
+    story.append(Spacer(1, 0.15 * cm))
+
+    active_category = None
+    for item in STARTUP_TERMS:
+        if item.get("category") != active_category:
+            active_category = item.get("category")
+            story.append(Spacer(1, 0.18 * cm))
+            story.append(Paragraph(pdf_escape(active_category), styles["section_title"]))
+
+        term_table = RLTable(
+            [
+                [Paragraph("Istilah", styles["label"]), Paragraph(pdf_escape(item.get("term", "")), styles["body"])],
+                [Paragraph("Arti sederhana", styles["label"]), Paragraph(pdf_escape(item.get("simple", "")), styles["body"])],
+                [Paragraph("Rumus / cara hitung", styles["label"]), Paragraph(pdf_escape(item.get("formula", "")), styles["body"])],
+                [Paragraph("Contoh", styles["label"]), Paragraph(pdf_escape(item.get("example", "")), styles["body"])],
+                [Paragraph("Dipakai di slide", styles["label"]), Paragraph(pdf_escape(item.get("used_in", "")), styles["body"])],
+            ],
+            colWidths=[3.4 * cm, 12.5 * cm],
+            hAlign="LEFT",
+        )
+        term_table.setStyle(
+            TableStyle(
+                [
+                    ("BOX", (0, 0), (-1, -1), 0.45, colors.HexColor("#cbd5e1")),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ]
+            )
+        )
+        story.append(term_table)
+        story.append(Spacer(1, 0.16 * cm))
+
+    story.append(PageBreak())
     story.append(Paragraph("Final rehearsal checklist", styles["cover_title"]))
     checklist = [
         "One-liner dapat diucapkan dalam kurang dari 15 detik.",
@@ -2461,13 +2976,14 @@ with st.sidebar:
     )
     st.success(DEVELOPER_FOOTER)
 
-identity, story, market, finance, team_asset, insight_tab = st.tabs(
+identity, story, market, finance, team_asset, glossary_tab, insight_tab = st.tabs(
     [
         "Identitas",
         "Story",
         "Market & Traction",
         "Financial & Funding",
         "Team & Competition",
+        "Istilah & Rumus",
         "Analisa",
     ]
 )
@@ -2893,6 +3409,10 @@ with team_asset:
             }
         )
 
+with glossary_tab:
+    render_glossary_section()
+
+
 # Collect current data for analysis and generation.
 data = {
     "company": company,
@@ -2974,6 +3494,7 @@ with col_generate:
 with col_hint:
     st.caption(
         "Sebelum generate, cek tab Analisa untuk memastikan narasi problem, traction, financial, dan ask sudah konsisten. "
+        "Gunakan tab Istilah & Rumus untuk memahami cara menghitung metrik sebelum mengisi angka. "
         "PPTX dan PDF scenario guide akan otomatis membawa footer Developed by Galuh Adi Insani."
     )
 
@@ -2993,7 +3514,7 @@ if generate:
         """
         <div class="readable-panel">
             <p><strong>PDF Pitch Scenario Guide</strong></p>
-            <p>PDF ini mengikuti urutan slide PPTX dan berisi tujuan slide, narasi bicara, transisi, pertanyaan investor, serta checklist latihan pitching.</p>
+            <p>PDF ini mengikuti urutan slide PPTX dan berisi tujuan slide, narasi bicara, transisi, pertanyaan investor, kamus istilah startup, rumus perhitungan, contoh angka, serta checklist latihan pitching.</p>
         </div>
         """,
         unsafe_allow_html=True,
