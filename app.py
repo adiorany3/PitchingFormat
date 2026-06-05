@@ -408,6 +408,113 @@ def short_money(value: float, currency: str) -> str:
     return f"{sign}{currency} {value:,.0f}"
 
 
+
+def normalize_competitors(data: dict[str, Any]) -> list[dict[str, str]]:
+    """Return clean competitor rows from dynamic UI data or legacy fields."""
+    rows = data.get("competitors") or []
+    cleaned = []
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+
+        name = str(row.get("name", "")).strip()
+        weakness = str(row.get("weakness", "")).strip()
+        advantage = str(row.get("advantage", "")).strip()
+        category = str(row.get("category", "Alternative")).strip() or "Alternative"
+
+        if name or weakness or advantage:
+            cleaned.append(
+                {
+                    "name": name or "Alternative",
+                    "category": category,
+                    "weakness": weakness or "Belum diisi",
+                    "advantage": advantage or "Belum diisi",
+                }
+            )
+
+    if cleaned:
+        return cleaned
+
+    legacy_rows = [
+        {
+            "name": data.get("competitor_1", ""),
+            "category": "Direct competitor",
+            "weakness": data.get("weakness_1", ""),
+            "advantage": data.get("advantage_1", ""),
+        },
+        {
+            "name": data.get("competitor_2", ""),
+            "category": "Indirect competitor",
+            "weakness": data.get("weakness_2", ""),
+            "advantage": data.get("advantage_2", ""),
+        },
+        {
+            "name": "Status quo",
+            "category": "Status quo",
+            "weakness": data.get("status_quo", ""),
+            "advantage": data.get("advantage_3", ""),
+        },
+    ]
+
+    return [row for row in legacy_rows if str(row.get("name", "")).strip()]
+
+
+def normalize_milestones(data: dict[str, Any]) -> list[dict[str, str]]:
+    """Return clean milestone rows from structured UI data or milestone headline."""
+    rows = data.get("milestones") or []
+    cleaned = []
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+
+        period = str(row.get("period", "")).strip()
+        target = str(row.get("target", "")).strip()
+        metric = str(row.get("metric", "")).strip()
+        owner = str(row.get("owner", "")).strip()
+
+        if period or target or metric or owner:
+            cleaned.append(
+                {
+                    "period": period or "Next",
+                    "target": target or "Target belum diisi",
+                    "metric": metric or "Metric belum diisi",
+                    "owner": owner or "Team",
+                }
+            )
+
+    if cleaned:
+        return cleaned
+
+    fallback = str(data.get("milestone", "")).strip()
+
+    if fallback:
+        return [
+            {
+                "period": "12-18 bulan",
+                "target": fallback,
+                "metric": "Funding milestone",
+                "owner": "Core team",
+            }
+        ]
+
+    return []
+
+
+def milestone_headline(data: dict[str, Any]) -> str:
+    milestones = normalize_milestones(data)
+
+    if not milestones:
+        return str(data.get("milestone", "Milestone belum diisi"))
+
+    first = milestones[0]
+    period = first.get("period", "Next")
+    target = first.get("target", "Milestone belum diisi")
+
+    return f"{period}: {target}"
+
+
 # ==============================
 # Investor Insight Engine
 # ==============================
@@ -424,6 +531,8 @@ def generate_investor_insights(data: dict[str, Any]) -> dict[str, Any]:
     ask = float(data.get("ask", 0) or 0)
     runway = int(data.get("runway", 0) or 0)
     currency = data.get("currency", "Rp")
+    competitor_count = len(normalize_competitors(data))
+    milestone_count = len(normalize_milestones(data))
 
     growth_y2 = safe_div(rev2 - rev1, rev1) if rev1 else None
     growth_y3 = safe_div(rev3 - rev2, rev2) if rev2 else None
@@ -444,7 +553,11 @@ def generate_investor_insights(data: dict[str, Any]) -> dict[str, Any]:
         "gtm", "team", "founder_fit", "use_of_funds", "next_round", "milestone",
     ]
     filled = sum(1 for field in completeness_fields if str(data.get(field, "")).strip())
-    completeness = filled / len(completeness_fields)
+    if competitor_count >= 2:
+        filled += 1
+    if milestone_count >= 2:
+        filled += 1
+    completeness = filled / (len(completeness_fields) + 2)
 
     score = 45
     score += int(completeness * 20)
@@ -476,6 +589,12 @@ def generate_investor_insights(data: dict[str, Any]) -> dict[str, Any]:
 
     if year3_profit_margin is not None and year3_profit_margin > 0:
         score += 5
+
+    if competitor_count >= 3:
+        score += 3
+
+    if milestone_count >= 3:
+        score += 4
 
     score = min(score, 100)
 
@@ -544,6 +663,24 @@ def generate_investor_insights(data: dict[str, Any]) -> dict[str, Any]:
     if revenue_multiple_y3 is not None:
         recommendations.append(
             f"Revenue Year 3 adalah {multiple(revenue_multiple_y3)} dibanding Year 1. Tambahkan asumsi utama: jumlah customer, ARPU, churn, dan channel conversion."
+        )
+
+    if competitor_count < 3:
+        risks.append(
+            "Kompetitor/alternatif masih terlalu sedikit. Tambahkan kompetitor langsung, tidak langsung, dan status quo agar positioning terlihat matang."
+        )
+    else:
+        recommendations.append(
+            f"Slide kompetisi memuat {competitor_count} alternatif. Gunakan narasi: customer saat ini memakai apa, kelemahannya apa, dan kenapa produk Anda menang."
+        )
+
+    if milestone_count < 3:
+        risks.append(
+            "Milestone masih kurang detail. Seed investor biasanya ingin melihat target 3-4 tahap: product, traction, revenue, dan readiness untuk round berikutnya."
+        )
+    else:
+        recommendations.append(
+            f"Gunakan {milestone_count} milestone sebagai jembatan antara ask funding, runway, dan next round story."
         )
 
     if not data.get("problem_evidence", "").strip():
@@ -980,6 +1117,146 @@ def add_table(slide, headers, rows, x, y, w, h, data):
     return table_shape
 
 
+def add_competitor_card(slide, row, x, y, w, h, data):
+    accent = rgb(data["accent_color"])
+
+    shape = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE,
+        Inches(x),
+        Inches(y),
+        Inches(w),
+        Inches(h),
+    )
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = THEME["white"]
+    shape.line.color.rgb = THEME["line"]
+
+    add_text(slide, row.get("category", "Alternative").upper(), x + 0.22, y + 0.18, w - 0.44, 0.22, 7, accent, True)
+    add_text(slide, row.get("name", "Alternative"), x + 0.22, y + 0.43, w - 0.44, 0.32, 14, THEME["ink"], True)
+    add_text(slide, "Weakness", x + 0.22, y + 0.86, 1.25, 0.18, 7, THEME["muted"], True)
+    add_text(slide, row.get("weakness", "Belum diisi"), x + 0.22, y + 1.08, w / 2 - 0.34, 0.43, 8.5, THEME["ink"])
+    add_text(slide, "Our advantage", x + w / 2 + 0.03, y + 0.86, 1.75, 0.18, 7, THEME["muted"], True)
+    add_text(slide, row.get("advantage", "Belum diisi"), x + w / 2 + 0.03, y + 1.08, w / 2 - 0.30, 0.43, 8.5, THEME["ink"])
+
+
+def add_competition_slides(prs, data, page):
+    competitors = normalize_competitors(data)
+
+    if not competitors:
+        competitors = [
+            {
+                "name": "Status quo",
+                "category": "Status quo",
+                "weakness": "Customer tetap memakai cara lama.",
+                "advantage": "Produk memberi workflow baru yang lebih cepat dan terukur.",
+            }
+        ]
+
+    chunk_size = 4
+
+    for chunk_index in range(0, len(competitors), chunk_size):
+        chunk = competitors[chunk_index:chunk_index + chunk_size]
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+        set_bg(slide, THEME["bg"])
+
+        suffix = "" if len(competitors) <= chunk_size else f" ({chunk_index // chunk_size + 1}/{(len(competitors) + chunk_size - 1) // chunk_size})"
+        add_seed_header(
+            slide,
+            "Competition",
+            f"We win through focus, speed, and distribution{suffix}",
+            "Layout otomatis menyesuaikan jumlah kompetitor: langsung, tidak langsung, dan status quo.",
+            data,
+        )
+
+        positions = [
+            (0.85, 2.00),
+            (6.78, 2.00),
+            (0.85, 4.05),
+            (6.78, 4.05),
+        ]
+
+        for idx, row in enumerate(chunk):
+            x, y = positions[idx]
+            add_competitor_card(slide, row, x, y, 5.45, 1.68, data)
+
+        add_takeaway(
+            slide,
+            data.get("competition_summary", "Jelaskan kenapa startup ini menang dibanding alternatif yang sudah dipakai customer."),
+            data,
+        )
+        add_footer(slide, data, page)
+        add_notes(slide, "Kompetitor bisa lebih dari satu. Gunakan slide ini untuk menunjukkan positioning dan alasan customer akan berpindah.")
+        page += 1
+
+    return page
+
+
+def add_milestone_card(slide, row, x, y, w, h, data):
+    accent = rgb(data["accent_color"])
+
+    shape = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE,
+        Inches(x),
+        Inches(y),
+        Inches(w),
+        Inches(h),
+    )
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = THEME["white"]
+    shape.line.color.rgb = THEME["line"]
+
+    add_text(slide, row.get("period", "Next"), x + 0.22, y + 0.20, w - 0.44, 0.28, 12, accent, True)
+    add_text(slide, row.get("target", "Target belum diisi"), x + 0.22, y + 0.60, w - 0.44, 0.46, 13, THEME["ink"], True)
+    add_text(slide, "Success metric", x + 0.22, y + 1.14, 1.65, 0.18, 7, THEME["muted"], True)
+    add_text(slide, row.get("metric", "Metric belum diisi"), x + 0.22, y + 1.36, w - 0.44, 0.28, 8.5, THEME["ink"])
+    add_text(slide, f"Owner: {row.get('owner', 'Team')}", x + 0.22, y + h - 0.27, w - 0.44, 0.18, 7, THEME["muted"])
+
+
+def add_milestone_slides(prs, data, page):
+    milestones = normalize_milestones(data)
+
+    if not milestones:
+        return page
+
+    chunk_size = 4
+
+    for chunk_index in range(0, len(milestones), chunk_size):
+        chunk = milestones[chunk_index:chunk_index + chunk_size]
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+        set_bg(slide, THEME["bg"])
+
+        suffix = "" if len(milestones) <= chunk_size else f" ({chunk_index // chunk_size + 1}/{(len(milestones) + chunk_size - 1) // chunk_size})"
+        add_seed_header(
+            slide,
+            "Milestones",
+            f"Funding converts into measurable execution milestones{suffix}",
+            "Tunjukkan target bertahap yang menghubungkan pendanaan, runway, traction, dan next round readiness.",
+            data,
+        )
+
+        positions = [
+            (0.85, 2.00),
+            (6.78, 2.00),
+            (0.85, 4.05),
+            (6.78, 4.05),
+        ]
+
+        for idx, row in enumerate(chunk):
+            x, y = positions[idx]
+            add_milestone_card(slide, row, x, y, 5.45, 1.68, data)
+
+        add_takeaway(
+            slide,
+            "Milestone yang baik harus measurable: angka revenue, user, retention, partnership, atau product release.",
+            data,
+        )
+        add_footer(slide, data, page)
+        add_notes(slide, "Gunakan milestone untuk menjelaskan kenapa jumlah funding, runway, dan next round logic saling konsisten.")
+        page += 1
+
+    return page
+
+
 def seed_content_slide(
     prs,
     data,
@@ -1318,28 +1595,7 @@ def build_deck(data, image_buffer=None):
     )
     page += 1
 
-    # Competition
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
-    set_bg(slide, THEME["bg"])
-    add_seed_header(slide, "Competition", "We win through focus, speed, and distribution", "Bandingkan dengan kompetitor langsung, tidak langsung, dan status quo.", data)
-    add_table(
-        slide,
-        ["Alternative", "Weakness", "Our Advantage"],
-        [
-            [data["competitor_1"], data["weakness_1"], data["advantage_1"]],
-            [data["competitor_2"], data["weakness_2"], data["advantage_2"]],
-            ["Status quo", data["status_quo"], data["advantage_3"]],
-        ],
-        0.85,
-        2.05,
-        11.65,
-        3.25,
-        data,
-    )
-    add_takeaway(slide, data["competition_summary"], data)
-    add_footer(slide, data, page)
-    add_notes(slide, "Jangan bilang tidak ada kompetitor. Status quo juga kompetitor.")
-    page += 1
+    page = add_competition_slides(prs, data, page)
 
     # Financials
     slide = prs.slides.add_slide(prs.slide_layouts[6])
@@ -1360,10 +1616,12 @@ def build_deck(data, image_buffer=None):
         data,
     )
     add_big_metric(slide, "Runway", f'{data["runway"]} months', 0.95, 5.3, 3.0, data)
-    add_big_metric(slide, "Milestone", data["milestone"], 4.25, 5.3, 7.4, data)
+    add_big_metric(slide, "Next milestone", milestone_headline(data), 4.25, 5.3, 7.4, data)
     add_footer(slide, data, page)
     add_notes(slide, "Jelaskan asumsi utama. Hubungkan funding ke milestone berikutnya.")
     page += 1
+
+    page = add_milestone_slides(prs, data, page)
 
     if data.get("include_insight_slide", True):
         add_insight_slide(prs, data, page)
@@ -1394,7 +1652,7 @@ def build_deck(data, image_buffer=None):
         lines(data["use_of_funds"], 5),
         "Ask harus jelas: jumlah, penggunaan, runway, dan target pembuktian.",
         side_title=data["round"],
-        side_body=f'{money(data["ask"], data["currency"])}\n\n{data["next_round"]}',
+        side_body=f'{money(data["ask"], data["currency"])}\n\nNext milestone: {milestone_headline(data)}\n\n{data["next_round"]}',
         speaker_note="Tutup dengan jumlah dana, runway, use of funds, dan target 12-18 bulan.",
     )
     page += 1
@@ -1419,7 +1677,7 @@ def build_deck(data, image_buffer=None):
 st.title("Seed Investor Pitch Deck Generator")
 st.caption(
     "Generator PPTX pitch deck profesional untuk seed-stage startup: story-led, data-first, "
-    "minim teks, dilengkapi panduan pengisian, dan analisa investor readiness otomatis."
+    "minim teks, kompetitor dinamis, milestone execution plan, dan analisa investor readiness otomatis."
 )
 
 st.markdown(f'<div class="developer-footer">{DEVELOPER_FOOTER}</div>', unsafe_allow_html=True)
@@ -1642,9 +1900,9 @@ with finance:
         profit3 = st.number_input("EBITDA/Profit Y3", value=3_500_000_000, step=100_000_000, help="EBITDA/profit tahun ketiga. Ini membantu menunjukkan operating leverage.")
         runway = st.number_input("Runway / bulan", min_value=1, value=18, help="Berapa bulan startup bisa berjalan dengan dana yang dicari. Seed biasanya ditargetkan 12-18 bulan, bergantung strategi.")
         milestone = st.text_input(
-            "Milestone funding",
+            "Milestone utama / headline",
             "Rp 500 juta MRR, 8.000 active businesses, gross margin >80%",
-            help="Target konkret sebelum round berikutnya: revenue, users, retention, margin, partnership, atau product milestone.",
+            help="Ringkasan milestone paling penting yang muncul di slide Financials dan Ask.",
         )
         use_of_funds = st.text_area(
             "Use of funds",
@@ -1659,30 +1917,107 @@ with finance:
             help="Jelaskan kondisi apa yang membuat startup siap raise round berikutnya.",
         )
 
+    guide(
+        "Detail milestone",
+        "Tambahkan milestone bertahap agar investor melihat rute eksekusi. Setiap milestone sebaiknya punya periode, target, success metric, dan owner. Jika lebih dari 4 milestone, PPT akan otomatis memecahnya menjadi beberapa slide.",
+    )
+
+    milestone_defaults = [
+        {
+            "period": "0-3 bulan",
+            "target": "Rilis MVP stabil dan onboarding 100 customer awal",
+            "metric": "100 active customers, activation >60%",
+            "owner": "Product & Growth",
+        },
+        {
+            "period": "4-6 bulan",
+            "target": "Validasi channel akuisisi utama",
+            "metric": "CAC payback <3 bulan, 500 customers",
+            "owner": "Growth",
+        },
+        {
+            "period": "7-12 bulan",
+            "target": "Capai repeatable revenue motion",
+            "metric": "Rp 250 juta MRR, retention D30 >70%",
+            "owner": "Sales & CS",
+        },
+        {
+            "period": "13-18 bulan",
+            "target": "Siap raise next round dengan traction kuat",
+            "metric": "Rp 500 juta MRR, gross margin >80%",
+            "owner": "Leadership",
+        },
+    ]
+
+    milestone_count = int(
+        st.number_input(
+            "Jumlah milestone detail",
+            min_value=1,
+            max_value=8,
+            value=4,
+            step=1,
+            help="PPT akan menyesuaikan layout otomatis. Maksimal 4 milestone per slide.",
+        )
+    )
+
+    milestones = []
+
+    for idx in range(milestone_count):
+        default = milestone_defaults[idx] if idx < len(milestone_defaults) else {
+            "period": f"Tahap {idx + 1}",
+            "target": "Target milestone",
+            "metric": "Metric keberhasilan",
+            "owner": "Team",
+        }
+
+        with st.expander(f"Milestone {idx + 1}: {default['period']}", expanded=idx < 2):
+            m1, m2 = st.columns(2)
+            with m1:
+                period = st.text_input(
+                    f"Periode milestone {idx + 1}",
+                    default["period"],
+                    key=f"milestone_period_{idx}",
+                    help="Contoh: 0-3 bulan, Q1 2027, sebelum Seed extension, sebelum Series A.",
+                )
+                target = st.text_area(
+                    f"Target milestone {idx + 1}",
+                    default["target"],
+                    height=80,
+                    key=f"milestone_target_{idx}",
+                    help="Target eksekusi yang ingin dicapai pada periode ini.",
+                )
+            with m2:
+                metric = st.text_input(
+                    f"Success metric {idx + 1}",
+                    default["metric"],
+                    key=f"milestone_metric_{idx}",
+                    help="Buat measurable: MRR, active user, retention, CAC payback, gross margin, jumlah partnership, atau product release.",
+                )
+                owner = st.text_input(
+                    f"Owner milestone {idx + 1}",
+                    default["owner"],
+                    key=f"milestone_owner_{idx}",
+                    help="Tim/role yang bertanggung jawab: Product, Growth, Sales, CS, Engineering, atau Leadership.",
+                )
+
+        milestones.append(
+            {
+                "period": period,
+                "target": target,
+                "metric": metric,
+                "owner": owner,
+            }
+        )
+
 with team_asset:
     guide(
         "Team dan competition",
-        "Investor seed sangat memperhatikan founder-market fit dan alasan startup ini bisa menang. Jangan menulis 'tidak ada kompetitor'; status quo dan cara manual juga kompetitor.",
+        "Investor seed sangat memperhatikan founder-market fit dan alasan startup ini bisa menang. Tambahkan kompetitor langsung, tidak langsung, dan status quo. PPT akan otomatis menyesuaikan layout jika kompetitor lebih dari satu atau lebih dari empat.",
     )
 
     col1, col2 = st.columns(2)
 
     with col1:
-        competitor_1 = st.text_input("Kompetitor 1", "Aplikasi Akuntansi A", help="Kompetitor langsung atau produk alternatif yang dipakai customer.")
-        weakness_1 = st.text_input("Kelemahan kompetitor 1", "Terlalu kompleks untuk mikro-UMKM", help="Kelemahan dari sudut pandang customer, bukan opini subjektif.")
-        advantage_1 = st.text_input("Keunggulan vs kompetitor 1", "Workflow chat-first dan onboarding cepat", help="Keunggulan spesifik startup Anda dibanding alternatif tersebut.")
-        competitor_2 = st.text_input("Kompetitor 2", "Spreadsheet/manual", help="Bisa kompetitor tidak langsung, manual workflow, agency, spreadsheet, atau status quo.")
-        weakness_2 = st.text_input("Kelemahan kompetitor 2", "Tidak real-time dan rawan error", help="Jelaskan keterbatasan yang membuka peluang untuk produk Anda.")
-        advantage_2 = st.text_input("Keunggulan vs kompetitor 2", "Otomatisasi laporan dan insight", help="Jelaskan kenapa customer akan pindah ke solusi Anda.")
-        status_quo = st.text_input("Kelemahan status quo", "Owner tidak punya data untuk keputusan cepat", help="Apa yang terjadi jika customer tidak memakai produk apa pun.")
-        advantage_3 = st.text_input("Keunggulan vs status quo", "Data harian langsung menjadi rekomendasi aksi", help="Keunggulan paling kuat dibanding kebiasaan lama customer.")
-        competition_summary = st.text_input(
-            "Ringkasan kompetisi",
-            "Kami menang di simplicity, distribusi lokal, dan data workflow UMKM.",
-            help="Satu kalimat narrative advantage: kenapa startup ini bisa menang.",
-        )
-
-    with col2:
         team = st.text_area(
             "Team",
             "Rex - CEO - 6 tahun membangun SaaS UMKM.\nNadia - CTO - ex fintech data engineer.\nBima - Growth - pernah scale komunitas UMKM 50k members.",
@@ -1699,6 +2034,107 @@ with team_asset:
             "Closing line",
             "Let’s help millions of small businesses understand their money.",
             help="Kalimat penutup yang merangkum visi besar startup.",
+        )
+
+    with col2:
+        competition_summary = st.text_area(
+            "Ringkasan kompetisi / narrative advantage",
+            "Kami menang di simplicity, distribusi lokal, dan data workflow UMKM.",
+            height=100,
+            help="Satu kalimat narrative advantage: kenapa startup ini bisa menang dibanding alternatif yang sudah dipakai customer.",
+        )
+        competitor_count = int(
+            st.number_input(
+                "Jumlah kompetitor / alternatif",
+                min_value=1,
+                max_value=10,
+                value=4,
+                step=1,
+                help="Masukkan kompetitor langsung, tidak langsung, dan status quo. Maksimal 4 kompetitor per slide; jika lebih, PPT otomatis memecah slide.",
+            )
+        )
+
+    competitor_defaults = [
+        {
+            "name": "Aplikasi Akuntansi A",
+            "category": "Direct competitor",
+            "weakness": "Terlalu kompleks untuk mikro-UMKM",
+            "advantage": "Workflow chat-first dan onboarding cepat",
+        },
+        {
+            "name": "Spreadsheet/manual",
+            "category": "Indirect competitor",
+            "weakness": "Tidak real-time dan rawan error",
+            "advantage": "Otomatisasi laporan dan insight",
+        },
+        {
+            "name": "Status quo",
+            "category": "Status quo",
+            "weakness": "Owner tidak punya data untuk keputusan cepat",
+            "advantage": "Data harian langsung menjadi rekomendasi aksi",
+        },
+        {
+            "name": "POS tanpa analitik keuangan",
+            "category": "Adjacent tool",
+            "weakness": "Mencatat transaksi tetapi tidak memberi insight cashflow",
+            "advantage": "Mengubah transaksi menjadi laporan dan rekomendasi bisnis",
+        },
+    ]
+
+    competitors = []
+
+    st.markdown("### Peta kompetitor")
+    st.caption(
+        "Untuk deck seed, kompetitor tidak harus hanya produk yang sama. Masukkan juga cara manual, spreadsheet, agency, status quo, atau adjacent tool yang saat ini dipakai customer."
+    )
+
+    for idx in range(competitor_count):
+        default = competitor_defaults[idx] if idx < len(competitor_defaults) else {
+            "name": f"Kompetitor {idx + 1}",
+            "category": "Alternative",
+            "weakness": "Kelemahan dari sudut pandang customer",
+            "advantage": "Keunggulan produk Anda",
+        }
+
+        with st.expander(f"Kompetitor / alternatif {idx + 1}: {default['name']}", expanded=idx < 3):
+            c1, c2 = st.columns(2)
+            with c1:
+                comp_name = st.text_input(
+                    f"Nama kompetitor / alternatif {idx + 1}",
+                    default["name"],
+                    key=f"competitor_name_{idx}",
+                    help="Nama produk, perusahaan, workflow manual, spreadsheet, agency, atau status quo.",
+                )
+                comp_category = st.selectbox(
+                    f"Kategori {idx + 1}",
+                    ["Direct competitor", "Indirect competitor", "Status quo", "Adjacent tool", "Alternative"],
+                    index=["Direct competitor", "Indirect competitor", "Status quo", "Adjacent tool", "Alternative"].index(default["category"]) if default["category"] in ["Direct competitor", "Indirect competitor", "Status quo", "Adjacent tool", "Alternative"] else 4,
+                    key=f"competitor_category_{idx}",
+                    help="Kategorisasi membantu investor memahami medan kompetisi.",
+                )
+            with c2:
+                comp_weakness = st.text_area(
+                    f"Kelemahan {idx + 1}",
+                    default["weakness"],
+                    height=80,
+                    key=f"competitor_weakness_{idx}",
+                    help="Tulis kelemahan dari perspektif customer: mahal, lambat, rumit, tidak real-time, sulit diadopsi, tidak terintegrasi, dsb.",
+                )
+                comp_advantage = st.text_area(
+                    f"Keunggulan kita vs alternatif {idx + 1}",
+                    default["advantage"],
+                    height=80,
+                    key=f"competitor_advantage_{idx}",
+                    help="Tulis keunggulan spesifik dan defensible: distribusi, data, UX, cost, speed, domain expertise, switching workflow, dsb.",
+                )
+
+        competitors.append(
+            {
+                "name": comp_name,
+                "category": comp_category,
+                "weakness": comp_weakness,
+                "advantage": comp_advantage,
+            }
         )
 
 # Collect current data for analysis and generation.
@@ -1736,14 +2172,15 @@ data = {
     "icp": icp,
     "channel": channel,
     "gtm": gtm,
-    "competitor_1": competitor_1,
-    "weakness_1": weakness_1,
-    "advantage_1": advantage_1,
-    "competitor_2": competitor_2,
-    "weakness_2": weakness_2,
-    "advantage_2": advantage_2,
-    "status_quo": status_quo,
-    "advantage_3": advantage_3,
+    "competitors": competitors,
+    "competitor_1": competitors[0]["name"] if len(competitors) > 0 else "",
+    "weakness_1": competitors[0]["weakness"] if len(competitors) > 0 else "",
+    "advantage_1": competitors[0]["advantage"] if len(competitors) > 0 else "",
+    "competitor_2": competitors[1]["name"] if len(competitors) > 1 else "",
+    "weakness_2": competitors[1]["weakness"] if len(competitors) > 1 else "",
+    "advantage_2": competitors[1]["advantage"] if len(competitors) > 1 else "",
+    "status_quo": competitors[2]["weakness"] if len(competitors) > 2 else "",
+    "advantage_3": competitors[2]["advantage"] if len(competitors) > 2 else "",
     "competition_summary": competition_summary,
     "rev1": rev1,
     "rev2": rev2,
@@ -1756,6 +2193,7 @@ data = {
     "profit3": profit3,
     "runway": runway,
     "milestone": milestone,
+    "milestones": milestones,
     "use_of_funds": use_of_funds,
     "next_round": next_round,
     "team": team,

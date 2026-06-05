@@ -24,9 +24,22 @@ Footer aplikasi dan setiap slide:
 - Panel insight diperbaiki agar semua isi berada di dalam kartu yang sama dan terbaca jelas pada dark theme.
 - Elemen/emblem bawaan Streamlit tetap disembunyikan.
 
+
+## Pembaruan Versi v4
+
+- Kompetitor sekarang dinamis: pengguna dapat menambah 1 sampai 10 kompetitor/alternatif.
+- Kompetitor bisa dikategorikan sebagai direct competitor, indirect competitor, status quo, adjacent tool, atau alternative.
+- Slide Competition otomatis menyesuaikan layout dan memecah data menjadi beberapa slide jika jumlah kompetitor lebih dari 4.
+- Ditambahkan milestone detail: periode, target, success metric, dan owner.
+- Slide Milestones otomatis dibuat dan juga dipecah menjadi beberapa slide jika milestone lebih dari 4.
+- Slide Financials dan Fundraising Ask sekarang menampilkan next milestone agar hubungan antara ask, runway, dan eksekusi lebih jelas.
+- Analisa investor readiness sekarang ikut membaca jumlah kompetitor dan milestone sebagai sinyal kelengkapan deck seed.
+
 ## Fitur
 
 - Struktur deck seed-stage startup.
+- Kompetitor dinamis hingga 10 alternatif.
+- Milestone execution plan dengan periode, target, success metric, dan owner.
 - Desain profesional: clean, data-first, minim teks, banyak whitespace.
 - Panduan pengisian pada bagian:
   1. Identitas
@@ -54,12 +67,13 @@ Footer aplikasi dan setiap slide:
   6. Business Model
   7. Traction
   8. Go-To-Market
-  9. Competition
+  9. Competition, otomatis multi-slide bila kompetitor lebih dari 4
   10. Financials
-  11. Investor Readiness, opsional
-  12. Team
-  13. Fundraising Ask
-  14. Closing
+  11. Milestones, otomatis multi-slide bila milestone lebih dari 4
+  12. Investor Readiness, opsional
+  13. Team
+  14. Fundraising Ask
+  15. Closing
 - Upload screenshot atau mockup produk.
 - Speaker notes otomatis di setiap slide.
 - Download hasil dalam format `.pptx`.
