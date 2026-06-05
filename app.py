@@ -31,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v11.0 - Indonesia Market Segment Adaptive"
+APP_VERSION = "v11.1 - Full Metric Text Fit"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -212,6 +212,22 @@ def hide_streamlit_emblems() -> None:
             [data-testid="stMetric"] {
                 padding: .9rem 1rem !important;
             }
+            /* v11.1: native metric fallback. Do not truncate labels/values with ellipsis. */
+            [data-testid="stMetric"] [data-testid="stMetricLabel"],
+            [data-testid="stMetric"] [data-testid="stMetricValue"],
+            [data-testid="stMetric"] [data-testid="stMetricLabel"] *,
+            [data-testid="stMetric"] [data-testid="stMetricValue"] * {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                overflow-wrap: anywhere !important;
+                word-break: normal !important;
+                line-height: 1.18 !important;
+            }
+            [data-testid="stMetric"] [data-testid="stMetricValue"] * {
+                font-size: clamp(17px, 2.0vw, 26px) !important;
+            }
+
             .guide-box,
             .insight-card,
             .readable-panel,
@@ -1712,14 +1728,134 @@ def build_investor_qa(data: dict[str, Any]) -> list[tuple[str, str]]:
     ]
 
 
+
+def render_metric_grid(metrics: list[tuple[Any, Any]] | dict[str, Any], columns: int = 4, title: str = "") -> None:
+    """Render metrics without Streamlit's ellipsis-prone st.metric component.
+
+    Streamlit's native metric cards can truncate labels/values when the browser
+    zoom, theme, or column width changes. This isolated HTML grid preserves the
+    full text and reduces/wraps typography instead of showing `...`.
+    """
+    if isinstance(metrics, dict):
+        items = list(metrics.items())
+    else:
+        items = list(metrics or [])
+
+    if not items:
+        return
+
+    safe_columns = max(1, min(int(columns or 4), 4))
+    cards = []
+    for label, value in items:
+        safe_label = html.escape(str(label))
+        safe_value = html.escape(str(value))
+        cards.append(
+            "<div class='metric-card'>"
+            f"<div class='metric-label'>{safe_label}</div>"
+            f"<div class='metric-value'>{safe_value}</div>"
+            "</div>"
+        )
+
+    safe_title = html.escape(title)
+    title_html = f"<div class='metric-title'>{safe_title}</div>" if safe_title else ""
+    iframe_html = f"""
+    <!doctype html>
+    <html lang="id">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <style>
+        :root {{ color-scheme: light; }}
+        * {{ box-sizing: border-box; }}
+        html, body {{
+          margin: 0;
+          padding: 0;
+          background: #f8fafc !important;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }}
+        .metric-title {{
+          margin: 0 0 10px 0;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          font-size: 14px;
+          font-weight: 900;
+        }}
+        .metric-grid {{
+          display: grid;
+          grid-template-columns: repeat({safe_columns}, minmax(0, 1fr));
+          gap: 12px;
+          width: 100%;
+        }}
+        .metric-card {{
+          min-width: 0;
+          background: #ffffff !important;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          border: 1px solid #cbd5e1;
+          border-radius: 16px;
+          padding: 12px 14px;
+          box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+          overflow: visible;
+        }}
+        .metric-card * {{
+          color: inherit !important;
+          -webkit-text-fill-color: currentColor !important;
+          text-shadow: none !important;
+          opacity: 1 !important;
+          text-overflow: clip !important;
+          overflow: visible !important;
+        }}
+        .metric-label {{
+          color: #475569 !important;
+          -webkit-text-fill-color: #475569 !important;
+          font-size: clamp(10px, 1.3vw, 12px);
+          line-height: 1.22;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: .04em;
+          margin-bottom: 8px;
+          white-space: normal;
+          overflow-wrap: anywhere;
+          word-break: normal;
+        }}
+        .metric-value {{
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          font-size: clamp(17px, 2.6vw, 28px);
+          line-height: 1.13;
+          font-weight: 950;
+          white-space: normal;
+          overflow-wrap: anywhere;
+          word-break: normal;
+        }}
+        @media (max-width: 980px) {{
+          .metric-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+        }}
+        @media (max-width: 560px) {{
+          .metric-grid {{ grid-template-columns: 1fr; }}
+          .metric-value {{ font-size: 22px; }}
+        }}
+      </style>
+    </head>
+    <body>
+      {title_html}
+      <div class="metric-grid" aria-label="Metric grid">
+        {''.join(cards)}
+      </div>
+    </body>
+    </html>
+    """
+    rows = math.ceil(len(items) / safe_columns)
+    height = max(120, 30 + rows * 104 + (28 if title else 0))
+    components.html(iframe_html, height=height, scrolling=False)
+
 def render_scorecards(insights: dict[str, Any]) -> None:
     st.subheader("📈 Analisa Investor Readiness")
     st.progress(insights["score"] / 100)
     st.markdown(f"<div class='readable-panel'><p><strong>{html.escape(insights['headline'])}</strong></p></div>", unsafe_allow_html=True)
-    cols = st.columns(3)
-    for idx, (label, value) in enumerate(list(insights["metrics"].items())[:9]):
-        with cols[idx % 3]:
-            st.metric(label, value)
+    render_metric_grid(list(insights["metrics"].items())[:9], columns=3)
     st.markdown("#### Skor per kategori")
     score_cols = st.columns(3)
     for idx, (label, value) in enumerate(insights["category_scores"].items()):
@@ -1994,10 +2130,7 @@ def render_calculator(data: dict[str, Any] | None = None) -> None:
         st.number_input("Revenue platform dari transaksi", min_value=0, step=1_000_000, key="platform_revenue_calc", help="Dipakai menghitung take rate.")
     calc_data = collect_data_preview_only()
     metrics = calculate_auto_metrics(calc_data)
-    metric_cols = st.columns(5)
-    for idx, (label, value) in enumerate(metrics.items()):
-        with metric_cols[idx % 5]:
-            st.metric(label, value)
+    render_metric_grid(metrics, columns=3, title="Hasil kalkulasi metrik")
 
 
 def label_text(text_id: str, language: str) -> str:
@@ -2110,10 +2243,13 @@ def add_card(slide, title, body, x, y, w, h, data, title_size=8, body_size=15):
 
 def add_metric(slide, label, value, x, y, w, data, size=24):
     accent = rgb(data.get("accent_color", "#2563EB"))
+    label_text_value = str(label or "").upper()
     value_text = str(value or "")
-    value_h = 0.66 if len(value_text) > 28 else 0.45
-    add_text(slide, value_text, x, y, w, value_h, size, accent, True)
-    add_text(slide, str(label).upper(), x, y + value_h + 0.10, w, 0.23, 8, THEME["muted"], True)
+    value_h = 0.66 if len(value_text) > 12 or len(label_text_value) > 16 else 0.50
+    value_size = estimate_fit_font_size(value_text, w, value_h, size, min_size=9.0)
+    label_size = estimate_fit_font_size(label_text_value, w, 0.34, 8.0, min_size=5.8)
+    add_text(slide, value_text, x, y, w, value_h, value_size, accent, True)
+    add_text(slide, label_text_value, x, y + value_h + 0.09, w, 0.34, label_size, THEME["muted"], True)
 
 
 def add_takeaway(slide, text, data):
@@ -3056,11 +3192,15 @@ def render_preview_section(data: dict[str, Any]) -> None:
     plan = build_slide_plan(data)
     timings = timing_for_plan(plan, int(data.get("pitch_duration_minutes", 10)))
     insights = generate_investor_insights(data)
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Durasi", f"{data.get('pitch_duration_minutes')} menit")
-    c2.metric("Jumlah slide", len(plan))
-    c3.metric("Kompetitor", len(data.get("competitors", [])))
-    c4.metric("Milestone", len(data.get("milestones", [])))
+    render_metric_grid(
+        [
+            ("Durasi", f"{data.get('pitch_duration_minutes')} menit"),
+            ("Jumlah slide", len(plan)),
+            ("Kompetitor", len(data.get("competitors", []))),
+            ("Milestone", len(data.get("milestones", []))),
+        ],
+        columns=4,
+    )
     st.markdown("#### Urutan slide dan timing")
     render_slide_timing_table(plan, timings)
     render_validation_panel(insights["issues"])

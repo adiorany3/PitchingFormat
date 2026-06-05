@@ -1,6 +1,6 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v11.0 - Indonesia Market Segment Adaptive  
+Versi: v11.1 - Full Metric Text Fit  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:
@@ -122,3 +122,13 @@ Fitur baru:
 - Glossary menambahkan istilah B2C, B2B, B2G, B2B2C, Sales Cycle, dan Decision Maker beserta cara menghitung/memetakannya.
 - Investor readiness score menambahkan kategori **Target segment clarity**.
 - Memperbaiki potensi DuplicateWidgetID pada field Retention.
+
+
+## v11.1 - Full Metric Text Fit
+
+Perbaikan utama:
+- Komponen `st.metric` bawaan Streamlit diganti dengan grid metrik custom agar label dan nilai tidak berubah menjadi `...`.
+- Metrik seperti MRR, ARR, Burn Rate, Runway, ARPU, Take Rate, CAC, dan GMV sekarang ditampilkan penuh.
+- Font metrik otomatis menyesuaikan ukuran kartu dan teks dapat wrap tanpa elipsis.
+- Preview ringkasan, kalkulator metrik, dan analisa investor readiness memakai rendering high-contrast yang terisolasi dari theme Streamlit.
+- Metric card di PPT juga memakai font fitting tambahan agar label/nilai lebih aman saat teks panjang.
