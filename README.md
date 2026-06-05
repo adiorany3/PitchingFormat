@@ -1,6 +1,6 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v9 - Complete Founder Toolkit  
+Versi: v9.2 - Adaptive Font No Ellipsis  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:
@@ -65,3 +65,14 @@ Perbaikan utama:
 - Teks, panel, card, metric, expander, select dropdown, uploader, tombol, dan footer memakai CSS variable tema Streamlit.
 - Semua panel edukasi dan analisa dibuat high-contrast agar tetap terbaca di light theme, dark theme, maupun system theme.
 - Warna primary button dibuat memakai pasangan `text-color` dan `background-color` agar tidak hilang ketika accent color terlalu terang atau terlalu gelap.
+
+
+## v9.2 - Adaptive Font No Ellipsis
+
+Perbaikan utama:
+- Teks panjang di PPT tidak lagi dipotong menjadi `...` atau elipsis.
+- Font pada text box, bullet, card, metric, takeaway, dan tabel otomatis mengecil sesuai panjang konten.
+- Slide Competition dibatasi menjadi maksimal 3 alternatif per slide agar kelemahan dan keunggulan tetap terbaca.
+- Slide Milestones dibatasi menjadi maksimal 2 milestone per slide agar target, success metric, dan owner tetap tampil penuh.
+- Dataframe/panel UI diberi CSS tambahan agar teks panjang wrap, bukan dipotong.
+- Slide Financials memakai card untuk Next Milestone sehingga teks panjang tidak dipotong.

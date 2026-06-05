@@ -30,7 +30,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v9.1 - Theme Contrast Fix"
+APP_VERSION = "v9.2 - Adaptive Font No Ellipsis"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -284,6 +284,21 @@ def hide_streamlit_emblems() -> None:
             [data-testid="stTable"] * {
                 color: var(--deck-text) !important;
             }
+            [data-testid="stDataFrame"] div,
+            [data-testid="stDataFrame"] span,
+            [data-testid="stDataFrame"] p {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                line-height: 1.35 !important;
+            }
+            .stMarkdown, .stMarkdown p, .stMarkdown li,
+            .guide-box, .insight-card, .readable-panel, .score-card {
+                overflow-wrap: anywhere !important;
+                word-break: normal !important;
+                white-space: normal !important;
+                text-overflow: clip !important;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -336,8 +351,69 @@ def clean_lines(text: str, limit: int = 5) -> list[str]:
 
 
 def truncate(text: Any, max_chars: int = 150) -> str:
+    """Return full text.
+
+    Earlier versions shortened long copy with an ellipsis. For pitching material,
+    long text is more useful when preserved and fitted with smaller typography.
+    The max_chars argument is kept for backward compatibility with older calls.
+    """
+    return str(text or "").strip()
+
+
+def estimate_fit_font_size(
+    text: Any,
+    box_w: float,
+    box_h: float,
+    base_size: float,
+    min_size: float = 6.5,
+) -> float:
+    """Approximate a readable font size that keeps long text inside a PPT box."""
     value = str(text or "").strip()
-    return value if len(value) <= max_chars else value[: max_chars - 1].rstrip() + "…"
+    if not value:
+        return base_size
+
+    explicit_lines = max(1, value.count("\n") + 1)
+    chars = len(value)
+    area = max(box_w * box_h, 0.15)
+
+    # Capacity estimate at base size. Larger boxes and smaller fonts hold more text.
+    capacity = max(18, area * 58 * (18 / max(base_size, 1)))
+    line_pressure = explicit_lines / max(box_h * 3.3, 1)
+    char_pressure = chars / capacity
+    pressure = max(char_pressure, line_pressure)
+
+    adjusted = base_size
+    if pressure > 1:
+        adjusted = base_size / (pressure ** 0.50)
+
+    # Additional reduction for very long single-line values such as milestone text.
+    longest_line = max((len(row) for row in value.splitlines()), default=0)
+    single_line_capacity = max(8, box_w * 9.5)
+    if longest_line > single_line_capacity:
+        adjusted = min(adjusted, base_size * (single_line_capacity / longest_line) ** 0.35)
+
+    return max(min_size, min(base_size, adjusted))
+
+
+def table_font_size(rows: list[list[Any]], base_size: float = 8.5, min_size: float = 6.2) -> float:
+    longest = 0
+    total = 0
+    cells = 0
+    for row in rows:
+        for cell in row:
+            text = str(cell or "")
+            longest = max(longest, len(text))
+            total += len(text)
+            cells += 1
+    avg = total / max(cells, 1)
+    size = base_size
+    if longest > 90 or avg > 55:
+        size -= 1.2
+    if longest > 140 or avg > 80:
+        size -= 1.0
+    if len(rows) >= 5:
+        size -= 0.7
+    return max(min_size, size)
 
 
 def filename(value: str) -> str:
@@ -1205,6 +1281,7 @@ def label_text(text_id: str, language: str) -> str:
 
 def add_text(slide, text, x, y, w, h, size=18, color=None, bold=False, align=PP_ALIGN.LEFT):
     color = color or THEME["ink"]
+    value = str(text or "")
     box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = box.text_frame
     tf.clear()
@@ -1217,9 +1294,10 @@ def add_text(slide, text, x, y, w, h, size=18, color=None, bold=False, align=PP_
     p = tf.paragraphs[0]
     p.alignment = align
     r = p.add_run()
-    r.text = str(text or "")
-    r.font.name = FONT_HEAD if bold else FONT_BODY
-    r.font.size = Pt(size)
+    r.text = value
+    r.font.name = FONT_HEAD if bold and len(value) < 90 else FONT_BODY
+    fitted_size = estimate_fit_font_size(value, w, h, size, min_size=6.5 if size <= 12 else 7.0)
+    r.font.size = Pt(fitted_size)
     r.font.bold = bold
     r.font.color.rgb = color
     return box
@@ -1257,14 +1335,18 @@ def add_bullets(slide, items, x, y, w, h, size=18, max_items=5):
     box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = box.text_frame
     tf.clear(); tf.word_wrap = True
+    tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     tf.margin_left = Inches(0); tf.margin_right = Inches(0)
-    for idx, item in enumerate((items or ["Lengkapi poin utama slide ini."])[:max_items]):
+    clean_items = (items or ["Lengkapi poin utama slide ini."])[:max_items]
+    total_text = "\n".join(str(item or "") for item in clean_items)
+    fitted_size = estimate_fit_font_size(total_text, w, h, size, min_size=7.0)
+    for idx, item in enumerate(clean_items):
         p = tf.paragraphs[0] if idx == 0 else tf.add_paragraph()
-        p.text = truncate(item, 145)
+        p.text = str(item or "")
         p.level = 0
-        p.space_after = Pt(10)
+        p.space_after = Pt(7 if fitted_size < 12 else 10)
         p.font.name = FONT_BODY
-        p.font.size = Pt(size)
+        p.font.size = Pt(fitted_size)
         p.font.color.rgb = THEME["ink"]
 
 
@@ -1272,36 +1354,44 @@ def add_card(slide, title, body, x, y, w, h, data, title_size=8, body_size=15):
     accent = rgb(data.get("accent_color", "#2563EB"))
     shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
     shape.fill.solid(); shape.fill.fore_color.rgb = THEME["white"]; shape.line.color.rgb = THEME["line"]
-    add_text(slide, title.upper(), x + 0.2, y + 0.16, w - 0.4, 0.25, title_size, accent, True)
-    add_text(slide, truncate(body, 240), x + 0.2, y + 0.52, w - 0.4, h - 0.65, body_size, THEME["ink"], True)
+    add_text(slide, str(title).upper(), x + 0.2, y + 0.16, w - 0.4, 0.25, title_size, accent, True)
+    body_text = str(body or "")
+    adjusted_body_size = estimate_fit_font_size(body_text, w - 0.4, h - 0.65, body_size, min_size=6.8)
+    add_text(slide, body_text, x + 0.2, y + 0.52, w - 0.4, h - 0.65, adjusted_body_size, THEME["ink"], True)
 
 
 def add_metric(slide, label, value, x, y, w, data, size=24):
     accent = rgb(data.get("accent_color", "#2563EB"))
-    add_text(slide, truncate(value, 24), x, y, w, 0.45, size, accent, True)
-    add_text(slide, label.upper(), x, y + 0.55, w, 0.23, 8, THEME["muted"], True)
+    value_text = str(value or "")
+    value_h = 0.66 if len(value_text) > 28 else 0.45
+    add_text(slide, value_text, x, y, w, value_h, size, accent, True)
+    add_text(slide, str(label).upper(), x, y + value_h + 0.10, w, 0.23, 8, THEME["muted"], True)
 
 
 def add_takeaway(slide, text, data):
     accent = rgb(data.get("accent_color", "#2563EB"))
-    shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.7), Inches(6.25), Inches(11.95), Inches(0.52))
+    takeaway = "Investor takeaway: " + str(text or "")
+    shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.7), Inches(6.12), Inches(11.95), Inches(0.66))
     shape.fill.solid(); shape.fill.fore_color.rgb = THEME["blue_soft"]; shape.line.color.rgb = RGBColor(191, 219, 254)
-    add_text(slide, "Investor takeaway: " + truncate(text, 135), 0.95, 6.39, 11.2, 0.22, 9.5, accent, True)
+    add_text(slide, takeaway, 0.95, 6.25, 11.2, 0.38, 9.5, accent, True)
 
 
 def add_table(slide, headers, rows, x, y, w, h, data):
     accent = rgb(data.get("accent_color", "#2563EB"))
     shape = slide.shapes.add_table(len(rows) + 1, len(headers), Inches(x), Inches(y), Inches(w), Inches(h))
     tbl = shape.table
+    body_size = table_font_size(rows, 8.5, 6.2)
     for c, header in enumerate(headers):
         cell = tbl.cell(0, c); cell.text = str(header); cell.fill.solid(); cell.fill.fore_color.rgb = accent
+        cell.text_frame.word_wrap = True
         for p in cell.text_frame.paragraphs:
-            p.font.name = FONT_BODY; p.font.size = Pt(9); p.font.bold = True; p.font.color.rgb = THEME["white"]
+            p.font.name = FONT_BODY; p.font.size = Pt(8.5); p.font.bold = True; p.font.color.rgb = THEME["white"]
     for r_idx, row in enumerate(rows, 1):
         for c_idx, value in enumerate(row):
-            cell = tbl.cell(r_idx, c_idx); cell.text = truncate(value, 95); cell.fill.solid(); cell.fill.fore_color.rgb = THEME["white"]
+            cell = tbl.cell(r_idx, c_idx); cell.text = str(value or ""); cell.fill.solid(); cell.fill.fore_color.rgb = THEME["white"]
+            cell.text_frame.word_wrap = True
             for p in cell.text_frame.paragraphs:
-                p.font.name = FONT_BODY; p.font.size = Pt(8.5); p.font.color.rgb = THEME["ink"]
+                p.font.name = FONT_BODY; p.font.size = Pt(body_size); p.font.color.rgb = THEME["ink"]
 
 
 def new_slide(prs, data, title, subtitle, page):
@@ -1347,13 +1437,14 @@ def add_competition_slides(prs, data, page):
     if not competitors:
         competitors = [{"name": "Status quo", "category": "Status quo", "weakness": "Workflow manual", "advantage": data.get("competition_summary", "") }]
     duration = int(data.get("pitch_duration_minutes", 10))
-    per_slide = 3 if duration <= 3 else 4 if duration <= 5 else 5
+    # Keep fewer rows per slide so full text can wrap without ellipsis.
+    per_slide = 2
     pages = []
     for chunk_idx in range(0, len(competitors), per_slide):
         chunk = competitors[chunk_idx: chunk_idx + per_slide]
         slide = new_slide(prs, data, "Competition", "Alternatif yang dipakai customer, kelemahannya, dan kenapa kita menang.", page + len(pages))
         rows = [[c.get("name", ""), c.get("category", ""), c.get("weakness", ""), c.get("advantage", "")] for c in chunk]
-        add_table(slide, ["Alternative", "Type", "Weakness", "Our edge"], rows, 0.8, 2.0, 11.75, 3.65, data)
+        add_table(slide, ["Alternative", "Type", "Weakness", "Our edge"], rows, 0.8, 1.95, 11.75, 4.05, data)
         add_takeaway(slide, data.get("competition_summary", "Tunjukkan narrative advantage yang spesifik."), data)
         pages.append(slide)
     return len(pages)
@@ -1364,7 +1455,7 @@ def add_milestone_slides(prs, data, page):
     if not milestones:
         milestones = [{"period": "0-12 bulan", "target": data.get("milestone", "Milestone utama"), "metric": "Success metric", "owner": "Team"}]
     duration = int(data.get("pitch_duration_minutes", 10))
-    per_slide = 2 if duration <= 5 else 3
+    per_slide = 2
     pages = []
     for chunk_idx in range(0, len(milestones), per_slide):
         chunk = milestones[chunk_idx: chunk_idx + per_slide]
@@ -1373,7 +1464,7 @@ def add_milestone_slides(prs, data, page):
         for idx, item in enumerate(chunk):
             x = 0.85 + idx * card_w
             body = f"Target: {item.get('target', '')}\nMetric: {item.get('metric', '')}\nOwner: {item.get('owner', '')}"
-            add_card(slide, item.get("period", f"Step {idx + 1}"), body, x, 2.15, card_w - 0.25, 2.55, data, 9, 13)
+            add_card(slide, item.get("period", f"Step {idx + 1}"), body, x, 2.05, card_w - 0.25, 3.15, data, 9, 13)
         add_takeaway(slide, data.get("milestone", "Milestone harus spesifik, terukur, dan terkait ask pendanaan."), data)
         pages.append(slide)
     return len(pages)
@@ -1442,7 +1533,7 @@ def build_deck(data: dict[str, Any], image_buffer: BytesIO | None = None) -> Byt
             ]
             add_table(slide, ["Metric", "Year 1", "Year 2", "Year 3"], rows, 0.85, 2.0, 11.65, 2.5, data)
             add_metric(slide, "Runway", f"{data.get('runway')} bulan", 0.95, 5.2, 2.3, data)
-            add_metric(slide, "Next Milestone", truncate(data.get("milestone"), 50), 4.0, 5.2, 7.7, data, 19)
+            add_card(slide, "Next Milestone", data.get("milestone"), 3.9, 5.05, 8.2, 1.0, data, 8, 12)
         elif key in {"financial_ask", "fundraising"}:
             content_slide(prs, data, page, title if key == "fundraising" else "Financials & Ask", item["purpose"], clean_lines(data.get("use_of_funds"), 5), "Ask harus jelas: jumlah, runway, use of funds, dan target pembuktian.", "Ask & next round", f"{money(data.get('ask', 0), data.get('currency', 'Rp'))} {data.get('round')}\n\nRunway: {data.get('runway')} bulan\n{data.get('next_round')}")
         elif key == "team_ask":
