@@ -31,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v10.1 - Editable Teleprompter Script"
+APP_VERSION = "v10.3 - Dropdown Contrast Fix"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -310,6 +310,251 @@ def hide_streamlit_emblems() -> None:
                 margin-bottom: 12px;
                 line-height: 1.55;
             }
+
+
+            /* v10.2 Safe Contrast Guard
+               Prevents black text on black backgrounds when Streamlit theme/browser theme changes.
+               The editor UI intentionally uses light high-contrast surfaces; generated PPT/PDF keep selected brand colors. */
+            html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stSidebar"], .block-container {
+                color-scheme: light !important;
+            }
+            .stApp,
+            [data-testid="stAppViewContainer"],
+            [data-testid="stMain"],
+            .main,
+            .block-container {
+                background: #f8fafc !important;
+                color: #0f172a !important;
+            }
+            [data-testid="stSidebar"] > div:first-child,
+            section[data-testid="stSidebar"] {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                border-right: 1px solid #cbd5e1 !important;
+            }
+            .stApp :where(h1,h2,h3,h4,h5,h6,p,li,label,span,div,strong,em,small,code,pre),
+            .stApp [data-testid="stMarkdownContainer"],
+            .stApp [data-testid="stMarkdownContainer"] *,
+            .stApp [data-testid="stCaptionContainer"],
+            .stApp [data-testid="stWidgetLabel"],
+            .stApp [data-testid="stWidgetLabel"] *,
+            .stApp [data-testid="InputInstructions"],
+            .stApp [data-testid="stHelp"],
+            .stApp [data-testid="stExpander"] *,
+            .stApp [data-testid="stMetric"] *,
+            .stApp [data-testid="stFileUploader"] * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                text-shadow: none !important;
+            }
+            .stApp a, .stApp a *,
+            .stApp [data-testid="stMarkdownContainer"] a,
+            .stApp [data-testid="stMarkdownContainer"] a * {
+                color: #1d4ed8 !important;
+                -webkit-text-fill-color: #1d4ed8 !important;
+            }
+            .stApp [data-testid="stTextInput"] input,
+            .stApp [data-testid="stNumberInput"] input,
+            .stApp [data-testid="stTextArea"] textarea,
+            .stApp [data-baseweb="input"] input,
+            .stApp [data-baseweb="textarea"] textarea,
+            .stApp [data-baseweb="select"] > div,
+            .stApp [data-testid="stFileUploader"] section,
+            .stApp [data-testid="stColorPicker"] input {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border-color: #94a3b8 !important;
+                box-shadow: none !important;
+            }
+            .stApp input::placeholder,
+            .stApp textarea::placeholder,
+            .stApp [data-baseweb="input"] input::placeholder,
+            .stApp [data-baseweb="textarea"] textarea::placeholder {
+                color: #475569 !important;
+                -webkit-text-fill-color: #475569 !important;
+                opacity: 1 !important;
+            }
+            [data-baseweb="popover"],
+            [data-baseweb="menu"],
+            [data-baseweb="option"],
+            [role="listbox"],
+            [role="option"] {
+                background: #ffffff !important;
+                color: #0f172a !important;
+            }
+            [data-baseweb="popover"] *,
+            [data-baseweb="menu"] *,
+            [data-baseweb="option"] *,
+            [role="listbox"] *,
+            [role="option"] * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            .stApp [data-testid="stTabs"] button[role="tab"],
+            .stApp [data-testid="stTabs"] button[role="tab"] * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                background: #e2e8f0 !important;
+            }
+            .stApp [data-testid="stTabs"] button[role="tab"][aria-selected="true"],
+            .stApp [data-testid="stTabs"] button[role="tab"][aria-selected="true"] * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                background: #ffffff !important;
+                font-weight: 850 !important;
+            }
+            .stApp [data-testid="stExpander"],
+            .stApp [data-testid="stMetric"],
+            .guide-box,
+            .insight-card,
+            .readable-panel,
+            .score-card,
+            .prompter-frame-note {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+            }
+            .guide-box *,
+            .insight-card *,
+            .readable-panel *,
+            .score-card *,
+            .prompter-frame-note * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            .pill,
+            .stApp .pill {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border: 1px solid #94a3b8 !important;
+            }
+            .stApp [data-testid="stAlert"],
+            .stApp [data-testid="stAlert"] *,
+            .stApp [data-testid="stDataFrame"],
+            .stApp [data-testid="stDataFrame"] *,
+            .stApp [data-testid="stTable"],
+            .stApp [data-testid="stTable"] * {
+                background-color: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            .stApp .stButton > button,
+            .stApp .stDownloadButton > button,
+            .stApp button[data-testid^="baseButton"] {
+                background: #0f172a !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+                border: 1px solid #0f172a !important;
+            }
+            .stApp .stButton > button *,
+            .stApp .stDownloadButton > button *,
+            .stApp button[data-testid^="baseButton"] * {
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+            }
+            .developer-footer {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border-top: 1px solid #cbd5e1 !important;
+            }
+
+            /* v10.3 Dropdown / selectbox contrast hardening
+               BaseWeb renders opened dropdowns in a portal outside .stApp, so
+               these selectors are intentionally global and include listbox,
+               option, popover, menu, svg icons, and search input states. */
+            div[data-baseweb="select"],
+            div[data-baseweb="select"] > div,
+            div[data-baseweb="select"] div,
+            div[data-baseweb="select"] span,
+            div[data-baseweb="select"] input {
+                background-color: #ffffff !important;
+                background-image: none !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                opacity: 1 !important;
+                text-shadow: none !important;
+            }
+            div[data-baseweb="select"] svg,
+            div[data-baseweb="select"] svg *,
+            div[data-baseweb="select"] path {
+                color: #0f172a !important;
+                fill: #0f172a !important;
+                stroke: #0f172a !important;
+            }
+            div[data-baseweb="select"] > div {
+                border: 1px solid #94a3b8 !important;
+                box-shadow: none !important;
+            }
+            div[data-baseweb="select"]:hover > div,
+            div[data-baseweb="select"]:focus-within > div {
+                border-color: #2563eb !important;
+                box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22) !important;
+            }
+            div[data-baseweb="popover"],
+            div[data-baseweb="popover"] > div,
+            div[data-baseweb="menu"],
+            ul[role="listbox"],
+            div[role="listbox"],
+            li[role="option"],
+            div[role="option"] {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                background-image: none !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border-color: #94a3b8 !important;
+                opacity: 1 !important;
+                text-shadow: none !important;
+            }
+            div[data-baseweb="popover"] *,
+            div[data-baseweb="menu"] *,
+            ul[role="listbox"] *,
+            div[role="listbox"] *,
+            li[role="option"] *,
+            div[role="option"] * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                opacity: 1 !important;
+                text-shadow: none !important;
+            }
+            li[role="option"][aria-selected="true"],
+            div[role="option"][aria-selected="true"],
+            li[role="option"]:hover,
+            div[role="option"]:hover,
+            li[role="option"][data-highlighted="true"],
+            div[role="option"][data-highlighted="true"] {
+                background: #dbeafe !important;
+                background-color: #dbeafe !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            li[role="option"][aria-selected="true"] *,
+            div[role="option"][aria-selected="true"] *,
+            li[role="option"]:hover *,
+            div[role="option"]:hover * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            input[aria-autocomplete="list"],
+            input[role="combobox"],
+            div[role="combobox"],
+            [aria-haspopup="listbox"] {
+                background-color: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            .stSelectbox label,
+            .stSelectbox label *,
+            .stMultiSelect label,
+            .stMultiSelect label * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -1758,13 +2003,14 @@ def build_rehearsal_html(data: dict[str, Any], *, standalone: bool = True) -> st
   --panel: #111827;
   --panel2: #1e293b;
   --text: #f8fafc;
-  --muted: #cbd5e1;
+  --muted: #e2e8f0;
   --accent: #60a5fa;
   --line: rgba(255,255,255,.16);
   --ok: #22c55e;
   --warn: #f59e0b;
 }}
 * {{ box-sizing: border-box; }}
+html {{ color-scheme: dark; }}
 body {{
   margin: 0;
   font-family: Inter, Aptos, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -1781,16 +2027,18 @@ body {{
 .brand p {{ margin: 4px 0 0; color: var(--muted); font-size: 12px; }}
 .controls {{ display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }}
 button, select {{
-  border: 1px solid var(--line); background: #f8fafc; color: #0f172a;
+  border: 1px solid rgba(255,255,255,.28); background: #f8fafc; color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
   border-radius: 12px; padding: 9px 12px; font-weight: 800; cursor: pointer;
 }}
-button.secondary {{ background: transparent; color: var(--text); }}
-button.danger {{ background: #fee2e2; color: #991b1b; }}
+button *, select * {{ color: #0f172a; -webkit-text-fill-color: #0f172a; }}
+button.secondary {{ background: rgba(255,255,255,.10); color: var(--text); -webkit-text-fill-color: var(--text); }}
+button.danger {{ background: #fee2e2; color: #991b1b; -webkit-text-fill-color: #991b1b; }}
 .grid {{ display: grid; grid-template-columns: 1.05fr .95fr; gap: 16px; margin-top: 16px; }}
 .card {{ border: 1px solid var(--line); border-radius: 22px; background: rgba(15,23,42,.78); overflow: hidden; }}
 .card-header {{ padding: 14px 16px; border-bottom: 1px solid var(--line); display:flex; justify-content:space-between; gap:12px; align-items:center; }}
 .eyebrow {{ color: var(--accent); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; font-weight: 900; }}
-.slide-title {{ font-size: clamp(28px, 4vw, 54px); line-height: 1.05; font-weight: 950; margin: 0; }}
+.slide-title {{ font-size: clamp(28px, 4vw, 54px); line-height: 1.05; font-weight: 950; margin: 0; color: var(--text); -webkit-text-fill-color: var(--text); }}
 .slide-screen {{ min-height: 475px; padding: 28px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }}
 .screen-body {{ white-space: pre-wrap; font-size: clamp(18px, 2.0vw, 30px); line-height: 1.35; color: var(--text); }}
 .meta-row {{ display:flex; gap:8px; flex-wrap: wrap; margin-top: 8px; }}
@@ -1802,7 +2050,7 @@ button.danger {{ background: #fee2e2; color: #991b1b; }}
 .progress {{ height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--ok)); }}
 .prompter {{ height: 420px; overflow: hidden; position: relative; padding: 20px 24px; }}
 .prompt-scroll {{ position: absolute; left: 24px; right: 24px; top: 20px; transition: transform .12s linear; }}
-.prompt-text {{ font-size: clamp(25px, 3.5vw, 44px); line-height: 1.42; font-weight: 800; white-space: pre-wrap; }}
+.prompt-text {{ font-size: clamp(25px, 3.5vw, 44px); line-height: 1.42; font-weight: 800; white-space: pre-wrap; color: var(--text); -webkit-text-fill-color: var(--text); }}
 .purpose {{ padding: 0 24px 18px; color: var(--muted); font-size: 14px; line-height: 1.55; }}
 .next {{ padding: 14px 16px; color: var(--muted); border-top:1px solid var(--line); font-size: 14px; line-height:1.45; }}
 .timeline {{ display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-top:16px; }}

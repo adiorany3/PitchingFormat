@@ -1,6 +1,6 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v10.1 - Editable Teleprompter Script  
+Versi: v10.3 - Dropdown Contrast Fix  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:
@@ -90,3 +90,7 @@ Fitur baru:
 - Timer, progress bar, start/pause/reset, prev/next, fullscreen, dan speed control.
 - Timing otomatis mengikuti pilihan durasi pitch: 3, 5, 8, 10, 15, atau 20 menit.
 - File ZIP output sekarang menyertakan HTML prompter mandiri: `*-pitch-prompter.html`, sehingga latihan bisa dilakukan offline di browser.
+
+
+## v10.3
+- Perbaikan kontras khusus dropdown/selectbox BaseWeb agar menu yang terbuka tetap terbaca di light/dark/system theme.
