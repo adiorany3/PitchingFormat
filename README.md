@@ -6,7 +6,7 @@ Footer aplikasi, setiap slide PPTX, dan PDF guide:
 
 **Developed by Galuh Adi Insani**
 
-## Pembaruan Versi v8 - Durasi Pitching & Model Bisnis Dinamis
+## Pembaruan Versi v8.1 - Perbaikan Metrik Model Bisnis
 
 - Ditambahkan pilihan **durasi pitching**:
   - 3 menit - elevator pitch
@@ -43,6 +43,10 @@ Footer aplikasi, setiap slide PPTX, dan PDF guide:
   - rumus praktis,
   - metrik utama yang bisa diedit.
 - Slide **Business Model**, PDF skenario, dan analisa otomatis sekarang mengikuti model bisnis yang dipilih.
+
+- Perbaikan bug `NameError: model_metric_labels is not defined` pada saat aplikasi dijalankan di Streamlit Cloud.
+- Metrik utama sesuai model bisnis sekarang ditampilkan sebagai input yang bisa diedit.
+- Nilai metrik tersebut otomatis masuk ke slide Business Model, PDF skenario, dan analisa.
 - PDF guide memiliki appendix baru: **Model bisnis startup dan metrik utama**.
 
 ## Fitur Utama

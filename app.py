@@ -3640,6 +3640,46 @@ with market:
             """,
             unsafe_allow_html=True,
         )
+
+        # Metrik spesifik model bisnis.
+        # Variabel ini wajib dibuat sebelum dictionary `data`, karena dipakai oleh
+        # slide Business Model, analisa, dan PDF scenario guide.
+        default_model_metrics = selected_model_template.get("metrics", [])[:4]
+        model_metric_labels = []
+        model_metric_values = []
+
+        with st.expander("Metrik utama sesuai model bisnis", expanded=True):
+            st.caption(
+                "Sesuaikan label dan nilai metrik agar cocok dengan revenue engine startup. "
+                "Contoh: SaaS memakai MRR/ARR, marketplace memakai GMV & take rate, "
+                "e-commerce memakai AOV & repeat purchase."
+            )
+
+            for metric_idx, metric in enumerate(default_model_metrics):
+                default_label = metric[0] if len(metric) > 0 else f"Metric {metric_idx + 1}"
+                default_value = metric[1] if len(metric) > 1 else ""
+
+                metric_col_1, metric_col_2 = st.columns([1, 1])
+
+                with metric_col_1:
+                    metric_label = st.text_input(
+                        f"Label metrik {metric_idx + 1}",
+                        value=default_label,
+                        key=f"model_metric_label_{metric_idx}",
+                        help="Nama metrik yang akan muncul di slide Business Model, misalnya MRR, GMV, Take Rate, AOV, NRR, atau Transaction Volume.",
+                    )
+
+                with metric_col_2:
+                    metric_value = st.text_input(
+                        f"Nilai metrik {metric_idx + 1}",
+                        value=default_value,
+                        key=f"model_metric_value_{metric_idx}",
+                        help="Nilai metrik yang akan ditampilkan di deck. Gunakan format yang mudah dibaca investor, misalnya Rp 85 juta MRR, 5% take rate, atau 2 juta API calls/bulan.",
+                    )
+
+                model_metric_labels.append(metric_label)
+                model_metric_values.append(metric_value)
+
         arpu = st.text_input("ARPU", "Rp 99.000/bulan", help="Average Revenue Per User. Tulis pendapatan rata-rata per customer/user.")
         gross_margin = st.text_input("Gross margin", "78%", help="Margin kotor. Untuk software/SaaS, margin tinggi menjadi sinyal scalability.")
         cac = st.text_input("CAC", "Rp 140.000", help="Customer Acquisition Cost. Tulis biaya rata-rata untuk mendapatkan satu customer.")
