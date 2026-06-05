@@ -6,81 +6,56 @@ Footer aplikasi, setiap slide PPTX, dan PDF guide:
 
 **Developed by Galuh Adi Insani**
 
-## Pembaruan Versi v7 - Istilah & Rumus Founder Baru
+## Pembaruan Versi v8 - Durasi Pitching & Model Bisnis Dinamis
 
-- Ditambahkan tab **Istilah & Rumus** di aplikasi.
-- Setiap istilah startup/investor dilengkapi:
-  - arti sederhana,
-  - rumus atau cara menghitung,
-  - contoh angka,
-  - slide tempat istilah biasanya dipakai.
-- Ditambahkan pencarian dan filter kategori istilah agar founder baru lebih mudah belajar.
-- PDF **Pitch Scenario Guide** sekarang memiliki appendix **Istilah investor dan cara menghitungnya**.
-- Istilah yang dicakup antara lain TAM, SAM, SOM, MRR, ARR, GMV, ARPU, CAC, CAC Payback, Gross Margin, Retention, Churn, Runway, Burn Rate, Valuation, Dilution, Milestone, Moat, GTM, dan lainnya.
+- Ditambahkan pilihan **durasi pitching**:
+  - 3 menit - elevator pitch
+  - 5 menit - demo day pitch
+  - 8 menit - seed pitch ringkas
+  - 10 menit - seed standard
+  - 15 menit - detailed seed meeting
+  - 20 menit - deep-dive seed meeting
+- Skema PPT otomatis menyesuaikan durasi:
+  - durasi pendek menggabungkan beberapa topik agar konteks tetap lengkap,
+  - durasi menengah membuat deck seed ringkas,
+  - durasi panjang memakai full deck dengan Competition dan Milestones yang bisa multi-slide.
+- PDF **Pitch Scenario Guide** sekarang menyesuaikan:
+  - jumlah slide,
+  - timing tiap slide,
+  - urutan skenario,
+  - ritme pitching,
+  - talk track sesuai durasi yang dipilih.
+- Ditambahkan pilihan **model bisnis**:
+  - SaaS / Subscription
+  - Marketplace / Take Rate
+  - E-commerce / D2C
+  - Transaction Fee / Fintech
+  - Usage-Based / API
+  - Freemium
+  - Enterprise / Licensing
+  - Service-Enabled Software
+  - Advertising / Media
+  - Hybrid / Other
+- Setiap model bisnis memiliki:
+  - penjelasan sederhana,
+  - model yang cocok,
+  - cara menjelaskan saat pitching,
+  - rumus praktis,
+  - metrik utama yang bisa diedit.
+- Slide **Business Model**, PDF skenario, dan analisa otomatis sekarang mengikuti model bisnis yang dipilih.
+- PDF guide memiliki appendix baru: **Model bisnis startup dan metrik utama**.
 
-## Pembaruan Versi v6 - PDF Pitch Scenario Guide
+## Fitur Utama
 
-- Ditambahkan output **Pitch Scenario Guide PDF** setelah generate.
-- PDF mengikuti urutan slide PPTX yang dibuat aplikasi.
-- Jika slide **Competition** atau **Milestones** otomatis terpecah menjadi beberapa slide, PDF juga mengikuti urutan tersebut.
-- PDF berisi panduan latihan pitching untuk setiap slide dan appendix istilah investor:
-  - Timing yang disarankan
-  - Tujuan slide
-  - Data penting yang perlu disebutkan
-  - Talk track / narasi bicara
-  - Transisi ke slide berikutnya
-  - Pertanyaan investor yang perlu disiapkan
-- Ditambahkan final rehearsal checklist agar founder dapat mengecek kesiapan sebelum meeting investor.
-- Ditambahkan dependency `reportlab` untuk pembuatan PDF.
-
-## Pembaruan Versi v5 - Layout Rapi & Adaptif
-
-- Slide Competition diubah menjadi comparison matrix agar tidak berantakan ketika kompetitor lebih dari satu.
-- Kompetitor dibagi maksimal 5 baris per slide dengan tabel adaptif dan pemotongan teks panjang.
-- Slide Milestones diubah menjadi timeline yang lebih lapang, maksimal 3 milestone per slide.
-- Ukuran font pada headline, metric, card, bullet, tabel, dan takeaway dibuat adaptif terhadap panjang teks.
-- Teks panjang otomatis diringkas dengan elipsis agar tidak menumpuk keluar dari card.
-- Screenshot/mockup produk dibatasi tinggi dan lebarnya agar tidak keluar area slide.
-- Area footer, investor takeaway, dan konten utama diberi jarak aman agar tidak saling bertabrakan.
-
-## Pembaruan Versi v4
-
-- Kompetitor dinamis: pengguna dapat menambah 1 sampai 10 kompetitor/alternatif.
-- Kompetitor bisa dikategorikan sebagai direct competitor, indirect competitor, status quo, adjacent tool, atau alternative.
-- Slide Competition otomatis memakai comparison matrix dan memecah data menjadi beberapa slide jika jumlah kompetitor banyak.
-- Ditambahkan milestone detail: periode, target, success metric, dan owner.
-- Slide Milestones otomatis dibuat sebagai timeline adaptif dan dipecah menjadi beberapa slide jika milestone banyak.
-- Slide Financials dan Fundraising Ask menampilkan next milestone agar hubungan antara ask, runway, dan eksekusi lebih jelas.
-- Analisa investor readiness ikut membaca jumlah kompetitor dan milestone sebagai sinyal kelengkapan deck seed.
-
-## Pembaruan Theme-Aware
-
-- Tampilan aplikasi mengikuti tema Streamlit yang sedang aktif: light, dark, atau system theme.
-- Warna teks, background, kartu panduan, panel analisa, tab, input, tombol, upload file, metric, dan footer memakai CSS variable bawaan Streamlit sehingga tetap kontras saat tema berubah.
-- Konfigurasi `.streamlit/config.toml` tidak mengunci aplikasi ke light theme.
-- Elemen/emblem bawaan Streamlit tetap disembunyikan.
-
-## Fitur
-
-- Struktur deck seed-stage startup.
+- Struktur deck seed-stage startup yang story-led dan data-first.
+- Durasi pitching dinamis: deck otomatis dipadatkan atau diperluas.
+- Model bisnis dinamis dengan metrik yang dapat disesuaikan.
 - Kompetitor dinamis hingga 10 alternatif.
 - Milestone execution plan dengan periode, target, success metric, dan owner.
-- Desain profesional: clean, data-first, minim teks, banyak whitespace.
-- Panduan pengisian pada bagian:
-  1. Identitas
-  2. Story
-  3. Market & Traction
-  4. Financial & Funding
-  5. Team & Competition
-  6. Istilah & Rumus
-  7. Analisa
-- Kamus istilah startup dan investor dengan rumus/cara menghitung:
-  - TAM, SAM, SOM
-  - Revenue, MRR, ARR, GMV, Take Rate
-  - ARPU, Gross Margin, COGS, CAC, CAC Payback, LTV, LTV/CAC
-  - Retention, Churn, MoM Growth, Pipeline, LOI
-  - Runway, Burn Rate, Operating Cost, EBITDA/Profit, Profit Margin
-  - Valuation, Dilution, Milestone, Success Metric, Moat, Status Quo
+- Desain profesional: clean, minim teks, banyak whitespace, dan adaptif terhadap input panjang.
+- Tampilan aplikasi theme-aware untuk light, dark, atau system theme.
+- Elemen/emblem bawaan Streamlit disembunyikan.
+- Kamus istilah startup dan investor dengan rumus/cara menghitung.
 - Analisa otomatis:
   - Deck readiness score
   - Revenue growth Y1->Y2 dan Y2->Y3
@@ -91,27 +66,64 @@ Footer aplikasi, setiap slide PPTX, dan PDF guide:
   - Strengths
   - Risk / investor questions
   - Rekomendasi pitching
-- Slide otomatis:
-  1. Cover
-  2. Problem
-  3. Solution
-  4. Product
-  5. Market
-  6. Business Model
-  7. Traction
-  8. Go-To-Market
-  9. Competition, comparison matrix otomatis multi-slide
-  10. Financials
-  11. Milestones, timeline otomatis multi-slide
-  12. Investor Readiness, opsional
-  13. Team
-  14. Fundraising Ask
-  15. Closing
-- Upload screenshot atau mockup produk.
-- Speaker notes otomatis di setiap slide.
-- Download hasil dalam format `.pptx`.
-- Download **Pitch Scenario Guide** dalam format `.pdf`.
-- Contoh PDF scenario guide tersedia di folder `docs/`.
+- Output:
+  - `.pptx` pitch deck investor
+  - `.pdf` Pitch Scenario Guide untuk latihan
+
+## Skema Slide Berdasarkan Durasi
+
+### 3 menit
+Deck sangat ringkas. Beberapa konteks digabung:
+1. Cover
+2. Problem + Solution + Product
+3. Market + Business Model
+4. Traction + GTM
+5. Competition + Milestones
+6. Team + Ask
+7. Closing
+
+### 5 menit
+Deck demo day singkat:
+1. Cover
+2. Problem + Solution
+3. Product
+4. Market + Business Model
+5. Traction + GTM
+6. Competition + Milestones
+7. Financials + Ask
+8. Team + Closing
+
+### 8-10 menit
+Deck seed ringkas:
+1. Cover
+2. Problem
+3. Solution
+4. Product
+5. Market
+6. Business Model
+7. Traction
+8. GTM + Competition
+9. Financials + Milestones
+10. Team
+11. Fundraising Ask + Closing
+
+### 15-20 menit
+Full seed investor deck:
+1. Cover
+2. Problem
+3. Solution
+4. Product
+5. Market
+6. Business Model
+7. Traction
+8. Go-To-Market
+9. Competition, otomatis multi-slide jika data banyak
+10. Financials
+11. Milestones, otomatis multi-slide jika data banyak
+12. Investor Readiness, opsional
+13. Team
+14. Fundraising Ask
+15. Closing
 
 ## Cara Menjalankan
 
@@ -133,14 +145,18 @@ pitch_deck_seed_generator/
 └── README.md
 ```
 
-## Cara Menggunakan PDF Scenario Guide
+## Cara Menggunakan
 
-1. Isi data pitch seperti biasa.
-2. Buka tab **Istilah & Rumus** jika ada istilah yang belum dipahami atau angka yang belum tahu cara dihitung.
-3. Klik **Generate Seed Investor Pitch Deck**.
-4. Download `.pptx` untuk presentasi investor.
-5. Download `.pdf` untuk latihan skenario pitching.
-6. Latih pitch mengikuti urutan PDF: tujuan slide, talk track, transisi, pertanyaan investor, appendix istilah, dan checklist.
+1. Pilih warna aksen, mata uang, dan **durasi pitching** di sidebar.
+2. Isi identitas startup dan round pendanaan.
+3. Isi story: problem, evidence, solution, product flow, dan benefit.
+4. Pilih **jenis model bisnis** pada tab Market, Model & Traction.
+5. Sesuaikan metrik model bisnis yang muncul otomatis.
+6. Isi traction, GTM, financial projection, use of funds, kompetitor, dan milestones.
+7. Buka tab **Analisa** untuk membaca kesiapan pitching.
+8. Buka tab **Istilah & Rumus** jika ingin mempelajari istilah dan cara menghitung metrik.
+9. Klik **Generate Seed Investor Pitch Deck**.
+10. Download PPTX dan PDF scenario guide.
 
 ## Catatan
 

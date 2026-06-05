@@ -774,6 +774,111 @@ STARTUP_TERMS = [
 ]
 
 
+# ==============================
+# Pitch Duration & Business Model System
+# ==============================
+PITCH_DURATION_OPTIONS = [3, 5, 8, 10, 15, 20]
+
+PITCH_DURATION_PROFILES = {
+    3: {"name": "3-minute elevator pitch", "scheme": "7 slide ringkas: konteks tetap lengkap, tetapi beberapa topik digabung agar cocok untuk opening meeting atau demo day singkat.", "slide_goal": "Setiap slide 20-35 detik. Fokus pada satu pesan utama per slide."},
+    5: {"name": "5-minute demo day pitch", "scheme": "8 slide kompak: problem, product, market, traction, competition, financial, team, dan ask tetap muncul.", "slide_goal": "Setiap slide 30-45 detik. Gunakan transisi cepat dan hindari membaca semua bullet."},
+    8: {"name": "8-minute seed pitch", "scheme": "10-11 slide seed ringkas: cukup detail untuk investor meeting awal tanpa membuat deck terlalu panjang.", "slide_goal": "Setiap slide 35-55 detik. Tekankan bukti dan asumsi utama."},
+    10: {"name": "10-minute seed standard", "scheme": "11 slide standar seed: semua konteks investor muncul dengan kompetisi dan milestone dipadatkan.", "slide_goal": "Setiap slide 45-65 detik. Sisakan waktu untuk Q&A."},
+    15: {"name": "15-minute detailed seed meeting", "scheme": "Full deck: slide competition dan milestones bisa dipisah/paginated bila data banyak.", "slide_goal": "Setiap slide 50-80 detik. Cocok untuk first investor meeting yang butuh pendalaman."},
+    20: {"name": "20-minute deep-dive seed meeting", "scheme": "Full deck dengan ruang narasi lebih longgar. PDF skenario memberi timing lebih detail untuk Q&A dan penjelasan asumsi.", "slide_goal": "Setiap slide 60-100 detik. Gunakan waktu tambahan untuk asumsi, competition, dan milestones."},
+}
+
+BUSINESS_MODEL_TEMPLATES = {
+    "SaaS / Subscription": {
+        "description": "Customer membayar biaya berlangganan bulanan/tahunan untuk memakai software atau platform.",
+        "best_for": "Software B2B/B2C, workflow tool, vertical SaaS, productivity, AI tool.",
+        "pitch_focus": "Tekankan MRR/ARR, retention, churn, ARPU, CAC payback, dan expansion revenue.",
+        "formula": "MRR = pelanggan berbayar x harga bulanan rata-rata; ARR = MRR x 12.",
+        "metrics": [("MRR / ARR", "Rp 85 juta MRR"), ("ARPU", "Rp 99.000/bulan"), ("Gross Margin", "78%"), ("CAC Payback", "< 2 bulan")],
+        "default_lines": "Subscription SaaS bulanan.\nPaket Pro untuk multi-outlet.\nAdd-on premium untuk laporan, automation, atau analytics.\nExpansion revenue melalui seat, outlet, usage, atau modul tambahan.",
+    },
+    "Marketplace / Take Rate": {
+        "description": "Platform mempertemukan supply dan demand, lalu mengambil komisi dari transaksi.",
+        "best_for": "Marketplace jasa, produk, B2B procurement, booking, creator/merchant platform.",
+        "pitch_focus": "Tekankan GMV, take rate, liquidity, repeat transaction, supply-demand balance, dan unit economics per transaksi.",
+        "formula": "Revenue = GMV x take rate; GMV = jumlah transaksi x nilai transaksi rata-rata.",
+        "metrics": [("GMV", "Rp 1,5M/bulan"), ("Take Rate", "5%"), ("Repeat Rate", "42%"), ("Liquidity", "70% order matched")],
+        "default_lines": "Marketplace mengambil komisi dari transaksi.\nSupply diakuisisi melalui partner dan komunitas.\nDemand datang dari channel digital dan referral.\nRevenue naik melalui GMV, take rate, dan repeat transaction.",
+    },
+    "E-commerce / D2C": {
+        "description": "Startup menjual produk langsung ke customer dengan margin dari selisih harga jual dan biaya produk/logistik.",
+        "best_for": "Brand consumer, D2C, retail online, produk fisik, commerce-enabled brand.",
+        "pitch_focus": "Tekankan AOV, gross margin, repeat purchase, CAC, payback, inventory turn, dan kontribusi margin.",
+        "formula": "Revenue = jumlah order x AOV; gross margin = (revenue - COGS) / revenue.",
+        "metrics": [("AOV", "Rp 180.000"), ("Gross Margin", "45%"), ("Repeat Purchase", "35%"), ("CAC Payback", "< 3 bulan")],
+        "default_lines": "Penjualan langsung ke customer melalui website, marketplace, dan channel komunitas.\nMargin berasal dari produk inti dan bundle.\nGrowth ditopang repeat purchase, subscription box, dan channel partnership.",
+    },
+    "Transaction Fee / Fintech": {
+        "description": "Startup mendapat fee dari pembayaran, pembiayaan, transfer, insurance, atau transaksi finansial lain.",
+        "best_for": "Fintech, payment, lending enablement, insurtech, embedded finance.",
+        "pitch_focus": "Tekankan transaction volume, fee rate, default/risk control bila lending, compliance, CAC, dan contribution margin.",
+        "formula": "Revenue = transaction volume x fee rate; untuk lending tambahkan risk cost/default rate.",
+        "metrics": [("Transaction Volume", "Rp 3M/bulan"), ("Fee Rate", "1,5%"), ("Default/Risk Cost", "< 2%"), ("Active Merchants", "1.200")],
+        "default_lines": "Revenue berasal dari fee transaksi dan revenue share dengan partner finansial.\nProduk tertanam di workflow customer.\nRisk, compliance, dan partner distribution menjadi kunci scale.",
+    },
+    "Usage-Based / API": {
+        "description": "Customer membayar sesuai pemakaian: API call, token, storage, transaksi, seat aktif, atau volume data.",
+        "best_for": "Developer tool, AI API, infrastructure, data platform, automation, cloud service.",
+        "pitch_focus": "Tekankan usage growth, net revenue retention, gross margin per usage, developer adoption, dan enterprise expansion.",
+        "formula": "Revenue = volume usage x harga per unit; NRR penting untuk melihat expansion.",
+        "metrics": [("Usage Volume", "2 juta API calls/bulan"), ("Revenue / Unit", "Rp 12/call"), ("Gross Margin", "72%"), ("NRR", "115%")],
+        "default_lines": "Customer membayar berdasarkan pemakaian.\nEntry point murah, revenue naik seiring volume.\nExpansion terjadi ketika produk tertanam dalam workflow atau sistem customer.",
+    },
+    "Freemium": {
+        "description": "Sebagian user memakai gratis, lalu sebagian dikonversi ke paket berbayar.",
+        "best_for": "Consumer app, productivity, creator tool, education, AI tool, developer product.",
+        "pitch_focus": "Tekankan activation, free-to-paid conversion, retention, viral/referral loop, dan cost to serve free users.",
+        "formula": "Paid users = free active users x conversion rate; MRR = paid users x ARPU.",
+        "metrics": [("Active Free Users", "25.000"), ("Free-to-Paid", "4%"), ("Paid ARPU", "Rp 79.000/bulan"), ("D30 Retention", "38%")],
+        "default_lines": "Free plan digunakan untuk akuisisi dan activation.\nRevenue berasal dari upgrade ke paket Pro.\nGrowth ditopang referral, komunitas, dan product-led growth.",
+    },
+    "Enterprise / Licensing": {
+        "description": "Customer perusahaan membayar kontrak tahunan, lisensi, implementation fee, atau seat enterprise.",
+        "best_for": "B2B enterprise SaaS, cybersecurity, HR tech, govtech, data/AI enterprise.",
+        "pitch_focus": "Tekankan ACV, sales cycle, pipeline, pilot-to-contract conversion, renewal, dan procurement readiness.",
+        "formula": "ARR = jumlah kontrak aktif x ACV; pipeline weighted = pipeline value x probability.",
+        "metrics": [("ACV", "Rp 250 juta/tahun"), ("Pipeline", "Rp 2,4M"), ("Sales Cycle", "90 hari"), ("Pilot Conversion", "40%")],
+        "default_lines": "Revenue berasal dari kontrak tahunan dan implementation fee.\nSales motion berbasis pilot, stakeholder mapping, dan procurement.\nExpansion melalui seat, modul tambahan, dan multi-department rollout.",
+    },
+    "Service-Enabled Software": {
+        "description": "Startup menggabungkan software dengan layanan operasional agar customer cepat mendapat outcome.",
+        "best_for": "Managed marketplace, vertical SaaS awal, AI service, operational startup, B2B solution.",
+        "pitch_focus": "Tekankan software leverage, margin improvement, repeatability, automation roadmap, dan proses yang bisa distandarisasi.",
+        "formula": "Gross margin membaik jika porsi software/automation naik dan biaya layanan per customer turun.",
+        "metrics": [("Service Margin", "35%"), ("Automation Rate", "55%"), ("Revenue / Customer", "Rp 2 juta/bulan"), ("Delivery SLA", "< 24 jam")],
+        "default_lines": "Layanan membantu customer mendapat outcome cepat.\nSoftware mengurangi biaya delivery dan membuat proses repeatable.\nMargin naik seiring automation dan standardisasi operasi.",
+    },
+    "Advertising / Media": {
+        "description": "Revenue berasal dari iklan, sponsorship, placement, affiliate, atau monetisasi audience.",
+        "best_for": "Media, community, content platform, consumer app dengan audience besar.",
+        "pitch_focus": "Tekankan audience quality, engagement, CPM/CPC, fill rate, retention, dan diversifikasi revenue.",
+        "formula": "Ad revenue = impressions / 1000 x CPM; affiliate revenue = conversion x commission.",
+        "metrics": [("MAU", "250.000"), ("Engagement", "12 menit/session"), ("CPM", "Rp 35.000"), ("Fill Rate", "60%")],
+        "default_lines": "Revenue berasal dari sponsorship, ads, affiliate, dan brand partnership.\nKekuatan utama adalah audience quality, engagement, dan data segmentasi.\nDiversifikasi revenue dilakukan melalui premium community atau commerce.",
+    },
+    "Hybrid / Other": {
+        "description": "Gabungan beberapa model revenue. Cocok bila startup punya revenue utama dan revenue tambahan.",
+        "best_for": "Startup yang masih mencari pricing, multi-product, atau model campuran SaaS + marketplace + services.",
+        "pitch_focus": "Tekankan model utama terlebih dahulu. Model tambahan harus memperkuat, bukan membuat cerita membingungkan.",
+        "formula": "Total revenue = revenue stream utama + revenue stream tambahan. Pisahkan asumsi per stream.",
+        "metrics": [("Primary Revenue", "Subscription"), ("Secondary Revenue", "Revenue share"), ("Gross Margin", "65%"), ("Expansion Driver", "Add-on / usage")],
+        "default_lines": "Revenue utama berasal dari model inti.\nRevenue tambahan berasal dari add-on, partnership, atau transaction fee.\nPitch tetap fokus pada satu engine utama agar investor tidak bingung.",
+    },
+}
+
+STARTUP_TERMS.extend([
+    {"category": "Business Model", "term": "SaaS / Subscription", "simple": "Model berlangganan bulanan/tahunan. Investor melihat kualitasnya dari MRR, retention, churn, gross margin, dan CAC payback.", "formula": "MRR = pelanggan berbayar x harga bulanan rata-rata. ARR = MRR x 12.", "example": "1.000 pelanggan x Rp 99.000/bulan = Rp 99 juta MRR.", "used_in": "Business Model, Traction, Financials"},
+    {"category": "Business Model", "term": "Marketplace / Take Rate", "simple": "Platform mengambil komisi dari transaksi antara supply dan demand.", "formula": "Revenue = GMV x take rate.", "example": "GMV Rp 1,5M x take rate 5% = Rp 75 juta revenue.", "used_in": "Business Model, Traction"},
+    {"category": "Business Model", "term": "Enterprise / Licensing", "simple": "Perusahaan membayar kontrak tahunan, lisensi, atau implementation fee.", "formula": "ARR = jumlah kontrak aktif x ACV.", "example": "10 kontrak x Rp 250 juta/tahun = Rp 2,5M ARR.", "used_in": "Business Model, Financials, GTM"},
+    {"category": "Business Model", "term": "Usage-Based Pricing", "simple": "Customer membayar berdasarkan pemakaian seperti API call, token, storage, atau transaksi.", "formula": "Revenue = volume usage x harga per unit.", "example": "2 juta API calls x Rp 12/call = Rp 24 juta revenue.", "used_in": "Business Model, Financials"},
+])
+
+
 def glossary_categories() -> list[str]:
     categories = []
     for item in STARTUP_TERMS:
@@ -953,6 +1058,152 @@ def milestone_headline(data: dict[str, Any]) -> str:
     return f"{period}: {target}"
 
 
+
+def slugify_key(value: str) -> str:
+    value = re.sub(r"[^a-zA-Z0-9]+", "_", str(value or "").lower()).strip("_")
+    return value or "default"
+
+
+def nearest_pitch_duration(value: Any) -> int:
+    try:
+        minutes = int(value)
+    except Exception:
+        minutes = 10
+    return min(PITCH_DURATION_OPTIONS, key=lambda option: abs(option - minutes))
+
+
+def pitch_duration_profile(data: dict[str, Any]) -> dict[str, Any]:
+    minutes = nearest_pitch_duration(data.get("pitch_duration_minutes", 10))
+    profile = dict(PITCH_DURATION_PROFILES.get(minutes, PITCH_DURATION_PROFILES[10]))
+    profile["minutes"] = minutes
+    if minutes <= 3:
+        profile["mode"] = "elevator"
+        profile["target_slide_count"] = 7
+    elif minutes <= 5:
+        profile["mode"] = "demo_day"
+        profile["target_slide_count"] = 8
+    elif minutes <= 10:
+        profile["mode"] = "standard_short"
+        profile["target_slide_count"] = 11
+    else:
+        profile["mode"] = "full"
+        profile["target_slide_count"] = "adaptive"
+    return profile
+
+
+def business_model_template(data_or_type: Any) -> dict[str, Any]:
+    if isinstance(data_or_type, dict):
+        model_type = data_or_type.get("business_model_type", "SaaS / Subscription")
+    else:
+        model_type = data_or_type
+    return BUSINESS_MODEL_TEMPLATES.get(str(model_type), BUSINESS_MODEL_TEMPLATES["SaaS / Subscription"])
+
+
+def get_business_model_slide_metrics(data: dict[str, Any]) -> list[tuple[str, str]]:
+    labels = data.get("model_metric_labels") or []
+    values = data.get("model_metric_values") or []
+    pairs: list[tuple[str, str]] = []
+    for label, value in zip(labels, values):
+        label_clean = str(label or "").strip()
+        value_clean = str(value or "").strip()
+        if label_clean or value_clean:
+            pairs.append((label_clean or "Metric", value_clean or "Belum diisi"))
+    if pairs:
+        return pairs[:4]
+    template = business_model_template(data)
+    return [(label, value) for label, value in template.get("metrics", [])][:4]
+
+
+def business_model_key_data(data: dict[str, Any]) -> list[str]:
+    template = business_model_template(data)
+    model_type = data.get("business_model_type", "SaaS / Subscription")
+    result = [f"Model: {model_type}", f"Fokus: {template.get('pitch_focus', '')}"]
+    for label, value in get_business_model_slide_metrics(data):
+        result.append(f"{label}: {value}")
+    result.extend(lines(data.get("business_model", ""), 4))
+    return result[:8]
+
+
+def business_model_formula_text(data: dict[str, Any]) -> str:
+    template = business_model_template(data)
+    return str(template.get("formula", "Sesuaikan revenue driver dengan model bisnis utama."))
+
+
+def build_pitch_rhythm(data: dict[str, Any]) -> list[str]:
+    profile = pitch_duration_profile(data)
+    minutes = profile["minutes"]
+    model_type = data.get("business_model_type", "SaaS / Subscription")
+    if minutes <= 3:
+        return [
+            "Opening: 20-30 detik untuk one-liner dan ask.",
+            "Problem + Solution + Product: 60-70 detik untuk membuat urgency dan value creation jelas.",
+            "Market + Business Model + Traction: 60-70 detik untuk menunjukkan opportunity dan demand.",
+            "Competition + Milestones + Ask + Team: 60-70 detik untuk menutup dengan execution plan dan kredibilitas.",
+            f"Model bisnis {model_type}: sebutkan 1 revenue driver dan 1 metric paling penting saja.",
+        ]
+    if minutes <= 5:
+        return [
+            "Opening: 30 detik untuk company, one-liner, dan ask.",
+            "Problem + Product: 90 detik untuk menjelaskan pain, solution, dan demo flow.",
+            "Market + Model + Traction: 120 detik untuk membuktikan peluang dan demand awal.",
+            "Competition + Financial + Milestones + Team + Ask: 120-150 detik untuk menjawab kesiapan eksekusi.",
+            f"Model bisnis {model_type}: tampilkan metric utama dan cara revenue dihitung.",
+        ]
+    if minutes <= 10:
+        return [
+            "Opening: 45 detik untuk company, one-liner, round, dan ask.",
+            "Problem + Solution + Product: 3 menit untuk membangun urgency dan value creation.",
+            "Market + Business Model + Traction + GTM: 4 menit untuk membuktikan opportunity, revenue engine, dan demand.",
+            "Competition + Financials + Milestones + Team + Ask: 3 menit untuk menunjukkan positioning, execution plan, dan readiness.",
+            f"Model bisnis {model_type}: jelaskan revenue formula dan unit economics paling relevan.",
+        ]
+    return [
+        "Opening: 30-45 detik untuk company, one-liner, dan ask.",
+        "Problem + Solution + Product: 3-4 menit untuk membangun urgency dan value creation.",
+        "Market + Business Model + Traction + GTM: 4-5 menit untuk membuktikan opportunity dan demand.",
+        "Competition + Financials + Milestones: 3-5 menit untuk menjawab positioning dan execution plan.",
+        "Team + Fundraising Ask + Closing: 2-3 menit untuk menutup dengan confidence dan next step.",
+        f"Model bisnis {model_type}: sesuaikan metrik utama dengan revenue engine, bukan memakai semua metrik startup secara generik.",
+    ]
+
+
+def format_timing(seconds: int) -> str:
+    seconds = max(10, int(seconds))
+    low = max(10, seconds - 8)
+    high = seconds + 8
+    if high >= 60:
+        return f"{low // 60}:{low % 60:02d}-{high // 60}:{high % 60:02d} menit"
+    return f"{low}-{high} detik"
+
+
+def apply_scenario_timing(items: list[dict[str, Any]], data: dict[str, Any]) -> list[dict[str, Any]]:
+    profile = pitch_duration_profile(data)
+    total_seconds = profile["minutes"] * 60
+    if not items:
+        return items
+    weights = []
+    for item in items:
+        title = item.get("title", "").lower()
+        weight = 1.0
+        if any(keyword in title for keyword in ["problem", "solution", "product", "business", "traction"]):
+            weight = 1.25
+        if any(keyword in title for keyword in ["financial", "milestone", "ask"]):
+            weight = 1.15
+        if any(keyword in title for keyword in ["cover", "closing"]):
+            weight = 0.65
+        weights.append(weight)
+    buffer_ratio = 0.18 if profile["minutes"] <= 5 else 0.12
+    usable_seconds = int(total_seconds * (1 - buffer_ratio))
+    total_weight = sum(weights) or 1
+    timed_items = []
+    for item, weight in zip(items, weights):
+        cloned = dict(item)
+        seconds = int(usable_seconds * weight / total_weight)
+        cloned["timing"] = format_timing(seconds)
+        timed_items.append(cloned)
+    return timed_items
+
+
 # ==============================
 # Investor Insight Engine
 # ==============================
@@ -1119,6 +1370,17 @@ def generate_investor_insights(data: dict[str, Any]) -> dict[str, Any]:
     else:
         recommendations.append(
             f"Gunakan {milestone_count} milestone sebagai jembatan antara ask funding, runway, dan next round story."
+        )
+
+    model_type = data.get("business_model_type", "SaaS / Subscription")
+    model_template = business_model_template(data)
+    recommendations.append(
+        f"Model bisnis yang dipilih: {model_type}. Saat pitching, fokuskan slide Business Model pada: {model_template.get('pitch_focus', '')}"
+    )
+
+    if len(get_business_model_slide_metrics(data)) < 3:
+        risks.append(
+            "Metrik khusus model bisnis masih kurang. Tambahkan 3-4 metrik yang sesuai dengan revenue engine, misalnya MRR untuk SaaS, GMV/take rate untuk marketplace, atau ACV/pipeline untuk enterprise."
         )
 
     if not data.get("problem_evidence", "").strip():
@@ -2154,7 +2416,7 @@ def pdf_bullets(items: list[Any], limit: int = 5) -> str:
     return "<br/>".join(cleaned)
 
 
-def scenario_slide_items(data: dict[str, Any]) -> list[dict[str, Any]]:
+def scenario_slide_items_full(data: dict[str, Any]) -> list[dict[str, Any]]:
     """Create a scenario guide that mirrors the generated PPTX order."""
     competitors = normalize_competitors(data)
     milestones = normalize_milestones(data)
@@ -2278,22 +2540,17 @@ def scenario_slide_items(data: dict[str, Any]) -> list[dict[str, Any]]:
 
     add(
         "Business Model",
-        "Menjelaskan cara startup menghasilkan uang dan apakah unit economics punya potensi scalable.",
-        [
-            f"ARPU: {data.get('arpu', '')}",
-            f"Gross margin: {data.get('gross_margin', '')}",
-            f"CAC: {data.get('cac', '')}",
-            f"Payback: {data.get('payback', '')}",
-        ] + lines(data.get("business_model", ""), 5),
+        "Menjelaskan cara startup menghasilkan uang dan apakah unit economics punya potensi scalable sesuai model bisnis yang dipilih.",
+        business_model_key_data(data) + [f"Formula: {business_model_formula_text(data)}"],
         [
             "Jelaskan siapa yang membayar, berapa, kapan, dan kenapa mereka bersedia membayar.",
-            "Hubungkan ARPU, CAC, gross margin, dan payback ke kualitas bisnis.",
+            "Gunakan metrik yang sesuai dengan model bisnis, bukan metrik generik.",
             "Sebutkan potensi expansion revenue jika ada.",
         ],
         "Setelah model revenue jelas, tunjukkan bukti bahwa market mulai merespons.",
         [
             "Apakah pricing sudah diuji?",
-            "Berapa CAC by channel?",
+            "Apa revenue driver utama model bisnis ini?",
             "Bagaimana margin membaik saat scale?",
         ],
     )
@@ -2487,6 +2744,76 @@ def scenario_slide_items(data: dict[str, Any]) -> list[dict[str, Any]]:
     return items
 
 
+
+def scenario_slide_items_compact(data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Scenario guide for duration-adjusted compact deck versions."""
+    profile = pitch_duration_profile(data)
+    insights = generate_investor_insights(data)
+    competitors = normalize_competitors(data)[:3]
+    milestones = normalize_milestones(data)[:3]
+
+    def comp_lines() -> list[str]:
+        if not competitors:
+            return ["Status quo: jelaskan cara lama yang masih dipakai customer dan kenapa produk Anda menang."]
+        return [f"{row.get('name', 'Alternative')} - {row.get('weakness', '')}; why we win: {row.get('advantage', '')}" for row in competitors]
+
+    def milestone_lines() -> list[str]:
+        if not milestones:
+            return [f"Next milestone: {milestone_headline(data)}"]
+        return [f"{row.get('period', 'Next')}: {row.get('target', '')} | metric: {row.get('metric', '')}" for row in milestones]
+
+    items: list[dict[str, Any]] = []
+
+    def add(title, purpose, key_data, talk_track, transition, questions=None):
+        items.append({"title": title, "purpose": purpose, "key_data": key_data, "talk_track": talk_track, "transition": transition, "questions": questions or [], "timing": "otomatis"})
+
+    add(
+        "Cover",
+        "Membuka pitch dengan company, one-liner, round, ask, durasi, dan model bisnis.",
+        [f"Company: {data.get('company', '')}", f"One-liner: {data.get('one_liner', '')}", f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))} {data.get('round', '')}", f"Pitch duration: {profile['minutes']} menit", f"Business model: {data.get('business_model_type', 'SaaS / Subscription')}",],
+        ["Buka dengan kalimat yang langsung menjawab customer, problem, solusi, dan outcome.", "Jangan membaca cover terlalu lama; gunakan sebagai anchor narasi."],
+        "Masuk ke problem agar investor memahami urgency sebelum melihat produk.",
+        ["Apakah one-liner bisa diucapkan dalam 15 detik?"],
+    )
+
+    if profile["minutes"] <= 3:
+        add("Problem + Solution + Product", "Menggabungkan pain, solusi, dan product flow agar konteks tetap lengkap dalam durasi sangat singkat.", lines(data.get("problem", ""), 3) + lines(data.get("solution", ""), 3) + [f"Product flow: {data.get('product_flow', '')}"], ["Ceritakan pain paling besar, bukan semua masalah.", "Langsung tunjukkan bagaimana solusi mengubah workflow customer.", "Gunakan product flow input -> proses -> output -> dampak."], "Setelah value creation jelas, tunjukkan market dan cara bisnis menghasilkan revenue.", ["Apa problem paling mahal?", "Apa workflow utama produk?"])
+        add("Market + Business Model", "Menjelaskan peluang pasar dan revenue engine tanpa kehilangan konteks model bisnis.", [f"TAM/SAM/SOM: {data.get('tam', '')} / {data.get('sam', '')} / {data.get('som', '')}"] + business_model_key_data(data), ["Sebutkan segmen awal yang paling realistis dimenangkan.", "Jelaskan formula revenue sesuai model bisnis.", "Pilih satu metrik bisnis yang paling kuat untuk disebutkan."], "Setelah market dan model jelas, buktikan demand dan channel akuisisi.", ["Kenapa segmen awal ini?", "Bagaimana revenue dihitung?"])
+        add("Traction + Go-To-Market", "Membuktikan demand awal dan cara memperoleh customer secara repeatable.", [f"Users: {data.get('users', '')}", f"Revenue/GMV: {data.get('revenue', '')}", f"Growth: {data.get('growth', '')}", f"Retention: {data.get('retention', '')}"] + lines(data.get("gtm", ""), 3), ["Buka dengan traction paling kuat.", "Hubungkan traction dengan channel utama dan ICP."], "Setelah demand terlihat, jawab positioning dan rencana eksekusi.", ["Traction mana yang paid/active?", "Channel mana yang sudah terbukti?"])
+        add("Competition + Milestones", "Menunjukkan positioning dan target eksekusi utama yang akan dicapai dengan funding.", comp_lines() + milestone_lines(), ["Akui alternatif yang dipakai customer hari ini.", "Tunjukkan why we win secara spesifik.", "Sebutkan milestone paling penting untuk 12-18 bulan."], "Tutup dengan team dan ask agar investor tahu siapa yang mengeksekusi dan dana dipakai untuk apa.", ["Apa moat?", "Milestone mana yang paling menentukan next round?"])
+        add("Team + Fundraising Ask", "Menggabungkan kredibilitas tim, penggunaan dana, runway, dan next milestone.", lines(data.get("team", ""), 3) + [f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))}", f"Runway: {data.get('runway', '')} bulan", f"Use of funds: {truncate_text(data.get('use_of_funds', ''), 160)}"], ["Hubungkan pengalaman tim dengan market.", "Nyatakan ask dan use of funds secara jelas."], "Akhiri dengan closing line dan next step.", ["Kenapa tim ini tepat?", "Apakah ask cukup untuk runway?"])
+    elif profile["minutes"] <= 5:
+        add("Problem + Solution", "Membangun urgency dan langsung menunjukkan perubahan before-after.", lines(data.get("problem", ""), 4) + lines(data.get("solution", ""), 4), ["Gunakan problem paling tajam.", "Jelaskan solution sebagai outcome, bukan fitur."], "Lanjutkan ke product agar investor melihat mekanismenya.", ["Apa bukti problem nyata?"])
+        add("Product", "Menjelaskan flow produk dan benefit utama.", [f"Product flow: {data.get('product_flow', '')}", f"Benefit: {data.get('product_benefit', '')}"] + lines(data.get("features", ""), 3), ["Jelaskan satu use case utama.", "Tampilkan dampak, bukan semua fitur."], "Setelah product jelas, masuk ke market dan revenue engine.", ["Apa workflow yang membuat user kembali?"])
+        add("Market + Business Model", "Menggabungkan market size dan cara startup menghasilkan uang.", [f"TAM/SAM/SOM: {data.get('tam', '')} / {data.get('sam', '')} / {data.get('som', '')}"] + business_model_key_data(data), ["Jelaskan wedge market.", "Gunakan formula revenue sesuai model bisnis."], "Setelah opportunity jelas, tampilkan demand awal.", ["Bagaimana TAM/SAM/SOM dihitung?", "Apa metric utama model bisnis ini?"])
+        add("Traction + GTM", "Membuktikan demand dan menunjukkan channel akuisisi yang bisa diulang.", [f"Users: {data.get('users', '')}", f"Revenue/GMV: {data.get('revenue', '')}", f"Growth: {data.get('growth', '')}", f"Retention: {data.get('retention', '')}"] + lines(data.get("gtm", ""), 3), ["Mulai dari metric terkuat.", "Hubungkan GTM dengan ICP dan CAC."], "Setelah demand dan GTM, jawab kompetisi dan rencana milestone.", ["Apa traction paling investor-grade?"])
+        add("Competition + Milestones", "Menyatukan positioning dan execution plan agar investor melihat alasan menang dan target berikutnya.", comp_lines() + milestone_lines(), ["Sebutkan alternatif utama.", "Tekankan why we win dan milestone measurable."], "Lanjutkan ke financial dan ask agar funding terasa logis.", ["Apa defensibility?", "Milestone mana yang unlock next round?"])
+        add("Financials + Ask", "Menghubungkan proyeksi, runway, use of funds, dan ask.", [f"Revenue Y1/Y2/Y3: {money(data.get('rev1', 0), data.get('currency', 'Rp'))} / {money(data.get('rev2', 0), data.get('currency', 'Rp'))} / {money(data.get('rev3', 0), data.get('currency', 'Rp'))}", f"Runway: {data.get('runway', '')} bulan", f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))}"] + lines(data.get("use_of_funds", ""), 3), ["Jelaskan asumsi utama, bukan membaca semua angka.", "Hubungkan ask ke milestone."], "Tutup dengan team dan closing.", ["Berapa burn bulanan?", "Apa asumsi revenue paling sensitif?"])
+        add("Team + Closing", "Menutup dengan founder-market fit dan ajakan tindak lanjut.", lines(data.get("team", ""), 4) + [f"Closing: {data.get('closing', '')}"], ["Tunjukkan kenapa tim tepat.", "Minta next step yang jelas."], "Q&A.", ["Apa gap tim terbesar?"])
+    else:
+        for title, purpose, key_data, talk_track, transition, questions in [
+            ("Problem", "Membuktikan pain yang nyata dan urgent.", lines(data.get("problem", ""), 5) + [f"Evidence: {data.get('problem_evidence', '')}"], ["Tunjukkan frekuensi dan biaya masalah.", "Gunakan bukti problem."], "Lanjut ke solution.", ["Apa bukti problem nyata?"]),
+            ("Solution", "Menjelaskan cara baru yang mengubah kondisi customer.", lines(data.get("solution", ""), 5) + [f"Value prop: {data.get('value_prop', '')}"], ["Fokus pada outcome before-after.", "Jangan terlalu teknis."], "Lanjut ke product.", ["Apa yang 10x lebih baik?"]),
+            ("Product", "Menunjukkan workflow produk dan benefit utama.", [f"Flow: {data.get('product_flow', '')}", f"Benefit: {data.get('product_benefit', '')}"] + lines(data.get("features", ""), 4), ["Jelaskan input -> proses -> output -> dampak.", "Pilih use case terpenting."], "Lanjut ke market.", ["Apakah sudah dipakai customer?"]),
+            ("Market", "Menunjukkan peluang besar dengan wedge awal yang fokus.", [f"TAM: {data.get('tam', '')}", f"SAM: {data.get('sam', '')}", f"SOM: {data.get('som', '')}"] + lines(data.get("market_notes", ""), 4), ["Jelaskan cara hitung dan segmen awal.", "Tekankan wedge market."], "Lanjut ke business model.", ["Bagaimana market size dihitung?"]),
+            ("Business Model", "Menjelaskan revenue engine sesuai model bisnis.", business_model_key_data(data) + [f"Formula: {business_model_formula_text(data)}"], ["Jelaskan siapa membayar, berapa, kapan.", "Gunakan metrik sesuai model."], "Lanjut ke traction.", ["Apa revenue driver utama?"]),
+            ("Traction", "Membuktikan demand awal.", [f"Users: {data.get('users', '')}", f"Revenue/GMV: {data.get('revenue', '')}", f"Growth: {data.get('growth', '')}", f"Retention: {data.get('retention', '')}"] + lines(data.get("traction_notes", ""), 4), ["Mulai dari traction terkuat.", "Jelaskan definisi metric."], "Lanjut ke GTM dan competition.", ["Apakah traction paid atau vanity?"]),
+            ("GTM + Competition", "Menunjukkan cara akuisisi customer dan alasan menang dibanding alternatif.", [f"ICP: {data.get('icp', '')}", f"Channel: {data.get('channel', '')}"] + lines(data.get("gtm", ""), 3) + comp_lines(), ["Hubungkan ICP, channel, dan CAC.", "Sebutkan why we win."], "Lanjut ke financials dan milestones.", ["Apa channel yang repeatable?", "Apa moat?"]),
+            ("Financials + Milestones", "Menghubungkan proyeksi, runway, dan target eksekusi.", [f"Revenue Y1/Y2/Y3: {money(data.get('rev1', 0), data.get('currency', 'Rp'))} / {money(data.get('rev2', 0), data.get('currency', 'Rp'))} / {money(data.get('rev3', 0), data.get('currency', 'Rp'))}", f"Runway: {data.get('runway', '')} bulan"] + milestone_lines(), ["Jelaskan 2-3 asumsi utama.", "Tunjukkan milestone measurable."], "Lanjut ke team.", ["Berapa burn?", "Milestone apa yang unlock next round?"]),
+            ("Team", "Membuktikan founder-market fit.", lines(data.get("team", ""), 5) + [f"Founder-market fit: {data.get('founder_fit', '')}"], ["Hubungkan pengalaman tim dengan market.", "Sebutkan gap hiring jika ada."], "Tutup dengan ask.", ["Kenapa tim ini tepat?"]),
+            ("Fundraising Ask + Closing", "Menutup dengan ask, use of funds, next round logic, dan next step.", [f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))}", f"Runway: {data.get('runway', '')} bulan"] + lines(data.get("use_of_funds", ""), 4) + [f"Closing: {data.get('closing', '')}"], ["Nyatakan ask secara spesifik.", "Hubungkan dana dengan milestone."], "Q&A.", ["Apa penggunaan dana terbesar?", "Kapan next round?"]),
+        ]:
+            add(title, purpose, key_data, talk_track, transition, questions)
+    return apply_scenario_timing(items, data)
+
+
+def scenario_slide_items(data: dict[str, Any]) -> list[dict[str, Any]]:
+    profile = pitch_duration_profile(data)
+    if profile["mode"] == "full":
+        return apply_scenario_timing(scenario_slide_items_full(data), data)
+    return scenario_slide_items_compact(data)
+
+
 def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     """Build a PDF speaker guide that teaches the pitch scenario order."""
     output = BytesIO()
@@ -2586,8 +2913,12 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     story.append(Paragraph(pdf_escape(one_liner), styles["cover_subtitle"]))
     story.append(Spacer(1, 0.25 * cm))
 
+    profile = pitch_duration_profile(data)
     summary_rows = [
         ["Purpose", "PDF latihan pitching berdasarkan urutan slide PPTX yang di-generate."],
+        ["Durasi pitching", f"{profile['minutes']} menit - {profile['name']}"],
+        ["Skema deck", profile["scheme"]],
+        ["Business model", f"{data.get('business_model_type', 'SaaS / Subscription')} - {business_model_template(data).get('description', '')}"],
         ["Round", str(data.get("round", ""))],
         ["Ask", money(data.get("ask", 0), data.get("currency", "Rp"))],
         ["Readiness", f"{insights['score']}/100"],
@@ -2616,13 +2947,7 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     story.append(Spacer(1, 0.45 * cm))
 
     story.append(Paragraph("Recommended pitch rhythm", styles["section_title"]))
-    rhythm = [
-        "Opening: 30-45 detik untuk company, one-liner, dan ask.",
-        "Problem + Solution + Product: 3-4 menit untuk membangun urgency dan value creation.",
-        "Market + Business Model + Traction + GTM: 4-5 menit untuk membuktikan opportunity dan demand.",
-        "Competition + Financials + Milestones: 3-4 menit untuk menjawab positioning dan execution plan.",
-        "Team + Fundraising Ask + Closing: 2-3 menit untuk menutup dengan confidence dan next step.",
-    ]
+    rhythm = build_pitch_rhythm(data)
     story.append(Paragraph(pdf_bullets(rhythm, 8), styles["body"]))
     story.append(PageBreak())
 
@@ -2665,6 +2990,39 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
 
         if idx in {5, 10, 15} and idx != len(scenario_items):
             story.append(PageBreak())
+
+    story.append(PageBreak())
+    story.append(Paragraph("Model bisnis startup dan metrik utama", styles["cover_title"]))
+    story.append(Paragraph("Bagian ini membantu founder memilih model bisnis yang paling cocok. Saat pitching, jangan menampilkan semua metrik; pilih metrik yang sesuai dengan revenue engine utama.", styles["cover_subtitle"]))
+    story.append(Spacer(1, 0.15 * cm))
+
+    selected_model = data.get("business_model_type", "SaaS / Subscription")
+    for model_name, model in BUSINESS_MODEL_TEMPLATES.items():
+        title = model_name if model_name != selected_model else f"{model_name} - model yang dipilih"
+        metric_text = "; ".join([f"{label}: {value}" for label, value in model.get("metrics", [])])
+        model_table = RLTable(
+            [
+                [Paragraph("Model", styles["label"]), Paragraph(pdf_escape(title), styles["body"])],
+                [Paragraph("Cocok untuk", styles["label"]), Paragraph(pdf_escape(model.get("best_for", "")), styles["body"])],
+                [Paragraph("Cara pitch", styles["label"]), Paragraph(pdf_escape(model.get("pitch_focus", "")), styles["body"])],
+                [Paragraph("Rumus", styles["label"]), Paragraph(pdf_escape(model.get("formula", "")), styles["body"])],
+                [Paragraph("Metrik", styles["label"]), Paragraph(pdf_escape(metric_text), styles["body"])],
+            ],
+            colWidths=[3.4 * cm, 12.5 * cm],
+            hAlign="LEFT",
+        )
+        model_table.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 0.45, colors.HexColor("#cbd5e1")),
+            ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#e2e8f0")),
+            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#eff6ff") if model_name == selected_model else colors.HexColor("#f8fafc")),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        story.append(model_table)
+        story.append(Spacer(1, 0.16 * cm))
 
     story.append(PageBreak())
     story.append(Paragraph("Istilah investor dan cara menghitungnya", styles["cover_title"]))
@@ -2737,7 +3095,7 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
 # ==============================
 # Deck Generator
 # ==============================
-def build_deck(data, image_buffer=None):
+def build_full_deck(data, image_buffer=None):
     prs = Presentation()
     prs.slide_width = Inches(SLIDE_W)
     prs.slide_height = Inches(SLIDE_H)
@@ -2832,7 +3190,7 @@ def build_deck(data, image_buffer=None):
         "Tampilkan cara menghasilkan uang dan indikasi kualitas bisnis.",
         lines(data["business_model"], 5),
         "Seed investor mencari sinyal bahwa bisnis bisa menjadi scalable.",
-        metric_items=[("ARPU", data["arpu"]), ("Gross Margin", data["gross_margin"]), ("CAC", data["cac"]), ("Payback", data["payback"])],
+        metric_items=get_business_model_slide_metrics(data),
         speaker_note="Jelaskan siapa yang membayar, kapan membayar, dan kenapa margin bisa naik saat skala naik.",
     )
     page += 1
@@ -2942,6 +3300,152 @@ def build_deck(data, image_buffer=None):
     return output
 
 
+
+def add_compact_split_slide(
+    prs,
+    data,
+    page,
+    eyebrow,
+    title,
+    subtitle,
+    left_title,
+    left_items,
+    right_title,
+    right_items,
+    takeaway,
+    metric_items=None,
+    speaker_note="",
+):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide, THEME["bg"])
+    add_seed_header(slide, eyebrow, title, subtitle, data)
+    if metric_items:
+        count = len(metric_items)
+        width = 11.5 / max(count, 1)
+        for idx, (label, value) in enumerate(metric_items):
+            add_big_metric(slide, label, value, 0.85 + idx * width, 2.05, width - 0.15, data)
+        content_y = 3.35
+        content_h = 2.25
+    else:
+        content_y = 2.15
+        content_h = 3.55
+    add_text(slide, left_title, 0.85, content_y, 5.4, 0.32, 13, rgb(data["accent_color"]), True, max_chars=60)
+    add_bullets(slide, left_items, 0.85, content_y + 0.42, 5.55, content_h - 0.28, 12.5)
+    add_text(slide, right_title, 6.85, content_y, 5.4, 0.32, 13, rgb(data["accent_color"]), True, max_chars=60)
+    add_bullets(slide, right_items, 6.85, content_y + 0.42, 5.45, content_h - 0.28, 12.5)
+    add_takeaway(slide, takeaway, data)
+    add_footer(slide, data, page)
+    add_notes(slide, speaker_note)
+    return slide
+
+
+def add_compact_cover(prs, data, page):
+    profile = pitch_duration_profile(data)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide, THEME["dark"])
+    add_text(slide, data["company"], 0.8, 0.8, 8.6, 0.65, 35, THEME["white"], True)
+    add_text(slide, data["one_liner"], 0.82, 1.72, 9.4, 0.85, 23, RGBColor(226, 232, 240), True)
+    add_text(slide, f'{data["round"]} • {money(data["ask"], data["currency"])}', 0.85, 4.65, 7.8, 0.35, 15, rgb(data["accent_color"]), True)
+    add_text(slide, f'Duration: {profile["minutes"]} min • {data.get("business_model_type", "SaaS / Subscription")}', 0.85, 5.12, 8.8, 0.28, 11, RGBColor(203, 213, 225))
+    add_text(slide, f'{data["presenter"]} | {data["contact"]}', 0.85, 5.48, 7.5, 0.28, 11, RGBColor(203, 213, 225))
+    add_text(slide, profile["name"], 9.35, 6.72, 3.0, 0.3, 10, RGBColor(148, 163, 184), True, PP_ALIGN.RIGHT)
+    add_footer(slide, data, page, dark=True)
+    add_notes(slide, "Buka dengan satu kalimat tajam: customer, problem, solusi, outcome, dan ask.")
+
+
+def add_compact_closing(prs, data, page):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide, THEME["dark"])
+    add_text(slide, data.get("closing", "Thank you"), 0.85, 1.15, 9.8, 1.1, 33, THEME["white"], True)
+    add_text(slide, f'{data.get("presenter", "")}\n{data.get("contact", "")}', 0.9, 5.35, 7.0, 0.6, 14, RGBColor(203, 213, 225))
+    add_text(slide, "Next step: demo, data room, follow-up call, or term discussion", 0.9, 4.70, 8.8, 0.35, 12, RGBColor(203, 213, 225))
+    add_footer(slide, data, page, dark=True)
+    add_notes(slide, "Akhiri dengan ajakan follow-up yang spesifik.")
+
+
+def compact_competition_lines(data: dict[str, Any], limit: int = 3) -> list[str]:
+    competitors = normalize_competitors(data)[:limit]
+    if not competitors:
+        return ["Status quo: jelaskan cara lama customer dan kenapa produk Anda menang."]
+    return [f"{row.get('name', 'Alternative')}: {row.get('advantage', '')}" for row in competitors]
+
+
+def compact_milestone_lines(data: dict[str, Any], limit: int = 3) -> list[str]:
+    milestones = normalize_milestones(data)[:limit]
+    if not milestones:
+        return [milestone_headline(data)]
+    return [f"{row.get('period', 'Next')}: {row.get('target', '')} ({row.get('metric', '')})" for row in milestones]
+
+
+def build_compact_deck(data, image_buffer=None):
+    prs = Presentation()
+    prs.slide_width = Inches(SLIDE_W)
+    prs.slide_height = Inches(SLIDE_H)
+    profile = pitch_duration_profile(data)
+    page = 1
+    add_compact_cover(prs, data, page)
+    page += 1
+    if profile["minutes"] <= 3:
+        add_compact_split_slide(prs, data, page, "Problem / Solution / Product", "Pain, solution, and product flow in one clear story", "Durasi sangat singkat: gabungkan konteks utama tanpa menghilangkan alur investor.", "Problem + Solution", lines(data.get("problem", ""), 3) + lines(data.get("solution", ""), 3), "Product flow", [data.get("product_flow", ""), data.get("product_benefit", "")] + lines(data.get("features", ""), 2), "Investor harus memahami pain dan value creation sebelum melihat angka.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Market / Business Model", "A focused market with a clear revenue engine", "Market size dan model bisnis dipadatkan agar investor tetap melihat opportunity dan cara monetisasi.", "Market wedge", [f"TAM: {data.get('tam', '')}", f"SAM: {data.get('sam', '')}", f"SOM: {data.get('som', '')}"] + lines(data.get("market_notes", ""), 2), "Revenue engine", business_model_key_data(data), "Jangan hanya menyebut pasar besar; jelaskan wedge awal dan cara revenue dihitung.", metric_items=get_business_model_slide_metrics(data))
+        page += 1
+        add_compact_split_slide(prs, data, page, "Traction / GTM", "Early demand and repeatable acquisition motion", "Gabungkan bukti demand dan channel agar investor melihat momentum serta cara scale.", "Traction", [f"Users: {data.get('users', '')}", f"Revenue/GMV: {data.get('revenue', '')}", f"Growth: {data.get('growth', '')}", f"Retention: {data.get('retention', '')}"] + lines(data.get("traction_notes", ""), 2), "Go-to-market", [f"ICP: {data.get('icp', '')}", f"Channel: {data.get('channel', '')}"] + lines(data.get("gtm", ""), 3), "Traction harus membuktikan demand, GTM harus menunjukkan cara demand diulang.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Competition / Milestones", "Why we win and what this funding unlocks", "Positioning dan milestone digabung agar konteks kompetisi dan eksekusi tetap ada.", "Competition snapshot", compact_competition_lines(data, 3) + [data.get("competition_summary", "")], "Execution milestones", compact_milestone_lines(data, 3), "Investor perlu melihat alasan menang dan target eksekusi yang measurable.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Team / Ask", "The right team raising to reach the next inflection point", "Tutup dengan founder-market fit, ask, runway, use of funds, dan milestone berikutnya.", "Team", lines(data.get("team", ""), 4) + [data.get("founder_fit", "")], "Fundraising ask", [f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))}", f"Runway: {data.get('runway', '')} bulan", f"Next milestone: {milestone_headline(data)}"] + lines(data.get("use_of_funds", ""), 3), "Ask harus terasa sebagai jembatan menuju milestone, bukan sekadar kebutuhan kas.")
+        page += 1
+        add_compact_closing(prs, data, page)
+    elif profile["minutes"] <= 5:
+        add_compact_split_slide(prs, data, page, "Problem / Solution", "The current workflow is broken, and the fix is clear", "Gabungkan pain dan solusi untuk menjaga tempo demo day.", "Problem", lines(data.get("problem", ""), 4) + [f"Evidence: {data.get('problem_evidence', '')}"], "Solution", lines(data.get("solution", ""), 4) + [data.get("value_prop", "")], "Problem harus terasa urgent dan solution harus langsung menjawabnya.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Product", "The product creates value through a simple workflow", "Pilih satu use case utama agar investor paham product value dalam 45 detik.", "Product flow", [data.get("product_flow", ""), data.get("product_benefit", "")], "Key features", lines(data.get("features", ""), 5), "Demo flow harus menunjukkan input, proses, output, dan dampak.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Market / Business Model", "A focused wedge with a model-specific revenue engine", "Model bisnis disesuaikan dengan jenis revenue yang dipilih.", "Market", [f"TAM: {data.get('tam', '')}", f"SAM: {data.get('sam', '')}", f"SOM: {data.get('som', '')}"] + lines(data.get("market_notes", ""), 2), "Business model", business_model_key_data(data), "Pasar awal harus spesifik; revenue engine harus mudah dihitung.", metric_items=get_business_model_slide_metrics(data))
+        page += 1
+        add_compact_split_slide(prs, data, page, "Traction / GTM", "Early demand is visible and acquisition can repeat", "Tampilkan metric demand dan channel utama.", "Traction", [f"Users: {data.get('users', '')}", f"Revenue/GMV: {data.get('revenue', '')}", f"Growth: {data.get('growth', '')}", f"Retention: {data.get('retention', '')}"], "GTM", [f"ICP: {data.get('icp', '')}", f"Channel: {data.get('channel', '')}"] + lines(data.get("gtm", ""), 3), "Gabungkan demand signal dengan repeatable acquisition motion.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Competition / Milestones", "Positioning and execution plan", "Jelaskan why we win dan target berikutnya secara ringkas.", "Competition", compact_competition_lines(data, 3) + [data.get("competition_summary", "")], "Milestones", compact_milestone_lines(data, 3), "Why we win dan milestones harus measurable.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Financials / Ask", "Funding converts into measurable milestones", "Hubungkan proyeksi, runway, use of funds, dan ask.", "Financials", [f"Revenue Y1: {money(data.get('rev1', 0), data.get('currency', 'Rp'))}", f"Revenue Y2: {money(data.get('rev2', 0), data.get('currency', 'Rp'))}", f"Revenue Y3: {money(data.get('rev3', 0), data.get('currency', 'Rp'))}", f"Runway: {data.get('runway', '')} bulan"], "Ask", [f"Ask: {money(data.get('ask', 0), data.get('currency', 'Rp'))}", f"Next milestone: {milestone_headline(data)}"] + lines(data.get("use_of_funds", ""), 3), "Angka harus menjelaskan why now, why this amount, dan what it unlocks.")
+        page += 1
+        add_compact_split_slide(prs, data, page, "Team / Closing", "The right team for this market", "Tutup dengan founder-market fit dan next step.", "Team", lines(data.get("team", ""), 4) + [data.get("founder_fit", "")], "Closing", [data.get("closing", ""), f"Contact: {data.get('contact', '')}"], "Investor harus ingat masalah, alasan menang, dan next step.")
+    else:
+        seed_content_slide(prs, data, page, "Problem", "The current workflow is broken and expensive", "Tunjukkan pain point yang sering terjadi, mahal, dan cukup besar untuk menjadi venture-scale opportunity.", lines(data.get("problem", ""), 5), "Problem harus terasa urgent, bukan sekadar nice-to-have.", side_title="Proof of pain", side_body=data.get("problem_evidence", ""), speaker_note="Mulai dari pain point dan biaya masalah.")
+        page += 1
+        seed_content_slide(prs, data, page, "Solution", "A simpler way to solve the problem", "Jelaskan perubahan sebelum dan sesudah produk dipakai.", lines(data.get("solution", ""), 5), "Solusi harus langsung menjawab problem utama.", side_title="Value proposition", side_body=data.get("value_prop", ""), speaker_note="Jelaskan before-after customer.")
+        page += 1
+        seed_content_slide(prs, data, page, "Product", "The product turns workflow into measurable outcomes", "Demo flow utama, bukan semua fitur.", [data.get("product_flow", ""), data.get("product_benefit", "")] + lines(data.get("features", ""), 4), "Investor harus paham cara produk menciptakan nilai.", speaker_note="Jelaskan input -> proses -> output -> dampak.")
+        page += 1
+        seed_content_slide(prs, data, page, "Market", "A large market with a focused entry wedge", "TAM menunjukkan potensi; SOM menunjukkan fokus eksekusi awal.", lines(data.get("market_notes", ""), 5), "Pasar awal harus spesifik dan bisa dimenangkan.", metric_items=[("TAM", data.get("tam", "")), ("SAM", data.get("sam", "")), ("SOM", data.get("som", ""))])
+        page += 1
+        seed_content_slide(prs, data, page, "Business Model", "Revenue engine matches the selected model", business_model_template(data).get("description", ""), lines(data.get("business_model", ""), 5) + [business_model_formula_text(data)], "Gunakan metric yang sesuai dengan model bisnis.", metric_items=get_business_model_slide_metrics(data))
+        page += 1
+        seed_content_slide(prs, data, page, "Traction", "Early demand is already visible", "Tampilkan demand signal paling kuat.", lines(data.get("traction_notes", ""), 5), "Traction harus membuktikan demand, bukan vanity metrics.", metric_items=[("Users", data.get("users", "")), ("Revenue", data.get("revenue", "")), ("Growth", data.get("growth", "")), ("Retention", data.get("retention", ""))])
+        page += 1
+        seed_content_slide(prs, data, page, "GTM + Competition", "Repeatable acquisition with a clear reason to win", "GTM dan kompetisi dipadatkan untuk durasi 8-10 menit.", [f"ICP: {data.get('icp', '')}", f"Channel: {data.get('channel', '')}"] + lines(data.get("gtm", ""), 3), "Investor perlu melihat channel dan positioning.", side_title="Why we win", side_body="\n".join(compact_competition_lines(data, 3) + [data.get("competition_summary", "")]))
+        page += 1
+        seed_content_slide(prs, data, page, "Financials + Milestones", "Funding converts into measurable execution", "Proyeksi dan milestones digabung agar alur tetap ringkas.", [f"Revenue Y1/Y2/Y3: {money(data.get('rev1', 0), data.get('currency', 'Rp'))} / {money(data.get('rev2', 0), data.get('currency', 'Rp'))} / {money(data.get('rev3', 0), data.get('currency', 'Rp'))}", f"Runway: {data.get('runway', '')} bulan"] + compact_milestone_lines(data, 3), "Funding harus terhubung langsung dengan milestone.", side_title="Next milestone", side_body=milestone_headline(data))
+        page += 1
+        seed_content_slide(prs, data, page, "Team", "The right team for this market", "Founder-market fit menjadi sinyal kuat di seed stage.", lines(data.get("team", ""), 5), "Tim harus terlihat punya unfair advantage.", side_title="Founder-market fit", side_body=data.get("founder_fit", ""))
+        page += 1
+        seed_content_slide(prs, data, page, "Fundraising Ask", "We are raising to reach the next inflection point", "Ask, runway, use of funds, dan next round logic.", lines(data.get("use_of_funds", ""), 5), "Ask harus jelas dan measurable.", side_title=data.get("round", "Round"), side_body=f'{money(data.get("ask", 0), data.get("currency", "Rp"))}\n\nNext milestone: {milestone_headline(data)}\n\n{data.get("next_round", "")}')
+        page += 1
+        add_compact_closing(prs, data, page)
+    output = BytesIO()
+    prs.save(output)
+    output.seek(0)
+    return output
+
+
+def build_deck(data, image_buffer=None):
+    profile = pitch_duration_profile(data)
+    if profile["mode"] == "full":
+        return build_full_deck(data, image_buffer)
+    return build_compact_deck(data, image_buffer)
+
+
 # ==============================
 # Streamlit UI
 # ==============================
@@ -2969,6 +3473,15 @@ with st.sidebar:
         ["Rp", "USD"],
         help="Pilih mata uang yang dipakai pada ask funding dan proyeksi finansial.",
     )
+    pitch_duration_minutes = st.selectbox(
+        "Durasi pitching",
+        PITCH_DURATION_OPTIONS,
+        index=PITCH_DURATION_OPTIONS.index(10),
+        format_func=lambda value: f"{value} menit - {PITCH_DURATION_PROFILES[value]['name']}",
+        help="Generator akan menyesuaikan jumlah slide, penggabungan topik, timing PDF, dan kedalaman narasi berdasarkan durasi ini.",
+    )
+    active_profile = pitch_duration_profile({"pitch_duration_minutes": pitch_duration_minutes})
+    st.info(f"Skema: {active_profile['scheme']}")
     include_insight_slide = st.checkbox(
         "Tambahkan slide analisa otomatis",
         value=True,
@@ -2980,7 +3493,7 @@ identity, story, market, finance, team_asset, glossary_tab, insight_tab = st.tab
     [
         "Identitas",
         "Story",
-        "Market & Traction",
+        "Market, Model & Traction",
         "Financial & Funding",
         "Team & Competition",
         "Istilah & Rumus",
@@ -3108,6 +3621,24 @@ with market:
             "Target awal: UMKM F&B dan ritel.\nWedge: bisnis yang sudah memakai WhatsApp untuk operasional.\nEkspansi: inventory, payroll, dan embedded financing.",
             height=120,
             help="Jelaskan segmen awal, alasan memilih segmen tersebut, dan rencana ekspansi pasar.",
+        )
+        business_model_type = st.selectbox(
+            "Jenis model bisnis",
+            list(BUSINESS_MODEL_TEMPLATES.keys()),
+            index=0,
+            help="Pilih model bisnis utama. Aplikasi akan menyesuaikan metrik, format slide Business Model, insight, dan PDF skenario.",
+        )
+        selected_model_template = business_model_template(business_model_type)
+        st.markdown(
+            f"""
+            <div class="readable-panel">
+                <p><strong>Format model:</strong> {html.escape(selected_model_template['description'])}</p>
+                <p><strong>Cocok untuk:</strong> {html.escape(selected_model_template['best_for'])}</p>
+                <p><strong>Yang harus ditekankan saat pitching:</strong> {html.escape(selected_model_template['pitch_focus'])}</p>
+                <p><strong>Rumus praktis:</strong> {html.escape(selected_model_template['formula'])}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
         arpu = st.text_input("ARPU", "Rp 99.000/bulan", help="Average Revenue Per User. Tulis pendapatan rata-rata per customer/user.")
         gross_margin = st.text_input("Gross margin", "78%", help="Margin kotor. Untuk software/SaaS, margin tinggi menjadi sinyal scalability.")
@@ -3422,6 +3953,7 @@ data = {
     "round": round_name,
     "ask": ask,
     "currency": currency,
+    "pitch_duration_minutes": pitch_duration_minutes,
     "accent_color": accent_color,
     "include_insight_slide": include_insight_slide,
     "problem": problem,
@@ -3439,7 +3971,10 @@ data = {
     "gross_margin": gross_margin,
     "cac": cac,
     "payback": payback,
+    "business_model_type": business_model_type,
     "business_model": business_model,
+    "model_metric_labels": model_metric_labels,
+    "model_metric_values": model_metric_values,
     "users": users,
     "revenue": revenue,
     "growth": growth,
@@ -3495,7 +4030,7 @@ with col_hint:
     st.caption(
         "Sebelum generate, cek tab Analisa untuk memastikan narasi problem, traction, financial, dan ask sudah konsisten. "
         "Gunakan tab Istilah & Rumus untuk memahami cara menghitung metrik sebelum mengisi angka. "
-        "PPTX dan PDF scenario guide akan otomatis membawa footer Developed by Galuh Adi Insani."
+        "PPTX dan PDF scenario guide akan menyesuaikan durasi pitching, model bisnis, dan otomatis membawa footer Developed by Galuh Adi Insani."
     )
 
 if generate:
