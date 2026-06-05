@@ -1,13 +1,13 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v10 - Auto Rehearsal Prompter  
+Versi: v10.1 - Editable Teleprompter Script  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:
 
 1. PPTX investor pitch deck.
 2. PDF Pitch Scenario Guide untuk latihan alur pitching.
-3. HTML Pitch Prompter untuk simulasi otomatis/offline.
+3. HTML Pitch Prompter untuk simulasi otomatis/offline dengan teks teleprompter custom.
 4. JSON project data untuk diedit ulang di kemudian hari.
 
 ## Fitur utama
@@ -26,7 +26,7 @@ Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output 
 - Brand kit: logo, warna aksen, warna cover, style deck, font style.
 - Output bahasa: Bahasa Indonesia, English, atau Bilingual untuk label deck.
 - Hasil generate hanya satu ZIP.
-- Simulasi presentasi otomatis seperti teleprompter: start/pause/reset, prev/next, fullscreen, speed control, progress bar, auto-scroll scenario, dan timeline slide.
+- Simulasi presentasi otomatis seperti teleprompter: start/pause/reset, prev/next, fullscreen, speed control, progress bar, auto-scroll scenario, timeline slide, dan teks teleprompter yang bisa diedit manual per slide.
 
 ## Cara menjalankan
 
@@ -56,7 +56,7 @@ pitch_deck_seed_generator/
 3. Pilih model bisnis agar metrik yang muncul sesuai.
 4. Gunakan Kalkulator untuk menghitung metrik dasar.
 5. Cek tab Analisa, Simulasi, dan Preview sebelum generate.
-6. Gunakan tab Simulasi untuk latihan timing dan skenario bicara.
+6. Gunakan tab Simulasi untuk latihan timing dan edit teks teleprompter sesuai gaya bicara presenter.
 7. Klik Generate Pitching Package untuk mengunduh ZIP.
 
 

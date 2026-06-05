@@ -31,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v10 - Auto Rehearsal Prompter"
+APP_VERSION = "v10.1 - Editable Teleprompter Script"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -811,6 +811,7 @@ def initialize_defaults() -> None:
         "platform_revenue_calc": 75_000_000,
         "average_order_value": 150_000,
         "orders_count": 10_000,
+        "use_custom_prompter": True,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -867,6 +868,12 @@ def load_project_from_json(file) -> None:
                 st.session_state[f"milestone_target_{idx}"] = item.get("target", "")
                 st.session_state[f"milestone_metric_{idx}"] = item.get("metric", "")
                 st.session_state[f"milestone_owner_{idx}"] = item.get("owner", "")
+        elif key == "custom_prompter_scripts" and isinstance(value, list):
+            st.session_state["prompter_slide_count"] = len(value)
+            for idx, item in enumerate(value[:30]):
+                st.session_state[f"prompter_script_{idx}"] = str(item or "")
+        elif key == "use_custom_prompter":
+            st.session_state["use_custom_prompter"] = bool(value)
         elif key == "model_metric_labels" and isinstance(value, list):
             for idx, item in enumerate(value[:4]):
                 st.session_state[f"model_metric_label_{idx}"] = item
@@ -1674,22 +1681,57 @@ def screen_summary_for_slide(item: dict[str, Any], data: dict[str, Any]) -> str:
     return data.get("closing", "Thank you")
 
 
+def normalize_custom_prompter_scripts(data: dict[str, Any], plan_len: int) -> list[str]:
+    """Return user-edited teleprompter scripts aligned to the current slide plan."""
+    raw = data.get("custom_prompter_scripts", []) or []
+    if not isinstance(raw, list):
+        raw = []
+
+    scripts: list[str] = []
+    for idx in range(plan_len):
+        value = raw[idx] if idx < len(raw) else ""
+        scripts.append(str(value or "").strip())
+    return scripts
+
+
 def build_rehearsal_items(data: dict[str, Any]) -> list[dict[str, Any]]:
     plan = build_slide_plan(data)
     timings = timing_for_plan(plan, int(data.get("pitch_duration_minutes", 10)))
     insights = generate_investor_insights(data)
+    custom_scripts = normalize_custom_prompter_scripts(data, len(plan))
+    use_custom = bool(data.get("use_custom_prompter", True))
     items: list[dict[str, Any]] = []
     for idx, item in enumerate(plan):
+        generated_talk = talk_track_for_slide(item, data, insights)
+        custom_talk = custom_scripts[idx] if idx < len(custom_scripts) else ""
+        talk = custom_talk if use_custom and custom_talk else generated_talk
         items.append({
             "slide": idx + 1,
             "title": str(item.get("title", f"Slide {idx + 1}")),
             "key": str(item.get("key", "")),
             "duration": int(timings[idx]),
             "purpose": str(item.get("purpose", "")),
-            "talk": talk_track_for_slide(item, data, insights),
+            "talk": talk,
+            "generated_talk": generated_talk,
             "screen": screen_summary_for_slide(item, data),
             "transition": "Hubungkan poin ini ke slide berikutnya; jangan membaca semua teks, tekankan bukti dan keputusan yang ingin investor ingat.",
         })
+    return items
+
+
+def sync_prompter_script_defaults(data: dict[str, Any], *, force: bool = False) -> list[dict[str, Any]]:
+    """Prepare editable Streamlit text areas for the current slide plan."""
+    base_data = dict(data)
+    base_data["use_custom_prompter"] = False
+    base_data["custom_prompter_scripts"] = []
+    items = build_rehearsal_items(base_data)
+    st.session_state["prompter_slide_count"] = len(items)
+
+    for idx, item in enumerate(items):
+        key = f"prompter_script_{idx}"
+        if force or key not in st.session_state:
+            st.session_state[key] = item.get("generated_talk", item.get("talk", ""))
+
     return items
 
 
@@ -1886,7 +1928,7 @@ buildTimeline(); render(); raf = requestAnimationFrame(tick);
 def render_rehearsal_section(data: dict[str, Any]) -> None:
     guide(
         "Simulasi pitching otomatis",
-        "Gunakan mode ini untuk latihan seperti teleprompter. Presentation view menampilkan ringkasan slide, sementara panel kanan menjalankan skenario bicara otomatis sesuai timing pitch.",
+        "Gunakan mode ini untuk latihan seperti teleprompter. Presentation view menampilkan ringkasan slide, sementara panel kanan menjalankan skenario bicara otomatis sesuai timing pitch. Teks teleprompter bisa diedit manual per slide.",
     )
     st.markdown(
         """
@@ -1896,7 +1938,43 @@ def render_rehearsal_section(data: dict[str, Any]) -> None:
         """,
         unsafe_allow_html=True,
     )
-    components.html(build_rehearsal_html(data, standalone=False), height=900, scrolling=False)
+
+    base_items = sync_prompter_script_defaults(data)
+
+    c1, c2, c3 = st.columns([1, 1, 2])
+    with c1:
+        st.checkbox(
+            "Gunakan teks teleprompter custom",
+            key="use_custom_prompter",
+            help="Jika aktif, simulasi, HTML prompter, dan PDF scenario guide memakai teks yang Anda edit di bawah.",
+        )
+    with c2:
+        if st.button("Reset teks dari data deck", use_container_width=True):
+            sync_prompter_script_defaults(data, force=True)
+            st.success("Teks teleprompter dikembalikan dari data deck.")
+            st.rerun()
+    with c3:
+        st.caption("Edit kalimat agar sesuai gaya bicara presenter. Gunakan bahasa natural, pendek, dan mudah dibaca saat latihan.")
+
+    with st.expander("✍️ Edit teks teleprompter per slide", expanded=False):
+        st.markdown(
+            """
+            <div class="readable-panel">
+                <strong>Tips:</strong> tulis seperti Anda berbicara, bukan seperti laporan. Satu slide idealnya berisi 2-5 kalimat utama. Jika pitch pendek, gunakan kalimat yang lebih langsung.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        for idx, item in enumerate(base_items):
+            st.text_area(
+                f"Slide {idx + 1} — {item.get('title', 'Slide')}",
+                key=f"prompter_script_{idx}",
+                height=135,
+                help="Teks ini akan tampil di teleprompter dan ikut tersimpan ke JSON project/export ZIP.",
+            )
+
+    live_data = collect_data_preview_only()
+    components.html(build_rehearsal_html(live_data, standalone=False), height=900, scrolling=False)
 
 def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     out = BytesIO()
@@ -1925,36 +2003,11 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
         for i, item in enumerate(plan)
     ], [1.1 * cm, 1.7 * cm, 3.4 * cm, 6.0 * cm, 4.1 * cm]))
     story += [PageBreak(), p("Skenario per slide", styles["h1"])]
+    rehearsal_items = build_rehearsal_items(data)
     for idx, item in enumerate(plan):
-        key = item["key"]
+        talk_item = rehearsal_items[idx] if idx < len(rehearsal_items) else {}
+        talk = str(talk_item.get("talk") or talk_track_for_slide(item, data, insights))
         story.append(p(f"{idx + 1}. {item['title']} - {timings[idx]} detik", styles["h2"]))
-        if key == "cover":
-            talk = f"Perkenalkan {data.get('company')} dalam satu kalimat: {data.get('one_liner')}. Sebutkan round dan ask secara ringkas."
-        elif "problem" in key:
-            talk = f"Mulai dari pain point: {truncate(data.get('problem'), 260)} Evidence: {truncate(data.get('problem_evidence'), 160)}"
-        elif "solution" in key or key == "product":
-            talk = f"Jelaskan solusi dan flow: {truncate(data.get('solution'), 220)} Product flow: {truncate(data.get('product_flow'), 160)}"
-        elif "market" in key:
-            talk = f"Sebutkan TAM {data.get('tam')}, SAM {data.get('sam')}, SOM {data.get('som')}. Jelaskan wedge awal: {truncate(data.get('market_notes'), 180)}"
-        elif "business" in key or "model" in key:
-            model = business_model_template(data)
-            talk = f"Model: {data.get('business_model_type')}. Formula utama: {model['formula']}. Metrik: {', '.join([a + ': ' + b for a, b in get_model_metrics(data)])}."
-        elif "traction" in key:
-            talk = f"Bukti demand: users {data.get('users')}, revenue {data.get('revenue')}, growth {data.get('growth')}, retention {data.get('retention')}. {truncate(data.get('traction_notes'), 200)}"
-        elif key == "gtm":
-            talk = f"ICP: {data.get('icp')}. Channel utama: {data.get('channel')}. GTM: {truncate(data.get('gtm'), 220)}"
-        elif key == "competition":
-            talk = f"Jelaskan alternatif customer saat ini dan narrative advantage: {data.get('competition_summary')}"
-        elif key == "milestones":
-            talk = f"Hubungkan dana dengan milestone: {data.get('milestone')}"
-        elif "financial" in key or "fundraising" in key:
-            talk = f"Ask {money(data.get('ask'), data.get('currency'))}, runway {data.get('runway')} bulan, use of funds: {truncate(data.get('use_of_funds'), 220)}"
-        elif key == "team":
-            talk = f"Kenapa tim ini tepat: {truncate(data.get('team'), 220)} Founder-market fit: {truncate(data.get('founder_fit'), 160)}"
-        elif key == "readiness":
-            talk = insights["headline"]
-        else:
-            talk = data.get("closing", "Tutup dengan visi dan next step.")
         story.append(p(talk, styles["body"]))
         story.append(p("Transisi: hubungkan slide ini dengan bukti berikutnya, jangan membaca seluruh teks slide.", styles["small"]))
     story += [PageBreak(), p("Pertanyaan Investor & Jawaban Latihan", styles["h1"])]
@@ -1994,7 +2047,7 @@ def build_download_zip(company_name: str, pptx_file: BytesIO, pdf_file: BytesIO,
         archive.writestr(f"{base}-project-data.json", project_json.read())
         if prompter_html:
             archive.writestr(f"{base}-pitch-prompter.html", prompter_html.encode("utf-8"))
-        archive.writestr("README.txt", f"Generated by {APP_VERSION}\n{DEVELOPER}\n\nIsi ZIP:\n- PPTX investor pitch deck\n- PDF pitch scenario guide\n- HTML pitch prompter untuk simulasi otomatis/offline\n- JSON project data untuk diedit ulang\n")
+        archive.writestr("README.txt", f"Generated by {APP_VERSION}\n{DEVELOPER}\n\nIsi ZIP:\n- PPTX investor pitch deck\n- PDF pitch scenario guide\n- HTML pitch prompter untuk simulasi otomatis/offline dengan teks teleprompter custom\n- JSON project data untuk diedit ulang\n")
     out.seek(0)
     return out
 
@@ -2029,6 +2082,15 @@ def collect_data_preview_only() -> dict[str, Any]:
         if str(st.session_state.get(f"milestone_target_{i}", "")).strip()
     ]
     data["round"] = data.get("round_name", data.get("round", ""))
+    slide_count = int(st.session_state.get("prompter_slide_count", 0) or 0)
+    if slide_count:
+        data["custom_prompter_scripts"] = [
+            st.session_state.get(f"prompter_script_{i}", "")
+            for i in range(slide_count)
+        ]
+    else:
+        data["custom_prompter_scripts"] = []
+    data["use_custom_prompter"] = bool(st.session_state.get("use_custom_prompter", True))
     logo = get_uploaded_logo_bytes()
     if logo:
         data["logo_bytes"] = logo
