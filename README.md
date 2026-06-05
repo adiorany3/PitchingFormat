@@ -29,11 +29,22 @@ Footer aplikasi dan setiap slide:
 
 - Kompetitor sekarang dinamis: pengguna dapat menambah 1 sampai 10 kompetitor/alternatif.
 - Kompetitor bisa dikategorikan sebagai direct competitor, indirect competitor, status quo, adjacent tool, atau alternative.
-- Slide Competition otomatis menyesuaikan layout dan memecah data menjadi beberapa slide jika jumlah kompetitor lebih dari 4.
+- Slide Competition otomatis memakai comparison matrix dan memecah data menjadi beberapa slide jika jumlah kompetitor banyak.
 - Ditambahkan milestone detail: periode, target, success metric, dan owner.
-- Slide Milestones otomatis dibuat dan juga dipecah menjadi beberapa slide jika milestone lebih dari 4.
+- Slide Milestones otomatis dibuat sebagai timeline adaptif dan dipecah menjadi beberapa slide jika milestone banyak.
 - Slide Financials dan Fundraising Ask sekarang menampilkan next milestone agar hubungan antara ask, runway, dan eksekusi lebih jelas.
 - Analisa investor readiness sekarang ikut membaca jumlah kompetitor dan milestone sebagai sinyal kelengkapan deck seed.
+
+
+## Pembaruan Versi v5 - Layout Rapi & Adaptif
+
+- Slide Competition diubah menjadi comparison matrix agar tidak berantakan ketika kompetitor lebih dari satu.
+- Kompetitor sekarang dibagi maksimal 5 baris per slide dengan tabel adaptif dan pemotongan teks panjang.
+- Slide Milestones diubah menjadi timeline horizontal/vertikal yang lebih lapang, maksimal 3 milestone per slide.
+- Ukuran font pada headline, metric, card, bullet, tabel, dan takeaway dibuat adaptif terhadap panjang teks.
+- Teks panjang otomatis diringkas dengan elipsis agar tidak menumpuk keluar dari card.
+- Screenshot/mockup produk dibatasi tinggi dan lebarnya agar tidak keluar area slide.
+- Area footer, investor takeaway, dan konten utama diberi jarak aman agar tidak saling bertabrakan.
 
 ## Fitur
 
@@ -67,9 +78,9 @@ Footer aplikasi dan setiap slide:
   6. Business Model
   7. Traction
   8. Go-To-Market
-  9. Competition, otomatis multi-slide bila kompetitor lebih dari 4
+  9. Competition, comparison matrix otomatis multi-slide
   10. Financials
-  11. Milestones, otomatis multi-slide bila milestone lebih dari 4
+  11. Milestones, timeline otomatis multi-slide
   12. Investor Readiness, opsional
   13. Team
   14. Fundraising Ask

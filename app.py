@@ -8,7 +8,7 @@ import streamlit as st
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
 from pptx.util import Inches, Pt
 
 
@@ -407,6 +407,46 @@ def short_money(value: float, currency: str) -> str:
 
     return f"{sign}{currency} {value:,.0f}"
 
+
+
+# ==============================
+# Layout Safety Helpers
+# ==============================
+def estimate_text_capacity(w: float, h: float, size: float) -> int:
+    """Approximate how many characters fit in a textbox before it becomes visually crowded."""
+    chars_per_line = max(12, int(w * 9.8 * (12 / max(size, 1))))
+    lines_available = max(1, int((h * 72) / (max(size, 1) * 1.25)))
+    return max(24, chars_per_line * lines_available)
+
+
+def truncate_text(text: Any, max_chars: int | None = None) -> str:
+    value = str(text or "").strip()
+    value = re.sub(r"\s+", " ", value)
+
+    if max_chars is None or len(value) <= max_chars:
+        return value
+
+    return value[: max(0, max_chars - 1)].rstrip() + "…"
+
+
+def adaptive_font_size(text: Any, base_size: int, min_size: int = 8) -> int:
+    value = str(text or "")
+    length = len(value)
+
+    if length > 220:
+        return max(min_size, base_size - 6)
+    if length > 150:
+        return max(min_size, base_size - 5)
+    if length > 95:
+        return max(min_size, base_size - 3)
+    if length > 55:
+        return max(min_size, base_size - 2)
+
+    return base_size
+
+
+def chunk_items(items: list[Any], chunk_size: int) -> list[list[Any]]:
+    return [items[i:i + chunk_size] for i in range(0, len(items), chunk_size)]
 
 
 def normalize_competitors(data: dict[str, Any]) -> list[dict[str, str]]:
@@ -823,8 +863,15 @@ def add_text(
     color=None,
     bold=False,
     align=PP_ALIGN.LEFT,
+    max_chars=None,
 ):
     color = color or THEME["ink"]
+    size = adaptive_font_size(text, size, 7)
+
+    if max_chars is None:
+        max_chars = estimate_text_capacity(w, h, size)
+
+    safe_text = truncate_text(text, max_chars)
 
     box = slide.shapes.add_textbox(
         Inches(x),
@@ -836,16 +883,18 @@ def add_text(
     tf = box.text_frame
     tf.clear()
     tf.word_wrap = True
-    tf.margin_left = Inches(0)
-    tf.margin_right = Inches(0)
-    tf.margin_top = Inches(0)
-    tf.margin_bottom = Inches(0)
+    tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+    tf.margin_left = Inches(0.02)
+    tf.margin_right = Inches(0.02)
+    tf.margin_top = Inches(0.01)
+    tf.margin_bottom = Inches(0.01)
 
     paragraph = tf.paragraphs[0]
     paragraph.alignment = align
+    paragraph.space_after = Pt(0)
 
     run = paragraph.add_run()
-    run.text = text or ""
+    run.text = safe_text
     run.font.name = FONT_HEAD if bold else FONT_BODY
     run.font.size = Pt(size)
     run.font.bold = bold
@@ -964,52 +1013,66 @@ def add_card(slide, title, body, x, y, w, h, data):
         slide,
         title.upper(),
         x + 0.22,
-        y + 0.20,
+        y + 0.18,
         w - 0.44,
-        0.25,
-        8,
+        0.24,
+        7.5,
         accent,
         True,
+        max_chars=44,
     )
 
+    body_size = adaptive_font_size(body, 14, 8)
     add_text(
         slide,
         body,
         x + 0.22,
-        y + 0.58,
+        y + 0.55,
         w - 0.44,
-        h - 0.78,
-        15,
+        h - 0.68,
+        body_size,
         THEME["ink"],
         True,
+        max_chars=estimate_text_capacity(w - 0.44, h - 0.68, body_size),
     )
 
 
 def add_big_metric(slide, label, value, x, y, w, data):
     accent = rgb(data["accent_color"])
+    value_text = str(value or "")
+
+    value_size = 28
+    if len(value_text) > 34:
+        value_size = 15
+    elif len(value_text) > 22:
+        value_size = 19
+    elif len(value_text) > 14:
+        value_size = 23
 
     add_text(
         slide,
-        value,
+        value_text,
         x,
         y,
         w,
-        0.55,
-        28,
+        0.68,
+        value_size,
         accent,
         True,
+        max_chars=estimate_text_capacity(w, 0.68, value_size),
     )
 
     add_text(
         slide,
         label.upper(),
         x,
-        y + 0.62,
+        y + 0.72,
         w,
         0.22,
-        8,
+        7.5,
         THEME["muted"],
         True,
+        max_chars=42,
     )
 
 
@@ -1024,20 +1087,33 @@ def add_bullets(slide, items, x, y, w, h, size=18):
     tf = box.text_frame
     tf.clear()
     tf.word_wrap = True
-    tf.margin_left = Inches(0)
-    tf.margin_right = Inches(0)
-    tf.margin_top = Inches(0)
-    tf.margin_bottom = Inches(0)
+    tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+    tf.margin_left = Inches(0.02)
+    tf.margin_right = Inches(0.02)
+    tf.margin_top = Inches(0.01)
+    tf.margin_bottom = Inches(0.01)
 
     clean_items = items or ["Lengkapi poin utama slide ini."]
+    max_items = min(len(clean_items), 5)
+    item_size = size
 
-    for i, item in enumerate(clean_items[:5]):
+    longest = max((len(str(item)) for item in clean_items[:max_items]), default=0)
+    if max_items >= 5 or longest > 150:
+        item_size = max(9, size - 5)
+    elif longest > 100:
+        item_size = max(10, size - 4)
+    elif longest > 65:
+        item_size = max(11, size - 2)
+
+    per_item_chars = max(38, estimate_text_capacity(w, h / max(max_items, 1), item_size) - 8)
+
+    for i, item in enumerate(clean_items[:max_items]):
         paragraph = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        paragraph.text = item
+        paragraph.text = truncate_text(item, per_item_chars)
         paragraph.level = 0
-        paragraph.space_after = Pt(12)
+        paragraph.space_after = Pt(7 if item_size <= 12 else 10)
         paragraph.font.name = FONT_BODY
-        paragraph.font.size = Pt(size)
+        paragraph.font.size = Pt(item_size)
         paragraph.font.color.rgb = THEME["ink"]
 
 
@@ -1047,9 +1123,9 @@ def add_takeaway(slide, text, data):
     shape = slide.shapes.add_shape(
         MSO_SHAPE.ROUNDED_RECTANGLE,
         Inches(0.7),
-        Inches(6.25),
+        Inches(6.18),
         Inches(11.95),
-        Inches(0.52),
+        Inches(0.58),
     )
 
     shape.fill.solid()
@@ -1058,14 +1134,15 @@ def add_takeaway(slide, text, data):
 
     add_text(
         slide,
-        f"Investor takeaway: {text}",
+        f"Investor takeaway: {truncate_text(text, 155)}",
         0.95,
-        6.38,
+        6.32,
         11.3,
-        0.25,
-        10,
+        0.27,
+        9.2,
         accent,
         True,
+        max_chars=175,
     )
 
 
@@ -1076,12 +1153,14 @@ def add_notes(slide, body):
         pass
 
 
-def add_table(slide, headers, rows, x, y, w, h, data):
+def add_table(slide, headers, rows, x, y, w, h, data, column_widths=None):
     accent = rgb(data["accent_color"])
+    row_count = len(rows) + 1
+    col_count = len(headers)
 
     table_shape = slide.shapes.add_table(
-        len(rows) + 1,
-        len(headers),
+        row_count,
+        col_count,
         Inches(x),
         Inches(y),
         Inches(w),
@@ -1090,29 +1169,63 @@ def add_table(slide, headers, rows, x, y, w, h, data):
 
     tbl = table_shape.table
 
+    if column_widths and len(column_widths) == col_count:
+        total = sum(column_widths)
+        for idx, width_ratio in enumerate(column_widths):
+            tbl.columns[idx].width = Inches(w * width_ratio / total)
+
+    header_h = 0.42
+    body_h = max(0.42, (h - header_h) / max(len(rows), 1))
+    tbl.rows[0].height = Inches(header_h)
+
+    for row_index in range(1, row_count):
+        tbl.rows[row_index].height = Inches(body_h)
+
+    font_size = 10
+    if len(rows) >= 5:
+        font_size = 8
+    elif any(len(str(cell)) > 80 for row in rows for cell in row):
+        font_size = 8.5
+    elif len(rows) >= 4:
+        font_size = 9
+
     for col, value in enumerate(headers):
         cell = tbl.cell(0, col)
-        cell.text = value
+        cell.text = truncate_text(value, 38)
         cell.fill.solid()
         cell.fill.fore_color.rgb = accent
+        cell.margin_left = Inches(0.06)
+        cell.margin_right = Inches(0.06)
+        cell.margin_top = Inches(0.03)
+        cell.margin_bottom = Inches(0.03)
 
         for paragraph in cell.text_frame.paragraphs:
             paragraph.font.name = FONT_BODY
-            paragraph.font.size = Pt(10)
+            paragraph.font.size = Pt(8.5)
             paragraph.font.bold = True
             paragraph.font.color.rgb = THEME["white"]
 
     for row_i, row in enumerate(rows, 1):
         for col_i, value in enumerate(row):
             cell = tbl.cell(row_i, col_i)
-            cell.text = str(value)
+            max_chars = 95
+            if col_i == 0:
+                max_chars = 36
+            elif col_i == 1 and col_count >= 4:
+                max_chars = 46
+            cell.text = truncate_text(value, max_chars)
             cell.fill.solid()
             cell.fill.fore_color.rgb = THEME["white"]
+            cell.margin_left = Inches(0.06)
+            cell.margin_right = Inches(0.06)
+            cell.margin_top = Inches(0.03)
+            cell.margin_bottom = Inches(0.03)
 
             for paragraph in cell.text_frame.paragraphs:
                 paragraph.font.name = FONT_BODY
-                paragraph.font.size = Pt(10)
+                paragraph.font.size = Pt(font_size)
                 paragraph.font.color.rgb = THEME["ink"]
+                paragraph.space_after = Pt(0)
 
     return table_shape
 
@@ -1152,32 +1265,44 @@ def add_competition_slides(prs, data, page):
             }
         ]
 
-    chunk_size = 4
+    chunk_size = 5
+    chunks = chunk_items(competitors, chunk_size)
 
-    for chunk_index in range(0, len(competitors), chunk_size):
-        chunk = competitors[chunk_index:chunk_index + chunk_size]
+    for chunk_index, chunk in enumerate(chunks):
         slide = prs.slides.add_slide(prs.slide_layouts[6])
         set_bg(slide, THEME["bg"])
 
-        suffix = "" if len(competitors) <= chunk_size else f" ({chunk_index // chunk_size + 1}/{(len(competitors) + chunk_size - 1) // chunk_size})"
+        suffix = "" if len(chunks) == 1 else f" ({chunk_index + 1}/{len(chunks)})"
         add_seed_header(
             slide,
             "Competition",
             f"We win through focus, speed, and distribution{suffix}",
-            "Layout otomatis menyesuaikan jumlah kompetitor: langsung, tidak langsung, dan status quo.",
+            "Comparison matrix dibuat adaptif agar tetap rapi meski kompetitor lebih dari satu.",
             data,
         )
 
-        positions = [
-            (0.85, 2.00),
-            (6.78, 2.00),
-            (0.85, 4.05),
-            (6.78, 4.05),
+        rows = [
+            [
+                row.get("category", "Alternative"),
+                row.get("name", "Alternative"),
+                row.get("weakness", "Belum diisi"),
+                row.get("advantage", "Belum diisi"),
+            ]
+            for row in chunk
         ]
 
-        for idx, row in enumerate(chunk):
-            x, y = positions[idx]
-            add_competitor_card(slide, row, x, y, 5.45, 1.68, data)
+        table_height = 3.45 if len(chunk) <= 4 else 3.85
+        add_table(
+            slide,
+            ["Category", "Alternative", "Customer pain / weakness", "Why we win"],
+            rows,
+            0.78,
+            2.02,
+            11.78,
+            table_height,
+            data,
+            column_widths=[1.4, 1.8, 3.35, 3.35],
+        )
 
         add_takeaway(
             slide,
@@ -1185,7 +1310,7 @@ def add_competition_slides(prs, data, page):
             data,
         )
         add_footer(slide, data, page)
-        add_notes(slide, "Kompetitor bisa lebih dari satu. Gunakan slide ini untuk menunjukkan positioning dan alasan customer akan berpindah.")
+        add_notes(slide, "Gunakan slide ini untuk menunjukkan positioning. Bila teks panjang, ringkas menjadi customer pain dan why we win yang paling kuat.")
         page += 1
 
     return page
@@ -1205,11 +1330,74 @@ def add_milestone_card(slide, row, x, y, w, h, data):
     shape.fill.fore_color.rgb = THEME["white"]
     shape.line.color.rgb = THEME["line"]
 
-    add_text(slide, row.get("period", "Next"), x + 0.22, y + 0.20, w - 0.44, 0.28, 12, accent, True)
-    add_text(slide, row.get("target", "Target belum diisi"), x + 0.22, y + 0.60, w - 0.44, 0.46, 13, THEME["ink"], True)
-    add_text(slide, "Success metric", x + 0.22, y + 1.14, 1.65, 0.18, 7, THEME["muted"], True)
-    add_text(slide, row.get("metric", "Metric belum diisi"), x + 0.22, y + 1.36, w - 0.44, 0.28, 8.5, THEME["ink"])
-    add_text(slide, f"Owner: {row.get('owner', 'Team')}", x + 0.22, y + h - 0.27, w - 0.44, 0.18, 7, THEME["muted"])
+    # Wide timeline layout; keeps long milestone data readable.
+    period_w = 1.75
+    metric_x = x + 7.25
+    target_w = 4.95
+    metric_w = w - 7.55
+
+    add_text(
+        slide,
+        row.get("period", "Next"),
+        x + 0.24,
+        y + 0.22,
+        period_w,
+        0.34,
+        12,
+        accent,
+        True,
+        max_chars=28,
+    )
+
+    add_text(
+        slide,
+        row.get("target", "Target belum diisi"),
+        x + 2.05,
+        y + 0.22,
+        target_w,
+        0.72,
+        13,
+        THEME["ink"],
+        True,
+        max_chars=105,
+    )
+
+    add_text(
+        slide,
+        "Success metric",
+        metric_x,
+        y + 0.22,
+        1.65,
+        0.18,
+        7,
+        THEME["muted"],
+        True,
+        max_chars=28,
+    )
+
+    add_text(
+        slide,
+        row.get("metric", "Metric belum diisi"),
+        metric_x,
+        y + 0.47,
+        metric_w,
+        0.50,
+        10,
+        THEME["ink"],
+        max_chars=88,
+    )
+
+    add_text(
+        slide,
+        f"Owner: {row.get('owner', 'Team')}",
+        x + 0.24,
+        y + h - 0.32,
+        w - 0.48,
+        0.18,
+        7,
+        THEME["muted"],
+        max_chars=110,
+    )
 
 
 def add_milestone_slides(prs, data, page):
@@ -1218,36 +1406,30 @@ def add_milestone_slides(prs, data, page):
     if not milestones:
         return page
 
-    chunk_size = 4
+    chunk_size = 3
+    chunks = chunk_items(milestones, chunk_size)
 
-    for chunk_index in range(0, len(milestones), chunk_size):
-        chunk = milestones[chunk_index:chunk_index + chunk_size]
+    for chunk_index, chunk in enumerate(chunks):
         slide = prs.slides.add_slide(prs.slide_layouts[6])
         set_bg(slide, THEME["bg"])
 
-        suffix = "" if len(milestones) <= chunk_size else f" ({chunk_index // chunk_size + 1}/{(len(milestones) + chunk_size - 1) // chunk_size})"
+        suffix = "" if len(chunks) == 1 else f" ({chunk_index + 1}/{len(chunks)})"
         add_seed_header(
             slide,
             "Milestones",
             f"Funding converts into measurable execution milestones{suffix}",
-            "Tunjukkan target bertahap yang menghubungkan pendanaan, runway, traction, dan next round readiness.",
+            "Timeline dibuat adaptif agar periode, target, metric, dan owner tetap terbaca.",
             data,
         )
 
-        positions = [
-            (0.85, 2.00),
-            (6.78, 2.00),
-            (0.85, 4.05),
-            (6.78, 4.05),
-        ]
+        y_positions = [2.00, 3.35, 4.70]
 
         for idx, row in enumerate(chunk):
-            x, y = positions[idx]
-            add_milestone_card(slide, row, x, y, 5.45, 1.68, data)
+            add_milestone_card(slide, row, 0.85, y_positions[idx], 11.45, 1.14, data)
 
         add_takeaway(
             slide,
-            "Milestone yang baik harus measurable: angka revenue, user, retention, partnership, atau product release.",
+            "Milestone yang baik harus measurable: revenue, users, retention, partnership, atau product release.",
             data,
         )
         add_footer(slide, data, page)
@@ -1323,10 +1505,10 @@ def seed_content_slide(
             slide,
             side_title,
             side_body,
-            7.7,
-            2.15,
-            4.35,
-            2.15,
+            7.45,
+            2.10,
+            4.75,
+            3.05,
             data,
         )
 
@@ -1525,13 +1707,13 @@ def build_deck(data, image_buffer=None):
 
     if image_buffer:
         image_buffer.seek(0)
-        slide.shapes.add_picture(image_buffer, Inches(0.85), Inches(2.05), width=Inches(6.2))
-        add_card(slide, "Product flow", data["product_flow"], 7.55, 2.05, 4.55, 1.65, data)
-        add_card(slide, "Product benefit", data["product_benefit"], 7.55, 4.05, 4.55, 1.25, data)
+        slide.shapes.add_picture(image_buffer, Inches(0.85), Inches(2.05), width=Inches(6.2), height=Inches(3.45))
+        add_card(slide, "Product flow", data["product_flow"], 7.45, 2.05, 4.75, 1.75, data)
+        add_card(slide, "Product benefit", data["product_benefit"], 7.45, 4.10, 4.75, 1.35, data)
     else:
         add_bullets(slide, lines(data["features"], 5), 0.85, 2.05, 6.4, 3.7, 20)
-        add_card(slide, "Product flow", data["product_flow"], 7.7, 2.15, 4.35, 1.75, data)
-        add_card(slide, "Product benefit", data["product_benefit"], 7.7, 4.2, 4.35, 1.15, data)
+        add_card(slide, "Product flow", data["product_flow"], 7.45, 2.15, 4.75, 1.85, data)
+        add_card(slide, "Product benefit", data["product_benefit"], 7.45, 4.25, 4.75, 1.25, data)
 
     add_takeaway(slide, "Investor harus paham cara produk menciptakan nilai dalam 30 detik.", data)
     add_footer(slide, data, page)
