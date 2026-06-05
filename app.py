@@ -1,5 +1,6 @@
 import html
 import re
+import zipfile
 from io import BytesIO
 from typing import Any
 
@@ -364,6 +365,32 @@ def filename(value: str) -> str:
     )
 
     return value.strip().lower().replace(" ", "-") or "pitch-deck"
+
+
+def build_download_zip(
+    company_name: str,
+    pptx_file: BytesIO,
+    pdf_file: BytesIO,
+) -> BytesIO:
+    """Package generated PPTX and PDF into one downloadable ZIP."""
+    base_name = filename(company_name)
+    output = BytesIO()
+
+    pptx_file.seek(0)
+    pdf_file.seek(0)
+
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(
+            f"{base_name}-seed-investor-pitch-deck.pptx",
+            pptx_file.read(),
+        )
+        archive.writestr(
+            f"{base_name}-pitch-scenario-guide.pdf",
+            pdf_file.read(),
+        )
+
+    output.seek(0)
+    return output
 
 
 def parse_percent(value: str) -> float | None:
@@ -4082,35 +4109,25 @@ if generate:
     pptx = build_deck(data, image_buffer)
     scenario_pdf = build_scenario_pdf(data)
 
-    st.success("Pitch deck dan PDF scenario guide berhasil dibuat.")
+    output_zip = build_download_zip(company, pptx, scenario_pdf)
+
+    st.success("Pitch deck PPTX dan PDF scenario guide berhasil dibuat dalam satu file ZIP.")
     show_insights(generate_investor_insights(data))
 
     st.markdown(
         """
         <div class="readable-panel">
-            <p><strong>PDF Pitch Scenario Guide</strong></p>
-            <p>PDF ini mengikuti urutan slide PPTX dan berisi tujuan slide, narasi bicara, transisi, pertanyaan investor, kamus istilah startup, rumus perhitungan, contoh angka, serta checklist latihan pitching.</p>
+            <p><strong>File ZIP siap download</strong></p>
+            <p>ZIP berisi dua file: PPTX pitch deck untuk investor dan PDF Pitch Scenario Guide untuk latihan alur pitching. PDF mengikuti urutan slide PPTX dan berisi tujuan slide, narasi bicara, transisi, pertanyaan investor, kamus istilah startup, rumus perhitungan, contoh angka, serta checklist latihan pitching.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    download_col1, download_col2 = st.columns(2)
-
-    with download_col1:
-        st.download_button(
-            "📥 Download Seed Investor Pitch Deck (.pptx)",
-            data=pptx,
-            file_name=f"{filename(company)}-seed-investor-pitch-deck.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            use_container_width=True,
-        )
-
-    with download_col2:
-        st.download_button(
-            "📘 Download Pitch Scenario Guide (.pdf)",
-            data=scenario_pdf,
-            file_name=f"{filename(company)}-pitch-scenario-guide.pdf",
-            mime="application/pdf",
-            use_container_width=True,
-        )
+    st.download_button(
+        "📦 Download PPTX + PDF Scenario Guide (.zip)",
+        data=output_zip,
+        file_name=f"{filename(company)}-pitching-package.zip",
+        mime="application/zip",
+        use_container_width=True,
+    )

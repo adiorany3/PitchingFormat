@@ -160,8 +160,18 @@ pitch_deck_seed_generator/
 7. Buka tab **Analisa** untuk membaca kesiapan pitching.
 8. Buka tab **Istilah & Rumus** jika ingin mempelajari istilah dan cara menghitung metrik.
 9. Klik **Generate Seed Investor Pitch Deck**.
-10. Download PPTX dan PDF scenario guide.
+10. Download PPTX dan PDF scenario guide dalam satu ZIP.
 
 ## Catatan
 
 CSS di dalam `app.py` sudah menyembunyikan elemen bawaan Streamlit. Namun, tampilan akhir tetap dapat sedikit berbeda tergantung versi Streamlit dan platform deployment.
+
+
+## Update v8.2
+
+Output aplikasi sekarang menjadi satu tombol download ZIP berisi:
+
+- `*-seed-investor-pitch-deck.pptx`
+- `*-pitch-scenario-guide.pdf`
+
+Dengan begitu pengguna cukup download sekali untuk mendapatkan deck dan scenario guide.
