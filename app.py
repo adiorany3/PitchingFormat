@@ -31,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v10.5 - Isolated Slide Timing Contrast Fix"
+APP_VERSION = "v10.6 - Forced Readable Theme"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -553,6 +553,152 @@ def hide_streamlit_emblems() -> None:
             .stMultiSelect label * {
                 color: #0f172a !important;
                 -webkit-text-fill-color: #0f172a !important;
+            }
+
+
+            /* v10.6 Forced Readable Theme
+               Single light editor theme for Streamlit UI. Generated PPT/PDF still use selected brand colors.
+               This prevents unreadable sections such as Q&A investor and Cara menghitung. */
+            :root,
+            html,
+            body,
+            .stApp,
+            [data-testid="stAppViewContainer"] {
+                color-scheme: light !important;
+                --deck-bg: #f8fafc !important;
+                --deck-surface: #ffffff !important;
+                --deck-text: #0f172a !important;
+                --deck-muted: #334155 !important;
+                --deck-primary: #2563eb !important;
+                --deck-border: #cbd5e1 !important;
+                --deck-border-strong: #94a3b8 !important;
+            }
+            .stApp,
+            [data-testid="stAppViewContainer"],
+            [data-testid="stMain"],
+            .main,
+            .block-container {
+                background: #f8fafc !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            .stApp *:not(svg):not(path) {
+                text-shadow: none !important;
+            }
+            .stApp :where(h1,h2,h3,h4,h5,h6,p,li,label,span,div,strong,em,small,blockquote,td,th),
+            .stApp [data-testid="stMarkdownContainer"],
+            .stApp [data-testid="stMarkdownContainer"] *,
+            .stApp [data-testid="stWidgetLabel"],
+            .stApp [data-testid="stWidgetLabel"] *,
+            .stApp [data-testid="stCaptionContainer"],
+            .stApp [data-testid="InputInstructions"],
+            .stApp [data-testid="stHelp"] {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                opacity: 1 !important;
+            }
+            .stApp code,
+            .stApp pre,
+            .stApp kbd,
+            .stApp [data-testid="stCodeBlock"],
+            .stApp [data-testid="stCodeBlock"] * {
+                background: #e2e8f0 !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border-color: #94a3b8 !important;
+                text-shadow: none !important;
+            }
+            .stApp [data-testid="stExpander"],
+            .stApp [data-testid="stExpander"] > details,
+            .stApp [data-testid="stExpander"] summary,
+            .stApp [data-testid="stExpander"] div,
+            .stApp [data-testid="stExpander"] p,
+            .stApp [data-testid="stExpander"] span,
+            .stApp [data-testid="stExpander"] code,
+            .stApp [data-testid="stMetric"],
+            .stApp [data-testid="stFileUploader"] section,
+            .guide-box,
+            .insight-card,
+            .readable-panel,
+            .score-card,
+            .prompter-frame-note {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border-color: #cbd5e1 !important;
+            }
+            .stApp [data-testid="stExpander"] *,
+            .stApp [data-testid="stMetric"] *,
+            .stApp [data-testid="stFileUploader"] *,
+            .guide-box *,
+            .insight-card *,
+            .readable-panel *,
+            .score-card *,
+            .prompter-frame-note * {
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                opacity: 1 !important;
+            }
+            .stApp [data-testid="stDataFrame"],
+            .stApp [data-testid="stDataFrame"] *,
+            .stApp [data-testid="stTable"],
+            .stApp [data-testid="stTable"] *,
+            .stApp iframe {
+                color-scheme: light !important;
+            }
+            .stApp [data-testid="stTextInput"] input,
+            .stApp [data-testid="stNumberInput"] input,
+            .stApp [data-testid="stTextArea"] textarea,
+            .stApp [data-baseweb="input"] input,
+            .stApp [data-baseweb="textarea"] textarea,
+            .stApp [data-baseweb="select"] > div,
+            .stApp [data-testid="stColorPicker"] input {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border-color: #94a3b8 !important;
+                caret-color: #2563eb !important;
+            }
+            .stApp input::placeholder,
+            .stApp textarea::placeholder {
+                color: #475569 !important;
+                -webkit-text-fill-color: #475569 !important;
+                opacity: 1 !important;
+            }
+            [data-baseweb="popover"],
+            [data-baseweb="popover"] *,
+            [data-baseweb="menu"],
+            [data-baseweb="menu"] *,
+            [role="listbox"],
+            [role="listbox"] *,
+            [role="option"],
+            [role="option"] * {
+                background-color: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                opacity: 1 !important;
+            }
+            [role="option"]:hover,
+            [role="option"][aria-selected="true"],
+            li[role="option"]:hover,
+            li[role="option"][aria-selected="true"] {
+                background-color: #dbeafe !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }
+            .stApp .stButton > button,
+            .stApp .stDownloadButton > button,
+            .stApp button[data-testid^="baseButton"] {
+                background: #0f172a !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+                border-color: #0f172a !important;
+            }
+            .stApp .stButton > button *,
+            .stApp .stDownloadButton > button *,
+            .stApp button[data-testid^="baseButton"] * {
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
             }
 
         </style>
@@ -1466,6 +1612,210 @@ def render_validation_panel(issues: list[dict[str, str]]) -> None:
             st.warning(f"{issue['area']}: {issue['message']}")
 
 
+
+def _isolated_page_html(title: str, body_html: str, subtitle: str = "") -> str:
+    """Return a light-theme isolated HTML document for Streamlit components.
+
+    This iframe is intentionally independent from Streamlit theme CSS so black text
+    cannot be rendered on black backgrounds in Q&A, glossary, and formula sections.
+    """
+    safe_title = html.escape(title)
+    safe_subtitle = html.escape(subtitle)
+    return f"""
+    <!doctype html>
+    <html lang="id">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <style>
+        :root {{ color-scheme: light; }}
+        * {{ box-sizing: border-box; }}
+        html, body {{
+          margin: 0;
+          padding: 0;
+          background: #f8fafc !important;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          line-height: 1.55;
+        }}
+        .shell {{
+          background: #f8fafc;
+          color: #0f172a;
+          padding: 2px 2px 12px 2px;
+        }}
+        .title {{
+          font-size: 18px;
+          font-weight: 900;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          margin: 0 0 4px 0;
+        }}
+        .subtitle {{
+          font-size: 13px;
+          color: #334155 !important;
+          -webkit-text-fill-color: #334155 !important;
+          margin: 0 0 12px 0;
+        }}
+        .grid {{
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 12px;
+        }}
+        .card {{
+          background: #ffffff !important;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          border: 1px solid #cbd5e1;
+          border-radius: 16px;
+          padding: 14px 16px;
+          box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+          overflow-wrap: anywhere;
+        }}
+        .card * {{
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          opacity: 1 !important;
+          text-shadow: none !important;
+        }}
+        .card h4 {{
+          margin: 0 0 8px 0;
+          font-size: 15px;
+          line-height: 1.35;
+          font-weight: 900;
+        }}
+        .label {{
+          display: inline-block;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: .04em;
+          text-transform: uppercase;
+          color: #1d4ed8 !important;
+          -webkit-text-fill-color: #1d4ed8 !important;
+          margin-bottom: 6px;
+        }}
+        .body {{
+          margin: 0;
+          font-size: 13px;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+        }}
+        .formula {{
+          margin-top: 8px;
+          padding: 8px 10px;
+          border-radius: 10px;
+          background: #e2e8f0 !important;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          border: 1px solid #94a3b8;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 12px;
+          font-weight: 800;
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }}
+        .example {{
+          margin-top: 8px;
+          color: #334155 !important;
+          -webkit-text-fill-color: #334155 !important;
+          font-size: 12px;
+          font-weight: 650;
+        }}
+        table {{
+          width: 100%;
+          border-collapse: collapse;
+          background: #ffffff !important;
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          border: 1px solid #cbd5e1;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+        }}
+        th {{
+          background: #0f172a !important;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+          text-align: left;
+          padding: 12px;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: .04em;
+        }}
+        td {{
+          color: #0f172a !important;
+          -webkit-text-fill-color: #0f172a !important;
+          background: #ffffff !important;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 12px;
+          vertical-align: top;
+          font-size: 13px;
+          overflow-wrap: anywhere;
+        }}
+        tr:nth-child(even) td {{ background: #f8fafc !important; }}
+        tr:last-child td {{ border-bottom: 0; }}
+        strong, b {{ color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-weight: 900; }}
+      </style>
+    </head>
+    <body>
+      <div class="shell">
+        <div class="title">{safe_title}</div>
+        {f'<div class="subtitle">{safe_subtitle}</div>' if safe_subtitle else ''}
+        {body_html}
+      </div>
+    </body>
+    </html>
+    """
+
+
+def render_investor_qa(qa: list[tuple[str, str]]) -> None:
+    rows = []
+    for idx, (question, answer) in enumerate(qa, 1):
+        rows.append(
+            "<tr>"
+            f"<td style='width:44px;font-weight:900;color:#1d4ed8;-webkit-text-fill-color:#1d4ed8;'>{idx}</td>"
+            f"<td><strong>{html.escape(str(question))}</strong></td>"
+            f"<td>{html.escape(str(answer))}</td>"
+            "</tr>"
+        )
+    body = (
+        "<table aria-label='Q&A investor'>"
+        "<thead><tr><th>No</th><th>Pertanyaan investor</th><th>Cara menjawab</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+    iframe = _isolated_page_html(
+        "Q&A investor",
+        body,
+        "Bagian ini memakai tema terang terisolasi agar selalu terbaca di semua tema Streamlit.",
+    )
+    height = min(760, max(320, 110 + len(qa) * 88))
+    components.html(iframe, height=height, scrolling=True)
+
+
+def render_glossary_cards(rows: list[tuple[str, str, str, str, str]]) -> None:
+    if not rows:
+        st.warning("Tidak ada istilah yang cocok dengan filter.")
+        return
+    cards = []
+    for cat, term, simple, formula, example in rows:
+        cards.append(
+            "<div class='card'>"
+            f"<span class='label'>{html.escape(cat)}</span>"
+            f"<h4>{html.escape(term)}</h4>"
+            f"<p class='body'><strong>Arti sederhana:</strong> {html.escape(simple)}</p>"
+            f"<div class='formula'>Cara menghitung: {html.escape(formula)}</div>"
+            f"<div class='example'><strong>Contoh:</strong> {html.escape(example)}</div>"
+            "</div>"
+        )
+    body = f"<div class='grid'>{''.join(cards)}</div>"
+    iframe = _isolated_page_html(
+        "Istilah investor dan cara menghitungnya",
+        body,
+        "Semua kartu memakai background terang dan teks gelap agar rumus tetap terbaca.",
+    )
+    height = min(900, max(360, 160 + math.ceil(len(rows) / 2) * 230))
+    components.html(iframe, height=height, scrolling=True)
+
 def render_glossary() -> None:
     guide(
         "Istilah & rumus",
@@ -1482,11 +1832,7 @@ def render_glossary() -> None:
         if category != "Semua" and cat != category:
             continue
         rows.append((cat, term, simple, formula, example))
-    for cat, term, simple, formula, example in rows:
-        with st.expander(f"{term} - {cat}"):
-            st.markdown(f"**Arti sederhana:** {simple}")
-            st.markdown(f"**Cara menghitung:** `{formula}`")
-            st.markdown(f"**Contoh:** {example}")
+    render_glossary_cards(rows)
 
 
 def render_calculator(data: dict[str, Any] | None = None) -> None:
@@ -2799,8 +3145,7 @@ def main() -> None:
             st.markdown("#### Validasi input")
             render_validation_panel(insights["issues"])
             st.markdown("#### Q&A investor")
-            qa_rows = [{"Pertanyaan": q, "Cara menjawab": a} for q, a in insights["qa"]]
-            st.dataframe(qa_rows, use_container_width=True, hide_index=True)
+            render_investor_qa(insights["qa"])
     with section_container("Istilah"):
         if "Istilah" in active_sections:
             render_glossary()

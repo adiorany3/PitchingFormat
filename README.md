@@ -99,3 +99,11 @@ Fitur baru:
 - Bagian **Urutan slide dan timing** sekarang dirender dalam iframe terisolasi, bukan markdown/table biasa.
 - Warna header, baris, border, dan teks tabel memakai nilai fixed high-contrast sehingga tidak bisa tertimpa theme Streamlit/browser.
 - Memperbaiki kasus tulisan tidak terlihat karena background dan warna huruf sama.
+
+## v10.6 - Forced Readable Theme
+
+Perbaikan utama:
+- Aplikasi sekarang dipaksa memakai light theme melalui `.streamlit/config.toml`.
+- Q&A investor dan Istilah/Cara menghitung tidak lagi memakai dataframe/expander bawaan untuk konten utama.
+- Q&A investor dan glossary dirender dalam iframe high-contrast terisolasi, sehingga warna tema Streamlit/browser tidak bisa membuat tulisan hilang.
+- Code/rummus, dropdown, input, card, tab, expander, metric, dan panel edukasi memakai background terang dan teks gelap yang kontras.
