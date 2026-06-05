@@ -1,3 +1,4 @@
+import html
 import re
 from io import BytesIO
 from typing import Any
@@ -23,10 +24,26 @@ st.set_page_config(
 # Streamlit Chrome Removal
 # ==============================
 def hide_streamlit_emblems():
-    """Hide default Streamlit menu, toolbar, footer, deploy button, and header chrome."""
+    """Hide Streamlit chrome and apply theme-aware readable UI styling."""
     st.markdown(
         """
         <style>
+            :root {
+                --deck-bg: var(--background-color, #f8fafc);
+                --deck-surface: var(--secondary-background-color, #ffffff);
+                --deck-surface-soft: rgba(148, 163, 184, 0.10);
+                --deck-surface-strong: rgba(148, 163, 184, 0.16);
+                --deck-text: var(--text-color, #0f172a);
+                --deck-primary: var(--primary-color, #2563eb);
+                --deck-muted: rgba(100, 116, 139, 0.96);
+                --deck-muted: color-mix(in srgb, var(--text-color, #0f172a) 68%, transparent);
+                --deck-border: rgba(148, 163, 184, 0.35);
+                --deck-border-strong: rgba(148, 163, 184, 0.55);
+                --deck-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+                --deck-radius: 16px;
+            }
+
+            /* Remove Streamlit chrome / emblem */
             #MainMenu {visibility: hidden !important;}
             footer {visibility: hidden !important;}
             header {visibility: hidden !important;}
@@ -39,62 +56,222 @@ def hide_streamlit_emblems():
             .stAppDeployButton {display: none !important;}
             .st-emotion-cache-1dp5vir {display: none !important;}
             .st-emotion-cache-14xtw13 {display: none !important;}
-            .viewerBadge_container__1QSob {display: none !important;}
-            .viewerBadge_link__1S137 {display: none !important;}
+            .viewerBadge_container__1QSob,
+            .viewerBadge_link__1S137,
             .viewerBadge_text__1JaDK {display: none !important;}
-            .block-container {
-                padding-top: 1.2rem !important;
-                padding-bottom: 5.2rem !important;
+
+            /* App layout */
+            .stApp {
+                background: var(--deck-bg) !important;
+                color: var(--deck-text) !important;
             }
+            .block-container {
+                max-width: 1320px;
+                padding-top: 1.35rem !important;
+                padding-bottom: 5.8rem !important;
+            }
+            [data-testid="stSidebar"] > div:first-child {
+                background: var(--deck-surface) !important;
+                border-right: 1px solid var(--deck-border);
+            }
+            [data-testid="stSidebar"] * {
+                color: var(--deck-text);
+            }
+
+            /* Text readability across light/dark themes */
+            h1, h2, h3, h4, h5, h6,
+            [data-testid="stMarkdownContainer"] p,
+            [data-testid="stMarkdownContainer"] li,
+            [data-testid="stCaptionContainer"],
+            label {
+                color: var(--deck-text) !important;
+            }
+            small, .caption, [data-testid="stCaptionContainer"] {
+                color: var(--deck-muted) !important;
+            }
+            hr {
+                border-color: var(--deck-border) !important;
+            }
+
+            /* Tabs */
+            [data-testid="stTabs"] [role="tablist"] {
+                gap: 0.35rem;
+                border-bottom: 1px solid var(--deck-border);
+                flex-wrap: wrap;
+            }
+            [data-testid="stTabs"] button[role="tab"] {
+                min-height: 42px;
+                padding: 0.55rem 0.85rem;
+                border-radius: 999px 999px 0 0;
+                color: var(--deck-muted) !important;
+                background: transparent !important;
+                border: 1px solid transparent !important;
+            }
+            [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+                color: var(--deck-text) !important;
+                background: var(--deck-surface) !important;
+                border: 1px solid var(--deck-border) !important;
+                border-bottom-color: var(--deck-surface) !important;
+                font-weight: 700;
+            }
+
+            /* Form controls */
+            [data-testid="stTextInput"] input,
+            [data-testid="stNumberInput"] input,
+            [data-testid="stTextArea"] textarea,
+            [data-baseweb="select"] > div,
+            [data-testid="stFileUploader"] section,
+            [data-testid="stColorPicker"] input {
+                background: var(--deck-surface) !important;
+                color: var(--deck-text) !important;
+                border-color: var(--deck-border) !important;
+                caret-color: var(--deck-primary) !important;
+            }
+            [data-testid="stTextInput"] input::placeholder,
+            [data-testid="stTextArea"] textarea::placeholder {
+                color: var(--deck-muted) !important;
+                opacity: 0.82;
+            }
+            [data-testid="stTextInput"] input:focus,
+            [data-testid="stNumberInput"] input:focus,
+            [data-testid="stTextArea"] textarea:focus,
+            [data-baseweb="select"] > div:focus-within {
+                border-color: var(--deck-primary) !important;
+                box-shadow: 0 0 0 2px color-mix(in srgb, var(--deck-primary) 24%, transparent) !important;
+            }
+            [data-testid="stWidgetLabel"] p {
+                color: var(--deck-text) !important;
+                font-weight: 650;
+            }
+            [data-testid="InputInstructions"],
+            [data-testid="stWidgetLabel"] small,
+            [data-testid="stHelp"] {
+                color: var(--deck-muted) !important;
+            }
+
+            /* Buttons */
+            .stButton > button,
+            .stDownloadButton > button {
+                border-radius: 12px !important;
+                border: 1px solid var(--deck-border-strong) !important;
+                background: var(--deck-surface) !important;
+                color: var(--deck-text) !important;
+                font-weight: 700 !important;
+                min-height: 44px;
+            }
+            .stButton > button[kind="primary"],
+            .stButton > button[data-testid="baseButton-primary"] {
+                background: var(--deck-primary) !important;
+                color: #ffffff !important;
+                border-color: var(--deck-primary) !important;
+            }
+            .stDownloadButton > button {
+                background: var(--deck-primary) !important;
+                color: #ffffff !important;
+                border-color: var(--deck-primary) !important;
+            }
+
+            /* Native Streamlit metric readability */
+            [data-testid="stMetric"] {
+                background: var(--deck-surface) !important;
+                border: 1px solid var(--deck-border);
+                border-radius: var(--deck-radius);
+                padding: 0.9rem 1rem;
+                box-shadow: var(--deck-shadow);
+            }
+            [data-testid="stMetricLabel"] p {
+                color: var(--deck-muted) !important;
+                font-weight: 700;
+            }
+            [data-testid="stMetricValue"] {
+                color: var(--deck-text) !important;
+            }
+
+            /* Custom reusable blocks */
             .developer-footer {
                 position: fixed;
                 left: 0;
                 bottom: 0;
                 width: 100%;
-                background: rgba(248, 250, 252, 0.97);
-                border-top: 1px solid #e2e8f0;
-                color: #64748b;
+                background: color-mix(in srgb, var(--deck-surface) 94%, transparent);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid var(--deck-border);
+                color: var(--deck-muted) !important;
                 text-align: center;
                 padding: 8px 0;
                 font-size: 12px;
+                line-height: 1.4;
                 z-index: 9999;
             }
-            .guide-box {
-                background: #f8fafc;
-                border: 1px solid #e2e8f0;
-                border-radius: 14px;
-                padding: 14px 16px;
+            .guide-box,
+            .insight-card,
+            .readable-panel {
+                background: var(--deck-surface);
+                border: 1px solid var(--deck-border);
+                border-radius: var(--deck-radius);
+                padding: 15px 17px;
                 margin: 8px 0 18px 0;
-                color: #334155;
+                color: var(--deck-text) !important;
+                box-shadow: var(--deck-shadow);
+            }
+            .guide-box {
+                border-left: 4px solid var(--deck-primary);
+            }
+            .guide-box strong,
+            .guide-box .guide-title,
+            .insight-card h4 {
+                color: var(--deck-text) !important;
+                font-weight: 800;
+            }
+            .guide-box p,
+            .guide-box span,
+            .insight-card p,
+            .insight-card li,
+            .readable-panel p,
+            .readable-panel li {
+                color: var(--deck-muted) !important;
                 font-size: 0.94rem;
-                line-height: 1.55;
-            }
-            .guide-box strong {
-                color: #0f172a;
-            }
-            .insight-card {
-                background: #ffffff;
-                border: 1px solid #e2e8f0;
-                border-radius: 14px;
-                padding: 14px 16px;
-                margin: 8px 0;
-                min-height: 115px;
+                line-height: 1.58;
             }
             .insight-card h4 {
-                margin: 0 0 8px 0;
-                font-size: 1rem;
-                color: #0f172a;
+                margin: 0 0 10px 0;
+                font-size: 1.02rem;
             }
-            .insight-card p, .insight-card li {
-                color: #475569;
-                font-size: 0.92rem;
-                line-height: 1.45;
+            .insight-card ul {
+                margin: 0.35rem 0 0 1.1rem;
+                padding: 0;
+            }
+            .insight-card li {
+                margin-bottom: 0.48rem;
+            }
+
+            /* Alerts and upload blocks should keep contrast */
+            [data-testid="stAlert"] {
+                border-radius: var(--deck-radius) !important;
+                border: 1px solid var(--deck-border) !important;
+            }
+            [data-testid="stFileUploader"] section {
+                border-radius: var(--deck-radius) !important;
+            }
+
+            @media (max-width: 900px) {
+                .block-container {
+                    padding-left: 1rem !important;
+                    padding-right: 1rem !important;
+                }
+                .developer-footer {
+                    font-size: 11px;
+                    padding: 7px 0;
+                }
+                [data-testid="stTabs"] button[role="tab"] {
+                    min-height: 38px;
+                    padding: 0.45rem 0.65rem;
+                }
             }
         </style>
         """,
         unsafe_allow_html=True,
     )
-
 
 hide_streamlit_emblems()
 
@@ -436,6 +613,23 @@ def guide(title: str, body: str):
     )
 
 
+def render_insight_card(title: str, items: list[str]):
+    safe_items = "".join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in items
+    )
+
+    st.markdown(
+        f"""
+        <div class="insight-card">
+            <h4>{html.escape(title)}</h4>
+            <ul>{safe_items}</ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def show_insights(insights: dict[str, Any]):
     st.subheader("📈 Analisa Investor Readiness")
     st.caption(
@@ -444,7 +638,14 @@ def show_insights(insights: dict[str, Any]):
     )
 
     st.progress(insights["score"] / 100)
-    st.write(f"**{insights['headline']}**")
+    st.markdown(
+        f"""
+        <div class="readable-panel">
+            <p><strong>{html.escape(str(insights['headline']))}</strong></p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     metric_cols = st.columns(6)
     metric_labels = [
@@ -462,22 +663,13 @@ def show_insights(insights: dict[str, Any]):
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        st.markdown('<div class="insight-card"><h4>Strength</h4>', unsafe_allow_html=True)
-        for item in insights["strengths"]:
-            st.markdown(f"- {item}")
-        st.markdown('</div>', unsafe_allow_html=True)
+        render_insight_card("Strength", insights["strengths"])
 
     with c2:
-        st.markdown('<div class="insight-card"><h4>Risk / Investor Question</h4>', unsafe_allow_html=True)
-        for item in insights["risks"]:
-            st.markdown(f"- {item}")
-        st.markdown('</div>', unsafe_allow_html=True)
+        render_insight_card("Risk / Investor Question", insights["risks"])
 
     with c3:
-        st.markdown('<div class="insight-card"><h4>Rekomendasi Pitching</h4>', unsafe_allow_html=True)
-        for item in insights["recommendations"]:
-            st.markdown(f"- {item}")
-        st.markdown('</div>', unsafe_allow_html=True)
+        render_insight_card("Rekomendasi Pitching", insights["recommendations"])
 
 
 # ==============================
@@ -1236,7 +1428,7 @@ with st.sidebar:
     st.header("Brand & Format")
     guide(
         "Pengaturan visual deck",
-        "Pilih warna aksen yang sesuai brand. Untuk seed deck, gunakan satu warna utama dan hindari terlalu banyak variasi visual agar investor fokus pada cerita dan data.",
+        "Pilih warna aksen yang sesuai brand. Tampilan aplikasi sudah theme-aware: ketika Streamlit memakai light, dark, atau system theme, warna teks, kartu, input, tab, dan panel analisa akan menyesuaikan agar tetap terbaca.",
     )
     accent_color = st.color_picker(
         "Warna aksen",

@@ -9,11 +9,20 @@ Footer aplikasi dan setiap slide:
 ## Pembaruan Versi Ini
 
 - Elemen bawaan Streamlit disembunyikan: menu, toolbar, header, footer, deploy button, dan badge/emblem yang umum muncul di UI.
-- Ditambahkan `.streamlit/config.toml` untuk membuat tampilan lebih bersih dan mengurangi chrome bawaan Streamlit.
+- Ditambahkan `.streamlit/config.toml` untuk membuat tampilan lebih bersih tanpa mengunci theme ke light/dark tertentu.
 - Setiap bagian input memiliki keterangan dan help text agar pengguna lebih mudah memahami cara mengisi data.
 - Ditambahkan tab **Analisa** untuk membaca input dan memberi insight otomatis tentang kesiapan pitch.
 - Ditambahkan opsi **slide analisa otomatis** di PPTX untuk merangkum kekuatan, risiko pertanyaan investor, dan rekomendasi pitching.
 - Footer **Developed by Galuh Adi Insani** tetap muncul di UI dan semua slide PPTX.
+
+
+## Pembaruan Versi Theme-Aware
+
+- Tampilan aplikasi sekarang mengikuti tema Streamlit yang sedang aktif: light, dark, atau system theme.
+- Warna teks, background, kartu panduan, panel analisa, tab, input, tombol, upload file, metric, dan footer memakai CSS variable bawaan Streamlit sehingga tetap kontras saat tema berubah.
+- Konfigurasi `.streamlit/config.toml` tidak lagi mengunci aplikasi ke light theme.
+- Panel insight diperbaiki agar semua isi berada di dalam kartu yang sama dan terbaca jelas pada dark theme.
+- Elemen/emblem bawaan Streamlit tetap disembunyikan.
 
 ## Fitur
 
