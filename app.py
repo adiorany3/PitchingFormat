@@ -30,7 +30,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v9 - Complete Founder Toolkit"
+APP_VERSION = "v9.1 - Theme Contrast Fix"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -45,16 +45,16 @@ def hide_streamlit_emblems() -> None:
         """
         <style>
             :root {
-                --deck-bg: var(--background-color, #f8fafc);
-                --deck-surface: var(--secondary-background-color, #ffffff);
+                --deck-bg: var(--background-color, #ffffff);
+                --deck-surface: var(--secondary-background-color, #f8fafc);
                 --deck-text: var(--text-color, #0f172a);
                 --deck-primary: var(--primary-color, #2563eb);
-                --deck-muted: color-mix(in srgb, var(--text-color, #0f172a) 66%, transparent);
-                --deck-border: rgba(148, 163, 184, 0.35);
-                --deck-border-strong: rgba(148, 163, 184, 0.55);
-                --deck-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+                --deck-border: rgba(128, 128, 128, 0.38);
+                --deck-border-strong: rgba(128, 128, 128, 0.58);
                 --deck-radius: 16px;
+                --deck-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
             }
+
             #MainMenu, footer, header,
             [data-testid="stHeader"],
             [data-testid="stToolbar"],
@@ -65,75 +65,225 @@ def hide_streamlit_emblems() -> None:
             .stAppDeployButton,
             .viewerBadge_container__1QSob,
             .viewerBadge_link__1S137,
-            .viewerBadge_text__1JaDK {display: none !important; visibility: hidden !important;}
+            .viewerBadge_text__1JaDK {
+                display: none !important;
+                visibility: hidden !important;
+            }
 
-            .stApp {background: var(--deck-bg) !important; color: var(--deck-text) !important;}
-            .block-container {max-width: 1360px; padding-top: 1.2rem !important; padding-bottom: 5.8rem !important;}
+            .stApp {
+                background: var(--deck-bg) !important;
+                color: var(--deck-text) !important;
+            }
+
+            .block-container {
+                max-width: 1360px;
+                padding-top: 1.2rem !important;
+                padding-bottom: 5.8rem !important;
+            }
+
             [data-testid="stSidebar"] > div:first-child {
                 background: var(--deck-surface) !important;
-                border-right: 1px solid var(--deck-border);
+                border-right: 1px solid var(--deck-border) !important;
             }
-            h1, h2, h3, h4, h5, h6,
-            [data-testid="stMarkdownContainer"] p,
-            [data-testid="stMarkdownContainer"] li,
-            [data-testid="stCaptionContainer"], label {color: var(--deck-text) !important;}
-            small, .caption, [data-testid="stCaptionContainer"] {color: var(--deck-muted) !important;}
 
-            [data-testid="stTabs"] [role="tablist"] {gap: .35rem; border-bottom: 1px solid var(--deck-border); flex-wrap: wrap;}
+            /* Global text contrast guard */
+            .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6,
+            .stApp p, .stApp li, .stApp label, .stApp span,
+            [data-testid="stMarkdownContainer"],
+            [data-testid="stMarkdownContainer"] *,
+            [data-testid="stCaptionContainer"],
+            [data-testid="stWidgetLabel"],
+            [data-testid="stWidgetLabel"] *,
+            [data-testid="stExpander"] *,
+            [data-testid="stMetric"] *,
+            [data-testid="stFileUploader"] * {
+                color: var(--deck-text) !important;
+            }
+
+            [data-testid="stCaptionContainer"],
+            [data-testid="InputInstructions"],
+            [data-testid="stHelp"],
+            .caption, small {
+                color: var(--deck-text) !important;
+                opacity: 0.88 !important;
+            }
+
+            /* Tabs */
+            [data-testid="stTabs"] [role="tablist"] {
+                gap: .35rem;
+                border-bottom: 1px solid var(--deck-border) !important;
+                flex-wrap: wrap;
+            }
             [data-testid="stTabs"] button[role="tab"] {
-                min-height: 42px; padding: .55rem .85rem; border-radius: 999px 999px 0 0;
-                color: var(--deck-muted) !important; background: transparent !important; border: 1px solid transparent !important;
+                min-height: 42px;
+                padding: .55rem .85rem;
+                border-radius: 999px 999px 0 0;
+                color: var(--deck-text) !important;
+                background: transparent !important;
+                border: 1px solid transparent !important;
+                opacity: 0.85 !important;
             }
             [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
-                color: var(--deck-text) !important; background: var(--deck-surface) !important;
-                border: 1px solid var(--deck-border) !important; border-bottom-color: var(--deck-surface) !important;
-                font-weight: 800;
+                color: var(--deck-text) !important;
+                background: var(--deck-surface) !important;
+                border: 1px solid var(--deck-border) !important;
+                border-bottom-color: var(--deck-surface) !important;
+                font-weight: 800 !important;
+                opacity: 1 !important;
             }
+
+            /* Inputs and BaseWeb widgets */
             [data-testid="stTextInput"] input,
             [data-testid="stNumberInput"] input,
             [data-testid="stTextArea"] textarea,
+            [data-baseweb="input"] input,
+            [data-baseweb="textarea"] textarea,
             [data-baseweb="select"] > div,
             [data-testid="stFileUploader"] section,
             [data-testid="stColorPicker"] input {
-                background: var(--deck-surface) !important; color: var(--deck-text) !important;
-                border-color: var(--deck-border) !important; caret-color: var(--deck-primary) !important;
+                background: var(--deck-surface) !important;
+                color: var(--deck-text) !important;
+                border-color: var(--deck-border-strong) !important;
+                caret-color: var(--deck-primary) !important;
             }
-            [data-testid="stWidgetLabel"] p {color: var(--deck-text) !important; font-weight: 700;}
-            [data-testid="InputInstructions"], [data-testid="stWidgetLabel"] small, [data-testid="stHelp"] {color: var(--deck-muted) !important;}
-            .stButton > button, .stDownloadButton > button {
-                border-radius: 12px !important; border: 1px solid var(--deck-border-strong) !important;
-                background: var(--deck-surface) !important; color: var(--deck-text) !important;
-                font-weight: 800 !important; min-height: 44px;
+            [data-testid="stTextInput"] input::placeholder,
+            [data-testid="stTextArea"] textarea::placeholder,
+            [data-baseweb="input"] input::placeholder,
+            [data-baseweb="textarea"] textarea::placeholder {
+                color: var(--deck-text) !important;
+                opacity: 0.70 !important;
             }
-            .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"], .stDownloadButton > button {
-                background: var(--deck-primary) !important; color: #fff !important; border-color: var(--deck-primary) !important;
+            [data-baseweb="select"] *,
+            [data-baseweb="popover"] *,
+            [data-baseweb="menu"] *,
+            [data-baseweb="option"] * {
+                color: var(--deck-text) !important;
+            }
+            [data-baseweb="popover"],
+            [data-baseweb="menu"],
+            [data-baseweb="option"] {
+                background: var(--deck-surface) !important;
+                color: var(--deck-text) !important;
+            }
+            [data-baseweb="option"]:hover,
+            [data-baseweb="option"][aria-selected="true"] {
+                background: var(--deck-bg) !important;
+                color: var(--deck-text) !important;
+            }
+
+            /* Buttons: use text/background pair for guaranteed contrast in any theme */
+            .stButton > button,
+            .stDownloadButton > button,
+            button[data-testid^="baseButton"] {
+                border-radius: 12px !important;
+                border: 1px solid var(--deck-border-strong) !important;
+                background: var(--deck-surface) !important;
+                color: var(--deck-text) !important;
+                font-weight: 800 !important;
+                min-height: 44px;
+            }
+            .stButton > button[kind="primary"],
+            .stButton > button[data-testid="baseButton-primary"],
+            .stDownloadButton > button {
+                background: var(--deck-text) !important;
+                color: var(--deck-bg) !important;
+                border-color: var(--deck-text) !important;
+            }
+            .stButton > button[kind="primary"] *,
+            .stButton > button[data-testid="baseButton-primary"] *,
+            .stDownloadButton > button * {
+                color: var(--deck-bg) !important;
+            }
+
+            /* Cards, panels, expanders, metrics */
+            [data-testid="stMetric"],
+            [data-testid="stExpander"],
+            .guide-box,
+            .insight-card,
+            .readable-panel,
+            .score-card {
+                background: var(--deck-surface) !important;
+                border: 1px solid var(--deck-border) !important;
+                border-radius: var(--deck-radius) !important;
+                color: var(--deck-text) !important;
+                box-shadow: var(--deck-shadow) !important;
             }
             [data-testid="stMetric"] {
-                background: var(--deck-surface) !important; border: 1px solid var(--deck-border);
-                border-radius: var(--deck-radius); padding: .9rem 1rem; box-shadow: var(--deck-shadow);
+                padding: .9rem 1rem !important;
             }
-            [data-testid="stMetricLabel"] p {color: var(--deck-muted) !important; font-weight: 800;}
-            [data-testid="stMetricValue"] {color: var(--deck-text) !important;}
+            .guide-box,
+            .insight-card,
+            .readable-panel,
+            .score-card {
+                padding: 15px 17px;
+                margin: 8px 0 18px 0;
+            }
+            .guide-box {
+                border-left: 4px solid var(--deck-primary) !important;
+            }
+            .guide-box strong,
+            .guide-title,
+            .insight-card h4,
+            .score-card strong,
+            .readable-panel strong {
+                color: var(--deck-text) !important;
+                font-weight: 850 !important;
+            }
+            .guide-box p, .guide-box span,
+            .insight-card p, .insight-card li,
+            .readable-panel p, .readable-panel li,
+            .score-card p,
+            .score-card li {
+                color: var(--deck-text) !important;
+                font-size: .94rem;
+                line-height: 1.58;
+                opacity: 0.94 !important;
+            }
+
+            .pill {
+                display: inline-block;
+                padding: 4px 10px;
+                border: 1px solid var(--deck-border-strong) !important;
+                border-radius: 999px;
+                margin: 3px;
+                background: var(--deck-surface) !important;
+                color: var(--deck-text) !important;
+            }
+            .risk {border-left: 4px solid #ef4444 !important;}
+            .ok {border-left: 4px solid #22c55e !important;}
+            .warn {border-left: 4px solid #f59e0b !important;}
+
+            /* Alerts and progress labels */
+            [data-testid="stAlert"],
+            [data-testid="stAlert"] *,
+            [data-testid="stProgress"],
+            [data-testid="stProgress"] * {
+                color: var(--deck-text) !important;
+            }
+
+            /* Footer */
             .developer-footer {
-                position: fixed; left: 0; bottom: 0; width: 100%;
-                background: color-mix(in srgb, var(--deck-surface) 94%, transparent);
-                backdrop-filter: blur(10px); border-top: 1px solid var(--deck-border);
-                color: var(--deck-muted) !important; text-align: center; padding: 8px 0;
-                font-size: 12px; line-height: 1.4; z-index: 9999;
+                position: fixed;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background: var(--deck-surface) !important;
+                border-top: 1px solid var(--deck-border) !important;
+                color: var(--deck-text) !important;
+                text-align: center;
+                padding: 8px 0;
+                font-size: 12px;
+                line-height: 1.4;
+                z-index: 9999;
             }
-            .guide-box, .insight-card, .readable-panel, .score-card {
-                background: var(--deck-surface); border: 1px solid var(--deck-border); border-radius: var(--deck-radius);
-                padding: 15px 17px; margin: 8px 0 18px 0; color: var(--deck-text) !important; box-shadow: var(--deck-shadow);
+
+            /* Data editor/table safety */
+            [data-testid="stDataFrame"],
+            [data-testid="stDataFrame"] *,
+            [data-testid="stTable"],
+            [data-testid="stTable"] * {
+                color: var(--deck-text) !important;
             }
-            .guide-box {border-left: 4px solid var(--deck-primary);}
-            .guide-box strong, .guide-title, .insight-card h4, .score-card strong {color: var(--deck-text) !important; font-weight: 850;}
-            .guide-box p, .guide-box span, .insight-card p, .insight-card li, .readable-panel p, .readable-panel li, .score-card p {
-                color: var(--deck-muted) !important; font-size: .94rem; line-height: 1.58;
-            }
-            .pill {display: inline-block; padding: 4px 10px; border: 1px solid var(--deck-border); border-radius: 999px; margin: 3px; background: color-mix(in srgb, var(--deck-surface) 80%, var(--deck-primary) 8%);}
-            .risk {border-left: 4px solid #ef4444;}
-            .ok {border-left: 4px solid #22c55e;}
-            .warn {border-left: 4px solid #f59e0b;}
         </style>
         """,
         unsafe_allow_html=True,

@@ -56,3 +56,12 @@ pitch_deck_seed_generator/
 5. Cek tab Analisa dan Preview sebelum generate.
 6. Klik Generate Pitching Package untuk mengunduh ZIP.
 
+
+
+## v9.1 - Theme Contrast Fix
+
+Perbaikan utama:
+- Aplikasi tidak lagi memaksa `base = "light"` di konfigurasi Streamlit.
+- Teks, panel, card, metric, expander, select dropdown, uploader, tombol, dan footer memakai CSS variable tema Streamlit.
+- Semua panel edukasi dan analisa dibuat high-contrast agar tetap terbaca di light theme, dark theme, maupun system theme.
+- Warna primary button dibuat memakai pasangan `text-color` dan `background-color` agar tidak hilang ketika accent color terlalu terang atau terlalu gelap.
