@@ -1,6 +1,6 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v10.4 - Slide Timing Preview Fix  
+Versi: v10.5 - Isolated Slide Timing Contrast Fix  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:
@@ -94,3 +94,8 @@ Fitur baru:
 
 ## v10.3
 - Perbaikan kontras khusus dropdown/selectbox BaseWeb agar menu yang terbuka tetap terbaca di light/dark/system theme.
+
+## v10.5
+- Bagian **Urutan slide dan timing** sekarang dirender dalam iframe terisolasi, bukan markdown/table biasa.
+- Warna header, baris, border, dan teks tabel memakai nilai fixed high-contrast sehingga tidak bisa tertimpa theme Streamlit/browser.
+- Memperbaiki kasus tulisan tidak terlihat karena background dan warna huruf sama.

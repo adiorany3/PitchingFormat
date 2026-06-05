@@ -31,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v10.4 - Slide Timing Preview Fix"
+APP_VERSION = "v10.5 - Isolated Slide Timing Contrast Fix"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -2529,11 +2529,12 @@ def render_preview_section(data: dict[str, Any]) -> None:
 
 
 def render_slide_timing_table(plan: list[dict[str, Any]], timings: list[int]) -> None:
-    """Render slide order and timing with HTML instead of st.dataframe.
+    """Render slide order/timing inside an isolated iframe.
 
-    Streamlit's dataframe canvas can occasionally render blank or unreadable under
-    heavy theme/CSS overrides. This table uses explicit high-contrast HTML so the
-    slide order is always visible in Preview and Simulasi.
+    The table is rendered with ``components.html`` instead of ``st.markdown`` so
+    global Streamlit theme CSS cannot override the table's foreground/background
+    colors. This prevents invisible text when the app theme, browser theme, or
+    previous CSS rules use the same color for text and background.
     """
     if not plan:
         st.warning("Belum ada skema slide yang dapat ditampilkan. Pilih durasi pitch dan jenis pitch terlebih dahulu.")
@@ -2552,106 +2553,152 @@ def render_slide_timing_table(plan: list[dict[str, Any]], timings: list[int]) ->
         purpose = html.escape(str(item.get("purpose", "")))
         key = html.escape(str(item.get("key", "")))
         seconds = int(safe_timings[i] or 0)
+        row_bg = "#ffffff" if i % 2 == 0 else "#f8fafc"
         rows_html.append(
             f"""
-            <tr>
+            <tr style="background:{row_bg};">
                 <td class="num">{i + 1}</td>
-                <td><strong>{title}</strong><br><span>{key}</span></td>
-                <td class="time">{seconds} detik</td>
-                <td>{purpose}</td>
+                <td class="title-cell"><strong>{title}</strong><br><span>{key}</span></td>
+                <td class="time-cell">{seconds} detik</td>
+                <td class="purpose-cell">{purpose}</td>
             </tr>
             """
         )
 
-    st.markdown(
-        f"""
+    iframe_html = f"""
+    <!doctype html>
+    <html lang="id">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
-            .slide-timing-summary {{
+            :root {{
+                color-scheme: light;
+                --bg: #ffffff;
+                --surface: #f8fafc;
+                --ink: #0f172a;
+                --muted: #334155;
+                --line: #cbd5e1;
+                --line-soft: #e2e8f0;
+                --primary: #1d4ed8;
+                --header: #0f172a;
+                --header-text: #ffffff;
+            }}
+            * {{ box-sizing: border-box; }}
+            html, body {{
+                margin: 0;
+                padding: 0;
+                background: transparent;
+                color: var(--ink);
+                font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                -webkit-text-fill-color: var(--ink);
+            }}
+            .summary {{
                 display: flex;
                 flex-wrap: wrap;
                 gap: 10px;
-                margin: 10px 0 12px 0;
+                margin: 0 0 12px 0;
             }}
-            .slide-timing-pill {{
-                background: #ffffff !important;
-                color: #0f172a !important;
-                -webkit-text-fill-color: #0f172a !important;
-                border: 1px solid #94a3b8 !important;
+            .pill {{
+                display: inline-flex;
+                align-items: center;
+                min-height: 34px;
+                background: var(--bg);
+                color: var(--ink);
+                -webkit-text-fill-color: var(--ink);
+                border: 1px solid #94a3b8;
                 border-radius: 999px;
                 padding: 7px 12px;
                 font-size: 13px;
-                font-weight: 800;
+                font-weight: 850;
+                line-height: 1.2;
             }}
-            .slide-timing-wrap {{
+            .wrap {{
                 overflow-x: auto;
-                background: #ffffff !important;
-                border: 1px solid #cbd5e1 !important;
+                overflow-y: hidden;
+                background: var(--bg);
+                border: 1px solid var(--line);
                 border-radius: 16px;
                 box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
-                margin: 8px 0 18px 0;
             }}
-            .slide-timing-table {{
+            table {{
                 width: 100%;
                 min-width: 820px;
                 border-collapse: collapse;
-                background: #ffffff !important;
-                color: #0f172a !important;
-                -webkit-text-fill-color: #0f172a !important;
+                background: var(--bg);
+                color: var(--ink);
+                -webkit-text-fill-color: var(--ink);
                 font-size: 14px;
                 line-height: 1.45;
             }}
-            .slide-timing-table th {{
-                background: #0f172a !important;
-                color: #ffffff !important;
-                -webkit-text-fill-color: #ffffff !important;
+            thead th {{
+                background: var(--header);
+                color: var(--header-text);
+                -webkit-text-fill-color: var(--header-text);
                 text-align: left;
-                padding: 11px 12px;
+                padding: 12px;
                 font-size: 12px;
                 text-transform: uppercase;
                 letter-spacing: .04em;
                 border-bottom: 1px solid #334155;
+                font-weight: 900;
             }}
-            .slide-timing-table td {{
-                background: #ffffff !important;
-                color: #0f172a !important;
-                -webkit-text-fill-color: #0f172a !important;
+            tbody td {{
+                color: var(--ink);
+                -webkit-text-fill-color: var(--ink);
                 padding: 12px;
                 vertical-align: top;
-                border-bottom: 1px solid #e2e8f0;
+                border-bottom: 1px solid var(--line-soft);
                 white-space: normal;
                 overflow-wrap: anywhere;
+                word-break: normal;
             }}
-            .slide-timing-table tr:nth-child(even) td {{
-                background: #f8fafc !important;
-            }}
-            .slide-timing-table td.num {{
+            tbody tr:last-child td {{ border-bottom: 0; }}
+            .num {{
                 width: 64px;
                 text-align: center;
-                font-weight: 900;
-                color: #1d4ed8 !important;
-                -webkit-text-fill-color: #1d4ed8 !important;
+                font-weight: 950;
+                color: var(--primary);
+                -webkit-text-fill-color: var(--primary);
             }}
-            .slide-timing-table td.time {{
-                width: 120px;
-                white-space: nowrap;
-                font-weight: 900;
-                color: #0f172a !important;
-                -webkit-text-fill-color: #0f172a !important;
+            .title-cell strong {{
+                display: inline-block;
+                color: var(--ink);
+                -webkit-text-fill-color: var(--ink);
+                font-weight: 950;
+                margin-bottom: 4px;
             }}
-            .slide-timing-table span {{
-                color: #475569 !important;
-                -webkit-text-fill-color: #475569 !important;
+            .title-cell span {{
+                color: var(--muted);
+                -webkit-text-fill-color: var(--muted);
                 font-size: 12px;
-                font-weight: 700;
+                font-weight: 750;
+            }}
+            .time-cell {{
+                width: 124px;
+                white-space: nowrap;
+                font-weight: 950;
+                color: var(--ink);
+                -webkit-text-fill-color: var(--ink);
+            }}
+            .purpose-cell {{
+                color: var(--ink);
+                -webkit-text-fill-color: var(--ink);
+            }}
+            @media (max-width: 760px) {{
+                table {{ min-width: 720px; font-size: 13px; }}
+                thead th, tbody td {{ padding: 10px; }}
             }}
         </style>
-        <div class="slide-timing-summary">
-            <div class="slide-timing-pill">Total slide: {len(plan)}</div>
-            <div class="slide-timing-pill">Total timing: {total_seconds} detik</div>
-            <div class="slide-timing-pill">≈ {total_minutes:.1f} menit</div>
+    </head>
+    <body>
+        <div class="summary" aria-label="Ringkasan timing slide">
+            <div class="pill">Total slide: {len(plan)}</div>
+            <div class="pill">Total timing: {total_seconds} detik</div>
+            <div class="pill">≈ {total_minutes:.1f} menit</div>
         </div>
-        <div class="slide-timing-wrap">
-            <table class="slide-timing-table">
+        <div class="wrap">
+            <table aria-label="Urutan slide dan timing">
                 <thead>
                     <tr>
                         <th>Slide</th>
@@ -2665,9 +2712,13 @@ def render_slide_timing_table(plan: list[dict[str, Any]], timings: list[int]) ->
                 </tbody>
             </table>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </body>
+    </html>
+    """
+
+    height = min(720, max(260, 122 + len(plan) * 58))
+    components.html(iframe_html, height=height, scrolling=True)
+
 
 def render_save_load(data: dict[str, Any]) -> None:
     with st.sidebar:
