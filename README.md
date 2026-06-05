@@ -1,6 +1,6 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v10.5 - Isolated Slide Timing Contrast Fix  
+Versi: v11.0 - Indonesia Market Segment Adaptive  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:
@@ -16,6 +16,8 @@ Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output 
 - Skema slide menyesuaikan durasi tanpa menghilangkan konteks utama.
 - Jenis pitch: Investor Seed Round, Demo Day, Pitch Competition, Corporate Partnership, Grant/Hibah, Incubator/Accelerator, dan Internal Business Proposal.
 - Model bisnis adaptif: SaaS, Marketplace, E-commerce/D2C, Fintech, Usage-Based/API, Freemium, Enterprise/Licensing, Service-Enabled Software, Advertising/Media, Hybrid/Other.
+- Target pasar Indonesia adaptif: B2C, B2B, B2G, B2B2C, B2B2G, dan Hybrid.
+- Field target pasar: segment, buyer/persona, decision maker/payer, sales/procurement cycle, channel, procurement notes, dan konteks lokal Indonesia.
 - Kalkulator metrik: MRR, ARR, ARPU, CAC, Gross Margin, Burn Rate, Runway, GMV, Take Rate.
 - Glossary istilah investor dan cara menghitungnya.
 - Validasi input dan warning edukatif.
@@ -53,7 +55,7 @@ pitch_deck_seed_generator/
 
 1. Isi bagian Identitas terlebih dahulu.
 2. Pilih durasi pitching dan jenis pitch.
-3. Pilih model bisnis agar metrik yang muncul sesuai.
+3. Pilih target pasar Indonesia dan model bisnis agar slide, metrik, insight, Q&A, dan PDF menyesuaikan konteks startup.
 4. Gunakan Kalkulator untuk menghitung metrik dasar.
 5. Cek tab Analisa, Simulasi, dan Preview sebelum generate.
 6. Gunakan tab Simulasi untuk latihan timing dan edit teks teleprompter sesuai gaya bicara presenter.
@@ -107,3 +109,16 @@ Perbaikan utama:
 - Q&A investor dan Istilah/Cara menghitung tidak lagi memakai dataframe/expander bawaan untuk konten utama.
 - Q&A investor dan glossary dirender dalam iframe high-contrast terisolasi, sehingga warna tema Streamlit/browser tidak bisa membuat tulisan hilang.
 - Code/rummus, dropdown, input, card, tab, expander, metric, dan panel edukasi memakai background terang dan teks gelap yang kontras.
+
+
+## v11.0 - Indonesia Market Segment Adaptive
+
+Fitur baru:
+- Menambahkan pilihan target pasar Indonesia: B2C, B2B, B2G, B2B2C, B2B2G, dan Hybrid.
+- Setiap target pasar memiliki panduan siapa user, siapa pembayar, decision maker, sales/procurement cycle, channel masuk pasar, dan konteks lokal Indonesia.
+- Slide deck otomatis menambahkan/menyesuaikan slide **Target Customer** untuk pitch 8 menit ke atas.
+- PDF Scenario Guide menambahkan appendix **Panduan target pasar Indonesia**.
+- Q&A investor menambahkan pertanyaan tentang target pasar dan alasan pemilihan segmen.
+- Glossary menambahkan istilah B2C, B2B, B2G, B2B2C, Sales Cycle, dan Decision Maker beserta cara menghitung/memetakannya.
+- Investor readiness score menambahkan kategori **Target segment clarity**.
+- Memperbaiki potensi DuplicateWidgetID pada field Retention.

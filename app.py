@@ -31,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v10.6 - Forced Readable Theme"
+APP_VERSION = "v11.0 - Indonesia Market Segment Adaptive"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -1071,7 +1071,129 @@ BUSINESS_MODEL_TEMPLATES = {
     },
 }
 
+
+TARGET_MARKET_TEMPLATES = {
+    "B2C - Consumer Indonesia": {
+        "description": "Menjual langsung ke konsumen akhir di Indonesia.",
+        "who_pays": "Konsumen/end user, kadang melalui subscription, one-time purchase, transaksi, atau iklan.",
+        "pitch_focus": "pain point mass market, acquisition channel, retention, repeat purchase, ARPU, CAC, dan payment behavior.",
+        "key_metrics": ["MAU/DAU", "Conversion Rate", "ARPU", "Retention"],
+        "defaults": {
+            "target_market_segment": "Konsumen urban dan semi-urban Indonesia yang aktif memakai mobile app dan pembayaran digital.",
+            "buyer_persona": "User individu yang ingin solusi cepat, murah, mudah dipakai, dan relevan dengan kebiasaan harian.",
+            "decision_maker": "User sendiri sebagai pengguna dan pembayar; untuk family product bisa orang tua/keluarga.",
+            "sales_cycle": "Cepat: menit sampai beberapa hari. Fokus pada activation, habit, dan repeat usage.",
+            "market_channel": "Content, komunitas, referral, influencer, marketplace, app store, partnership consumer brand.",
+            "procurement_notes": "Tidak ada proses procurement formal, tetapi perlu trust, pricing sederhana, payment mudah, dan customer support responsif.",
+            "indonesia_market_context": "Perhatikan variasi daya beli, bahasa/edukasi pengguna, metode pembayaran, distribusi luar kota besar, serta biaya akuisisi digital.",
+        },
+    },
+    "B2B - Business Indonesia": {
+        "description": "Menjual ke perusahaan, UMKM, koperasi, sekolah, rumah sakit, manufaktur, atau organisasi bisnis.",
+        "who_pays": "Perusahaan/organisasi; user, buyer, dan decision maker bisa orang berbeda.",
+        "pitch_focus": "ICP, decision maker, sales cycle, pilot conversion, ACV, CAC payback, ROI, retention, dan expansion account.",
+        "key_metrics": ["ACV/ARPA", "Pipeline", "Sales Cycle", "Pilot Conversion"],
+        "defaults": {
+            "target_market_segment": "UMKM dan bisnis menengah Indonesia dengan kebutuhan operasional yang berulang dan willingness to pay jelas.",
+            "buyer_persona": "Owner, finance/admin, operation manager, atau kepala divisi yang merasakan problem harian.",
+            "decision_maker": "Owner/director/manager anggaran; user harian bisa admin/operator/tim operasional.",
+            "sales_cycle": "Sedang: 2 minggu sampai 6 bulan, tergantung ticket size, integrasi, dan jumlah stakeholder.",
+            "market_channel": "Outbound, partnership asosiasi, komunitas bisnis, reseller/consultant, content edukasi, event industri, referral pelanggan.",
+            "procurement_notes": "Siapkan pilot, invoice/legal, SLA, keamanan data, case study, onboarding, dan bukti ROI agar pembelian lebih cepat.",
+            "indonesia_market_context": "B2B Indonesia sering membutuhkan trust, edukasi, hubungan channel, local support, dan pembuktian ROI sebelum kontrak besar.",
+        },
+    },
+    "B2G - Government Indonesia": {
+        "description": "Menjual atau bermitra dengan instansi pemerintah, BUMN/BUMD, dinas, lembaga, kampus negeri, atau program publik.",
+        "who_pays": "Anggaran pemerintah/instansi; user, evaluator teknis, procurement, dan penandatangan keputusan biasanya berbeda.",
+        "pitch_focus": "urgensi masalah publik, compliance, procurement readiness, dampak terukur, pilot/MoU, integrasi, keamanan data, dan siklus anggaran.",
+        "key_metrics": ["Pilot/MoU", "Budget Pipeline", "Procurement Cycle", "Impact Metric"],
+        "defaults": {
+            "target_market_segment": "Instansi pemerintah/daerah atau BUMN/BUMD yang memiliki mandat layanan publik dan problem operasional terukur.",
+            "buyer_persona": "Pejabat teknis, kepala program, unit digital/IT, procurement, atau stakeholder layanan publik.",
+            "decision_maker": "Kepala instansi/unit anggaran/procurement committee; user harian bisa operator, dinas teknis, atau petugas lapangan.",
+            "sales_cycle": "Panjang: 3-18 bulan. Perlu pilot, dokumen legal, anggaran, compliance, dan alignment program.",
+            "market_channel": "Pilot dengan instansi, kemitraan implementator, asosiasi pemerintah, forum publik, tender/pengadaan, CSR/BUMN, atau program inovasi daerah.",
+            "procurement_notes": "Siapkan legalitas, keamanan data, SLA, referensi implementasi, dokumen teknis, estimasi biaya, dan bukti dampak. Aturan pengadaan bisa berubah sehingga perlu cek ketentuan terbaru sebelum closing.",
+            "indonesia_market_context": "B2G Indonesia kuat jika narasi menyambungkan masalah publik, efisiensi anggaran, dampak sosial, readiness implementasi, dan risiko kepatuhan.",
+        },
+    },
+    "B2B2C - Partner to Consumer": {
+        "description": "Startup menjual/bermitra dengan bisnis, lalu produk dipakai oleh customer akhir bisnis tersebut.",
+        "who_pays": "Partner bisnis membayar atau berbagi revenue; end user memakai produk melalui channel partner.",
+        "pitch_focus": "partner value, distribution leverage, end-user adoption, revenue share, integration cost, dan retention dua sisi.",
+        "key_metrics": ["Active Partners", "End Users", "Revenue Share", "Activation"],
+        "defaults": {
+            "target_market_segment": "Partner bisnis yang sudah memiliki basis customer besar dan membutuhkan value tambahan untuk end user mereka.",
+            "buyer_persona": "Head of partnership, product lead, growth lead, atau business owner partner.",
+            "decision_maker": "Partner business/product lead sebagai buyer; end user menjadi pengguna akhir yang menentukan adoption.",
+            "sales_cycle": "Sedang-panjang: 1-9 bulan tergantung integrasi, legal, dan ukuran partner.",
+            "market_channel": "Strategic partnership, API/integration, reseller, white-label, embedded product, atau joint campaign.",
+            "procurement_notes": "Siapkan value untuk partner dan end user, integrasi teknis, data sharing, SLA, revenue share, dan success metric bersama.",
+            "indonesia_market_context": "Cocok untuk pasar Indonesia ketika biaya akuisisi direct tinggi dan partner punya distribusi ke komunitas/customer yang sulit dijangkau sendiri.",
+        },
+    },
+    "B2B2G - Vendor/Partner to Government": {
+        "description": "Startup masuk ke pemerintah lewat vendor, konsultan, system integrator, BUMN/BUMD, atau partner implementasi.",
+        "who_pays": "Partner atau instansi akhir, tergantung struktur kontrak dan pengadaan.",
+        "pitch_focus": "partner channel, implementation readiness, compliance, margin sharing, delivery capacity, dan bukti dampak publik.",
+        "key_metrics": ["Partner Pipeline", "Pilot Units", "Implementation Time", "Impact Metric"],
+        "defaults": {
+            "target_market_segment": "Vendor/implementator dan instansi pemerintah yang membutuhkan solusi siap implementasi dengan risiko rendah.",
+            "buyer_persona": "System integrator, konsultan, BUMN/BUMD, atau unit inovasi yang membutuhkan solusi untuk program publik.",
+            "decision_maker": "Partner komersial dan stakeholder instansi akhir. Keputusan dipengaruhi aspek teknis, legal, anggaran, dan dampak.",
+            "sales_cycle": "Panjang: 3-18 bulan. Lebih cepat jika partner sudah punya kontrak/payung kerja sama.",
+            "market_channel": "Channel partner, system integrator, BUMN/BUMD, konsultan implementasi, program inovasi, atau pilot bersama.",
+            "procurement_notes": "Pastikan pembagian peran, margin, kepemilikan data, dukungan teknis, dokumen legal, dan tanggung jawab implementasi jelas.",
+            "indonesia_market_context": "Strategi ini membantu startup kecil masuk pasar publik tanpa menanggung seluruh beban procurement dan implementasi sendiri.",
+        },
+    },
+    "Hybrid - B2C + B2B/B2G": {
+        "description": "Startup memiliki lebih dari satu segmen, misalnya user gratis B2C tetapi monetisasi lewat bisnis/pemerintah.",
+        "who_pays": "Bisa consumer, business, government, sponsor, atau partner; perlu jelas revenue stream utama.",
+        "pitch_focus": "prioritas beachhead, siapa user vs payer, urutan monetisasi, konflik channel, dan metrik per segmen.",
+        "key_metrics": ["Primary Segment", "Revenue Mix", "CAC by Channel", "Retention by Segment"],
+        "defaults": {
+            "target_market_segment": "Mulai dari satu beachhead utama, lalu ekspansi ke segmen kedua setelah demand dan revenue engine terbukti.",
+            "buyer_persona": "User/payer berbeda tergantung segmen. Jelaskan siapa pengguna, pembayar, dan influencer pembelian.",
+            "decision_maker": "Tentukan decision maker per segmen agar pitch tidak terlihat terlalu menyebar.",
+            "sales_cycle": "Campuran: B2C cepat, B2B sedang, B2G panjang. Urutkan berdasarkan prioritas pendapatan dan kecepatan validasi.",
+            "market_channel": "Kombinasi direct digital, partnership, enterprise sales, dan channel publik tergantung prioritas beachhead.",
+            "procurement_notes": "Jangan membuat pitch terlalu luas. Investor perlu melihat segmen pertama yang paling realistis dimenangkan.",
+            "indonesia_market_context": "Hybrid cocok jika Indonesia memiliki fragmentasi customer tinggi, tetapi harus tetap punya wedge awal yang tajam.",
+        },
+    },
+}
+
+
+def target_market_template(market_type: str | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(market_type, dict):
+        market_type = market_type.get("target_market_type", "B2B - Business Indonesia")
+    return TARGET_MARKET_TEMPLATES.get(str(market_type), TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"])
+
+
+def target_market_bullets(data: dict[str, Any], limit: int = 5) -> list[str]:
+    return clean_lines(
+        f"Target segment: {data.get('target_market_segment', '')}\n"
+        f"Buyer/persona: {data.get('buyer_persona', '')}\n"
+        f"Decision maker/payer: {data.get('decision_maker', '')}\n"
+        f"Sales/procurement cycle: {data.get('sales_cycle', '')}\n"
+        f"Channel: {data.get('market_channel', '')}\n"
+        f"Indonesia context: {data.get('indonesia_market_context', '')}",
+        limit,
+    )
+
+def target_market_takeaway(data: dict[str, Any]) -> str:
+    template = target_market_template(data)
+    return f"{data.get('target_market_type', 'Target market')} harus jelas: siapa user, siapa pembayar, siapa decision maker, dan channel masuknya. Fokus: {template['pitch_focus']}"
+
 GLOSSARY = [
+    ("Market Segment", "B2C", "Business-to-Consumer: startup menjual langsung ke konsumen akhir.", "Revenue = jumlah user/customer berbayar x ARPU atau jumlah order x AOV", "10.000 user berbayar x Rp 25.000/bulan = Rp 250 juta MRR"),
+    ("Market Segment", "B2B", "Business-to-Business: startup menjual ke perusahaan/organisasi bisnis.", "ARR = jumlah customer bisnis x ACV; CAC Payback = CAC / gross profit bulanan", "50 perusahaan x Rp 120 juta ACV = Rp 6M ARR"),
+    ("Market Segment", "B2G", "Business-to-Government: startup menjual/bermitra dengan instansi pemerintah atau organisasi publik.", "Pipeline = jumlah instansi target x nilai kontrak potensial x probabilitas closing", "20 instansi x Rp 500 juta x 20% = Rp 2M weighted pipeline"),
+    ("Market Segment", "B2B2C", "Startup menjual lewat partner bisnis lalu menjangkau konsumen akhir partner tersebut.", "Revenue = active partners x end users per partner x monetisasi per user", "10 partner x 20.000 user x Rp 2.000 = Rp 400 juta"),
+    ("Market Segment", "Sales Cycle", "Lama waktu dari lead pertama sampai customer membayar/kontrak ditandatangani.", "Sales Cycle = rata-rata tanggal closing - tanggal lead masuk", "10 deal rata-rata closing dalam 60 hari"),
+    ("Market Segment", "Decision Maker", "Pihak yang punya otoritas akhir untuk membeli, menyetujui anggaran, atau menandatangani kontrak.", "Tidak ada rumus. Petakan: user, influencer, buyer, approver, signer.", "User: admin; buyer: CFO; signer: direktur"),
     ("Market", "TAM", "Total Addressable Market: total pasar maksimum jika semua target memakai solusi.", "TAM = jumlah seluruh target customer x potensi belanja tahunan rata-rata", "10 juta UMKM x Rp 1 juta/tahun = Rp 10T"),
     ("Market", "SAM", "Serviceable Available Market: bagian TAM yang realistis dilayani oleh produk saat ini.", "SAM = segmen target yang cocok x belanja tahunan rata-rata", "1 juta UMKM digital x Rp 1 juta = Rp 1T"),
     ("Market", "SOM", "Serviceable Obtainable Market: bagian pasar yang realistis direbut dalam 2-3 tahun.", "SOM = target customer yang bisa diakuisisi x ARPU tahunan", "10.000 customer x Rp 1,2 juta = Rp 12M"),
@@ -1140,6 +1262,7 @@ def initialize_defaults() -> None:
         "pitch_type": "Investor Seed Round",
         "output_language": "Bahasa Indonesia",
         "business_model_type": "SaaS / Subscription",
+        "target_market_type": "B2B - Business Indonesia",
         "accent_color": "#2563EB",
         "secondary_color": "#0F172A",
         "deck_style": "Minimal VC",
@@ -1157,6 +1280,13 @@ def initialize_defaults() -> None:
         "sam": "Rp 18T",
         "som": "Rp 450M",
         "market_notes": "Target awal: UMKM F&B dan ritel.\nWedge: bisnis yang sudah memakai WhatsApp untuk operasional.\nEkspansi: inventory, payroll, dan embedded financing.",
+        "target_market_segment": TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"]["defaults"]["target_market_segment"],
+        "buyer_persona": TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"]["defaults"]["buyer_persona"],
+        "decision_maker": TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"]["defaults"]["decision_maker"],
+        "sales_cycle": TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"]["defaults"]["sales_cycle"],
+        "market_channel": TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"]["defaults"]["market_channel"],
+        "procurement_notes": TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"]["defaults"]["procurement_notes"],
+        "indonesia_market_context": TARGET_MARKET_TEMPLATES["B2B - Business Indonesia"]["defaults"]["indonesia_market_context"],
         "arpu": "Rp 99.000/bulan",
         "gross_margin": "78%",
         "cac": "Rp 140.000",
@@ -1271,7 +1401,7 @@ def load_project_from_json(file) -> None:
         elif key == "model_metric_values" and isinstance(value, list):
             for idx, item in enumerate(value[:4]):
                 st.session_state[f"model_metric_value_{idx}"] = item
-        elif key in st.session_state or key in {"company", "one_liner", "business_model_type"}:
+        elif key in st.session_state or key in {"company", "one_liner", "business_model_type", "target_market_type"}:
             st.session_state[key] = value
     st.success("Project berhasil dimuat. Form akan mengikuti data dari JSON.")
     st.rerun()
@@ -1369,6 +1499,7 @@ def build_slide_plan(data: dict[str, Any]) -> list[dict[str, Any]]:
             {"key": "solution", "title": "Solution", "purpose": "Jelaskan perubahan sebelum/sesudah produk."},
             {"key": "product", "title": "Product", "purpose": "Tunjukkan cara kerja produk."},
             {"key": "market", "title": "Market", "purpose": "Tunjukkan TAM/SAM/SOM dan wedge."},
+            {"key": "customer_segment", "title": "Target Customer", "purpose": "Jelaskan B2C/B2B/B2G, siapa user, siapa payer, dan channel masuk pasar Indonesia."},
             {"key": "business_model", "title": "Business Model", "purpose": "Jelaskan revenue engine sesuai model bisnis."},
             {"key": "traction", "title": "Traction", "purpose": "Bukti demand dan kualitas retention/growth."},
             {"key": "gtm", "title": "Go-To-Market", "purpose": "Jelaskan mesin akuisisi."},
@@ -1382,6 +1513,7 @@ def build_slide_plan(data: dict[str, Any]) -> list[dict[str, Any]]:
             {"key": "solution", "title": "Solution", "purpose": "Jelaskan solusi."},
             {"key": "product", "title": "Product", "purpose": "Demo flow produk."},
             {"key": "market", "title": "Market Opportunity", "purpose": "Pasar dan wedge."},
+            {"key": "customer_segment", "title": "Target Customer", "purpose": "Jelaskan B2C/B2B/B2G, siapa user, siapa payer, dan channel masuk pasar Indonesia."},
             {"key": "business_model", "title": "Business Model", "purpose": "Revenue engine."},
             {"key": "traction", "title": "Traction", "purpose": "Demand signal."},
             {"key": "gtm", "title": "Go-To-Market", "purpose": "Distribution engine."},
@@ -1456,6 +1588,7 @@ def category_score(data: dict[str, Any]) -> dict[str, int]:
         "Problem clarity": score_text("problem", 2, 70),
         "Solution clarity": score_text("solution", 2, 70),
         "Market logic": min(100, 45 + 15 * sum(1 for x in ["tam", "sam", "som"] if str(data.get(x, "")).strip()) + (20 if str(data.get("market_notes", "")).strip() else 0)),
+        "Target segment clarity": min(100, 30 + 12 * sum(1 for x in ["target_market_segment", "buyer_persona", "decision_maker", "sales_cycle", "market_channel"] if str(data.get(x, "")).strip()) + (10 if str(data.get("target_market_type", "")).strip() else 0)),
         "Traction strength": min(100, 30 + 15 * sum(1 for x in ["users", "revenue", "growth", "retention"] if str(data.get(x, "")).strip()) + (10 if retention and retention >= 0.6 else 0)),
         "Business model quality": min(100, 40 + 10 * len(get_model_metrics(data)) + (20 if gm and gm >= 0.5 else 0)),
         "Financial consistency": min(100, financial_score),
@@ -1476,6 +1609,8 @@ def validate_inputs(data: dict[str, Any]) -> list[dict[str, str]]:
     for key, name in [("tam", "TAM"), ("sam", "SAM"), ("som", "SOM")]:
         if not str(data.get(key, "")).strip():
             issues.append({"level": "error", "area": "Market", "message": f"{name} belum diisi. Investor perlu memahami ukuran pasar dan fokus segmen awal."})
+    if not str(data.get("target_market_segment", "")).strip() or not str(data.get("decision_maker", "")).strip():
+        issues.append({"level": "warning", "area": "Target market", "message": "Target pasar belum tajam. Jelaskan apakah B2C, B2B, B2G, siapa user, siapa payer, decision maker, sales/procurement cycle, dan channel masuk pasar."})
     if not str(data.get("traction_notes", "")).strip():
         issues.append({"level": "warning", "area": "Traction", "message": "Traction belum punya narasi. Tambahkan revenue, active usage, retention, pilot, LOI, pipeline, atau repeat usage."})
     if len(data.get("competitors", [])) < 2:
@@ -1536,6 +1671,8 @@ def generate_investor_insights(data: dict[str, Any]) -> dict[str, Any]:
     if year3_margin and year3_margin > 0:
         strengths.append(f"Profit margin Year 3 sekitar {pct(year3_margin)}. Ini membantu menunjukkan potensi operating leverage.")
     model = business_model_template(data)
+    market_template = target_market_template(data)
+    recommendations.append(f"Untuk target pasar {data.get('target_market_type')}, fokuskan narasi pada: {market_template['pitch_focus']}")
     recommendations.append(f"Untuk model {data.get('business_model_type')}, fokuskan narasi pada: {model['pitch_focus']}")
     recommendations.append(f"Gunakan milestone sebagai jembatan antara ask {money(ask, currency)} dan next round: apa yang akan terbukti dalam {data.get('runway')} bulan.")
     recommendations.append("Siapkan asumsi angka: sumber data market size, conversion funnel, CAC, churn/retention, dan alasan gross margin bisa naik.")
@@ -1565,6 +1702,7 @@ def build_investor_qa(data: dict[str, Any]) -> list[tuple[str, str]]:
     model = business_model_template(data)
     return [
         ("Kenapa masalah ini urgent sekarang?", f"Gunakan evidence problem: {truncate(data.get('problem_evidence'), 160)}. Hubungkan dengan biaya waktu/uang jika customer tetap memakai status quo."),
+        ("Siapa target pasar utama dan kenapa segmen ini dipilih?", f"Target: {data.get('target_market_type')}. Segment: {truncate(data.get('target_market_segment'), 150)}. Decision maker: {truncate(data.get('decision_maker'), 120)}."),
         ("Kenapa solusi ini bisa menang dibanding alternatif?", f"Tekankan narrative advantage: {truncate(data.get('competition_summary'), 160)}."),
         ("Bagaimana startup menghasilkan uang?", f"Model bisnis: {data.get('business_model_type')}. Fokus metrik: {model['pitch_focus']}"),
         ("Apa asumsi utama proyeksi finansial?", "Siapkan asumsi jumlah customer, pricing/ARPU, conversion channel, CAC, retention, COGS, dan hiring plan."),
@@ -1869,6 +2007,7 @@ def label_text(text_id: str, language: str) -> str:
         "solution": ("Solution", "Solusi"),
         "product": ("Product", "Produk"),
         "market": ("Market Opportunity", "Peluang Pasar"),
+        "customer_segment": ("Target Customer", "Target Pelanggan"),
         "business_model": ("Business Model", "Model Bisnis"),
         "traction": ("Traction", "Traksi"),
         "gtm": ("Go-To-Market", "Go-To-Market"),
@@ -2088,7 +2227,7 @@ def build_deck(data: dict[str, Any], image_buffer: BytesIO | None = None) -> Byt
     page = 1
     for item in plan:
         key = item["key"]
-        title = label_text(key, data.get("output_language", "Bahasa Indonesia")) if key in {"problem", "solution", "product", "market", "business_model", "traction", "gtm", "competition", "milestones", "financials", "fundraising", "team", "readiness", "closing", "cover"} else item["title"]
+        title = label_text(key, data.get("output_language", "Bahasa Indonesia")) if key in {"problem", "solution", "product", "market", "customer_segment", "business_model", "traction", "gtm", "competition", "milestones", "financials", "fundraising", "team", "readiness", "closing", "cover"} else item["title"]
         if key == "cover":
             add_cover_slide(prs, data, page)
         elif key == "problem_solution":
@@ -2115,9 +2254,12 @@ def build_deck(data: dict[str, Any], image_buffer: BytesIO | None = None) -> Byt
                 add_card(slide, "Benefit", data.get("product_benefit"), 7.55, 3.85, 4.55, 1.45, data)
             add_takeaway(slide, "Investor harus paham value produk tanpa demo panjang.", data)
         elif key == "market_model":
-            content_slide(prs, data, page, "Market & Business Model", item["purpose"], clean_lines(data.get("market_notes"), 3) + clean_lines(data.get("business_model"), 3), "Pasar awal harus spesifik dan revenue engine harus jelas.", metrics=[("TAM", data.get("tam")), ("SAM", data.get("sam")), ("SOM", data.get("som"))])
+            content_slide(prs, data, page, "Market & Business Model", item["purpose"], target_market_bullets(data, 2) + clean_lines(data.get("market_notes"), 2) + clean_lines(data.get("business_model"), 2), "Pasar awal harus spesifik dan revenue engine harus jelas.", metrics=[("TAM", data.get("tam")), ("SAM", data.get("sam")), ("SOM", data.get("som"))])
         elif key == "market":
             content_slide(prs, data, page, title, item["purpose"], clean_lines(data.get("market_notes"), 5), "TAM besar penting, tetapi wedge awal yang bisa dimenangkan lebih penting.", metrics=[("TAM", data.get("tam")), ("SAM", data.get("sam")), ("SOM", data.get("som"))])
+        elif key == "customer_segment":
+            template = target_market_template(data)
+            content_slide(prs, data, page, title, f"{data.get('target_market_type')} - {template['description']}", target_market_bullets(data, 5), target_market_takeaway(data), metrics=[("Target", data.get("target_market_type")), ("Cycle", data.get("sales_cycle")), ("Channel", data.get("market_channel"))])
         elif key == "business_model":
             model = business_model_template(data)
             content_slide(prs, data, page, title, f"{data.get('business_model_type')} - {model['description']}", clean_lines(data.get("business_model"), 5), f"Pitch focus: {model['pitch_focus']}", metrics=get_model_metrics(data))
@@ -2209,8 +2351,10 @@ def talk_track_for_slide(item: dict[str, Any], data: dict[str, Any], insights: d
         return f"Mulai dari pain point customer: {truncate(data.get('problem'), 260)} Evidence: {truncate(data.get('problem_evidence'), 180)}"
     if "solution" in key or key == "product":
         return f"Jelaskan solusi dan flow produk: {truncate(data.get('solution'), 240)} Product flow: {truncate(data.get('product_flow'), 180)}"
+    if key == "customer_segment":
+        return f"Jelaskan target pasar {data.get('target_market_type')}: {truncate(data.get('target_market_segment'), 180)}. Buyer/persona: {truncate(data.get('buyer_persona'), 120)}. Decision maker/payer: {truncate(data.get('decision_maker'), 120)}. Channel: {truncate(data.get('market_channel'), 120)}."
     if "market" in key:
-        return f"Sebutkan TAM {data.get('tam')}, SAM {data.get('sam')}, SOM {data.get('som')}. Jelaskan wedge awal: {truncate(data.get('market_notes'), 220)}"
+        return f"Sebutkan TAM {data.get('tam')}, SAM {data.get('sam')}, SOM {data.get('som')}. Jelaskan wedge awal dan target {data.get('target_market_type')}: {truncate(data.get('market_notes'), 220)}"
     if "business" in key or "model" in key:
         model = business_model_template(data)
         metrics = ", ".join([a + ": " + b for a, b in get_model_metrics(data)])
@@ -2246,8 +2390,10 @@ def screen_summary_for_slide(item: dict[str, Any], data: dict[str, Any]) -> str:
         return f"{data.get('problem')}\n\nProof: {data.get('problem_evidence')}"
     if "solution" in key or key == "product":
         return f"{data.get('solution')}\n\nFlow: {data.get('product_flow')}\n\nBenefit: {data.get('product_benefit')}"
+    if key == "customer_segment":
+        return f"{data.get('target_market_type')}\n\nTarget: {data.get('target_market_segment')}\nBuyer: {data.get('buyer_persona')}\nDecision maker: {data.get('decision_maker')}\nCycle: {data.get('sales_cycle')}\nChannel: {data.get('market_channel')}"
     if "market" in key:
-        return f"TAM: {data.get('tam')} | SAM: {data.get('sam')} | SOM: {data.get('som')}\n\n{data.get('market_notes')}"
+        return f"TAM: {data.get('tam')} | SAM: {data.get('sam')} | SOM: {data.get('som')}\nTarget: {data.get('target_market_type')}\n\n{data.get('market_notes')}"
     if "business" in key or "model" in key:
         metrics = "\n".join([f"{a}: {b}" for a, b in get_model_metrics(data)])
         return f"{data.get('business_model_type')}\n{data.get('business_model')}\n\n{metrics}"
@@ -2587,7 +2733,7 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     story += [
         p(f"Pitch Scenario Guide - {data.get('company')}", styles["title"]),
         Spacer(1, 0.25 * cm),
-        p(f"{data.get('pitch_type')} • {profile['name']} • {data.get('business_model_type')}", styles["body"]),
+        p(f"{data.get('pitch_type')} • {profile['name']} • {data.get('business_model_type')} • {data.get('target_market_type')}", styles["body"]),
         p(f"Focus: {type_guide['focus']}", styles["body"]),
         p(f"Deck readiness: {insights['score']}/100", styles["body"]),
         p(DEVELOPER, styles["small"]),
@@ -2611,6 +2757,11 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     story += [PageBreak(), p("Pertanyaan Investor & Jawaban Latihan", styles["h1"])]
     qa_rows = [["Pertanyaan", "Cara menjawab"]] + [[p(q, styles["small"]), p(a, styles["small"])] for q, a in insights["qa"]]
     story.append(make_rl_table(qa_rows, [6.0 * cm, 10.0 * cm]))
+    story += [PageBreak(), p("Panduan target pasar Indonesia", styles["h1"])]
+    market_rows = [["Tipe", "Siapa membayar", "Fokus pitch", "Metrik utama"]]
+    for name, item in TARGET_MARKET_TEMPLATES.items():
+        market_rows.append([p(name, styles["small"]), p(item["who_pays"], styles["small"]), p(item["pitch_focus"], styles["small"]), p(", ".join(item["key_metrics"]), styles["small"])])
+    story.append(make_rl_table(market_rows, [3.5 * cm, 4.2 * cm, 5.0 * cm, 3.5 * cm]))
     story += [PageBreak(), p("Istilah investor dan cara menghitungnya", styles["h1"])]
     gloss_rows = [["Istilah", "Arti", "Rumus", "Contoh"]]
     for _, term, simple, formula, example in GLOSSARY:
@@ -2707,6 +2858,18 @@ def update_model_defaults_if_needed() -> None:
         st.session_state["_last_model_type"] = model
 
 
+
+
+def update_target_market_defaults_if_needed() -> None:
+    market_type = st.session_state.get("target_market_type", "B2B - Business Indonesia")
+    last = st.session_state.get("_last_target_market_type")
+    if last != market_type:
+        defaults = target_market_template(market_type).get("defaults", {})
+        for key, value in defaults.items():
+            st.session_state[key] = value
+        st.session_state["_last_target_market_type"] = market_type
+
+
 def render_identity_section() -> None:
     guide("Identitas & konteks pitch", "Isi bagian ini untuk menentukan siapa yang pitching, jenis pitch, bahasa output, durasi, dan format deck yang akan dihasilkan.")
     c1, c2, c3 = st.columns(3)
@@ -2760,7 +2923,38 @@ def render_story_section() -> None:
 
 def render_market_model_section() -> None:
     update_model_defaults_if_needed()
+    update_target_market_defaults_if_needed()
     guide("Market & model bisnis", "TAM/SAM/SOM menjelaskan peluang pasar. Model bisnis menjelaskan bagaimana demand berubah menjadi revenue dan margin.")
+    st.markdown("### Target pasar Indonesia")
+    a, b = st.columns([1, 1])
+    with a:
+        st.selectbox(
+            "Tipe target pasar",
+            list(TARGET_MARKET_TEMPLATES.keys()),
+            key="target_market_type",
+            help="Pilih B2C, B2B, B2G, atau model hybrid. Pilihan ini menyesuaikan insight, slide, PDF, dan Q&A investor.",
+        )
+    with b:
+        target_template = target_market_template(st.session_state.target_market_type)
+        st.markdown(
+            f"<div class='readable-panel'><p><strong>{html.escape(st.session_state.target_market_type)}</strong></p>"
+            f"<p>{html.escape(target_template['description'])}</p>"
+            f"<p><strong>Siapa membayar:</strong> {html.escape(target_template['who_pays'])}</p>"
+            f"<p><strong>Fokus pitch:</strong> {html.escape(target_template['pitch_focus'])}</p></div>",
+            unsafe_allow_html=True,
+        )
+    with st.expander("Detail target pasar Indonesia", expanded=True):
+        t1, t2 = st.columns(2)
+        with t1:
+            st.text_area("Target segment", height=85, key="target_market_segment", help="Segmen pasar awal yang spesifik di Indonesia. Contoh: UMKM F&B Jabodetabek, dinas kabupaten, sekolah swasta, ibu muda urban.")
+            st.text_area("Buyer / persona", height=85, key="buyer_persona", help="Siapa pengguna utama dan masalah hariannya.")
+            st.text_area("Decision maker / payer", height=85, key="decision_maker", help="Siapa yang membayar atau menyetujui pembelian. Pada B2B/B2G, user dan payer sering berbeda.")
+        with t2:
+            st.text_area("Sales / procurement cycle", height=85, key="sales_cycle", help="Estimasi lama proses dari lead sampai bayar/kontrak. B2C cepat, B2B sedang, B2G biasanya panjang.")
+            st.text_area("Channel masuk pasar", height=85, key="market_channel", help="Channel akuisisi atau distribusi: content, komunitas, outbound sales, partnership, tender, reseller, SI, dsb.")
+            st.text_area("Catatan procurement / lokal Indonesia", height=85, key="procurement_notes", help="Dokumen, compliance, trust, payment, legal, tender, pilot, MoU, SLA, atau integrasi yang perlu disiapkan.")
+        st.text_area("Konteks pasar Indonesia", height=80, key="indonesia_market_context", help="Tuliskan faktor lokal: daya beli, regulasi, bahasa, distribusi daerah, trust, payment behavior, procurement, atau channel relationship.")
+
     c1, c2 = st.columns(2)
     with c1:
         st.text_input("TAM", key="tam", help="Total pasar maksimum. Cara hitung: total target customer x potensi belanja tahunan.")
@@ -2783,7 +2977,6 @@ def render_market_model_section() -> None:
                 st.text_input(f"Label metrik {idx + 1}", key=f"model_metric_label_{idx}")
             with m2:
                 st.text_input(f"Nilai metrik {idx + 1}", key=f"model_metric_value_{idx}")
-
 
 def render_traction_gtm_section() -> None:
     guide("Traction & Go-To-Market", "Traction membuktikan demand. GTM menjelaskan bagaimana startup mendapatkan customer secara berulang dan efisien.")
@@ -3098,6 +3291,7 @@ def main() -> None:
         st.header("Ringkasan")
         st.caption(f"Durasi: {st.session_state.pitch_duration_minutes} menit")
         st.caption(f"Model bisnis: {st.session_state.business_model_type}")
+        st.caption(f"Target pasar: {st.session_state.target_market_type}")
         st.caption(f"Jenis pitch: {st.session_state.pitch_type}")
         st.caption(f"Bahasa: {st.session_state.output_language}")
     update_model_defaults_if_needed()
