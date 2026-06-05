@@ -1,6 +1,6 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v10.3 - Dropdown Contrast Fix  
+Versi: v10.4 - Slide Timing Preview Fix  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:

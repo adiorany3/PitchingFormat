@@ -31,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v10.3 - Dropdown Contrast Fix"
+APP_VERSION = "v10.4 - Slide Timing Preview Fix"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -2222,6 +2222,10 @@ def render_rehearsal_section(data: dict[str, Any]) -> None:
             )
 
     live_data = collect_data_preview_only()
+    st.markdown("#### Urutan slide dan timing simulasi")
+    sim_plan = build_slide_plan(live_data)
+    sim_timings = timing_for_plan(sim_plan, int(live_data.get("pitch_duration_minutes", 10)))
+    render_slide_timing_table(sim_plan, sim_timings)
     components.html(build_rehearsal_html(live_data, standalone=False), height=900, scrolling=False)
 
 def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
@@ -2519,10 +2523,151 @@ def render_preview_section(data: dict[str, Any]) -> None:
     c3.metric("Kompetitor", len(data.get("competitors", [])))
     c4.metric("Milestone", len(data.get("milestones", [])))
     st.markdown("#### Urutan slide dan timing")
-    rows = [{"Slide": i + 1, "Judul": item["title"], "Timing": f"{timings[i]} detik", "Tujuan": item["purpose"]} for i, item in enumerate(plan)]
-    st.dataframe(rows, use_container_width=True, hide_index=True)
+    render_slide_timing_table(plan, timings)
     render_validation_panel(insights["issues"])
 
+
+
+def render_slide_timing_table(plan: list[dict[str, Any]], timings: list[int]) -> None:
+    """Render slide order and timing with HTML instead of st.dataframe.
+
+    Streamlit's dataframe canvas can occasionally render blank or unreadable under
+    heavy theme/CSS overrides. This table uses explicit high-contrast HTML so the
+    slide order is always visible in Preview and Simulasi.
+    """
+    if not plan:
+        st.warning("Belum ada skema slide yang dapat ditampilkan. Pilih durasi pitch dan jenis pitch terlebih dahulu.")
+        return
+
+    safe_timings = list(timings or [])
+    if len(safe_timings) < len(plan):
+        safe_timings = safe_timings + [0] * (len(plan) - len(safe_timings))
+
+    total_seconds = sum(max(0, int(x or 0)) for x in safe_timings[:len(plan)])
+    total_minutes = total_seconds / 60 if total_seconds else 0
+
+    rows_html = []
+    for i, item in enumerate(plan):
+        title = html.escape(str(item.get("title", f"Slide {i + 1}")))
+        purpose = html.escape(str(item.get("purpose", "")))
+        key = html.escape(str(item.get("key", "")))
+        seconds = int(safe_timings[i] or 0)
+        rows_html.append(
+            f"""
+            <tr>
+                <td class="num">{i + 1}</td>
+                <td><strong>{title}</strong><br><span>{key}</span></td>
+                <td class="time">{seconds} detik</td>
+                <td>{purpose}</td>
+            </tr>
+            """
+        )
+
+    st.markdown(
+        f"""
+        <style>
+            .slide-timing-summary {{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin: 10px 0 12px 0;
+            }}
+            .slide-timing-pill {{
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                border: 1px solid #94a3b8 !important;
+                border-radius: 999px;
+                padding: 7px 12px;
+                font-size: 13px;
+                font-weight: 800;
+            }}
+            .slide-timing-wrap {{
+                overflow-x: auto;
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 16px;
+                box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
+                margin: 8px 0 18px 0;
+            }}
+            .slide-timing-table {{
+                width: 100%;
+                min-width: 820px;
+                border-collapse: collapse;
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                font-size: 14px;
+                line-height: 1.45;
+            }}
+            .slide-timing-table th {{
+                background: #0f172a !important;
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+                text-align: left;
+                padding: 11px 12px;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                border-bottom: 1px solid #334155;
+            }}
+            .slide-timing-table td {{
+                background: #ffffff !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                padding: 12px;
+                vertical-align: top;
+                border-bottom: 1px solid #e2e8f0;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }}
+            .slide-timing-table tr:nth-child(even) td {{
+                background: #f8fafc !important;
+            }}
+            .slide-timing-table td.num {{
+                width: 64px;
+                text-align: center;
+                font-weight: 900;
+                color: #1d4ed8 !important;
+                -webkit-text-fill-color: #1d4ed8 !important;
+            }}
+            .slide-timing-table td.time {{
+                width: 120px;
+                white-space: nowrap;
+                font-weight: 900;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+            }}
+            .slide-timing-table span {{
+                color: #475569 !important;
+                -webkit-text-fill-color: #475569 !important;
+                font-size: 12px;
+                font-weight: 700;
+            }}
+        </style>
+        <div class="slide-timing-summary">
+            <div class="slide-timing-pill">Total slide: {len(plan)}</div>
+            <div class="slide-timing-pill">Total timing: {total_seconds} detik</div>
+            <div class="slide-timing-pill">≈ {total_minutes:.1f} menit</div>
+        </div>
+        <div class="slide-timing-wrap">
+            <table class="slide-timing-table">
+                <thead>
+                    <tr>
+                        <th>Slide</th>
+                        <th>Judul</th>
+                        <th>Timing</th>
+                        <th>Tujuan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {''.join(rows_html)}
+                </tbody>
+            </table>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 def render_save_load(data: dict[str, Any]) -> None:
     with st.sidebar:
