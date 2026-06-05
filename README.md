@@ -1,13 +1,14 @@
 # Seed Investor Pitch Deck Generator
 
-Versi: v9.2 - Adaptive Font No Ellipsis  
+Versi: v10 - Auto Rehearsal Prompter  
 Footer: Developed by Galuh Adi Insani
 
 Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output ZIP berisi:
 
 1. PPTX investor pitch deck.
 2. PDF Pitch Scenario Guide untuk latihan alur pitching.
-3. JSON project data untuk diedit ulang di kemudian hari.
+3. HTML Pitch Prompter untuk simulasi otomatis/offline.
+4. JSON project data untuk diedit ulang di kemudian hari.
 
 ## Fitur utama
 
@@ -25,6 +26,7 @@ Aplikasi Streamlit untuk membuat paket pitching startup sekali download. Output 
 - Brand kit: logo, warna aksen, warna cover, style deck, font style.
 - Output bahasa: Bahasa Indonesia, English, atau Bilingual untuk label deck.
 - Hasil generate hanya satu ZIP.
+- Simulasi presentasi otomatis seperti teleprompter: start/pause/reset, prev/next, fullscreen, speed control, progress bar, auto-scroll scenario, dan timeline slide.
 
 ## Cara menjalankan
 
@@ -53,8 +55,9 @@ pitch_deck_seed_generator/
 2. Pilih durasi pitching dan jenis pitch.
 3. Pilih model bisnis agar metrik yang muncul sesuai.
 4. Gunakan Kalkulator untuk menghitung metrik dasar.
-5. Cek tab Analisa dan Preview sebelum generate.
-6. Klik Generate Pitching Package untuk mengunduh ZIP.
+5. Cek tab Analisa, Simulasi, dan Preview sebelum generate.
+6. Gunakan tab Simulasi untuk latihan timing dan skenario bicara.
+7. Klik Generate Pitching Package untuk mengunduh ZIP.
 
 
 
@@ -76,3 +79,14 @@ Perbaikan utama:
 - Slide Milestones dibatasi menjadi maksimal 2 milestone per slide agar target, success metric, dan owner tetap tampil penuh.
 - Dataframe/panel UI diberi CSS tambahan agar teks panjang wrap, bukan dipotong.
 - Slide Financials memakai card untuk Next Milestone sehingga teks panjang tidak dipotong.
+
+
+## v10 - Auto Rehearsal Prompter
+
+Fitur baru:
+- Tab **Simulasi** untuk latihan pitching otomatis di dalam Streamlit.
+- Presentation view menampilkan ringkasan slide yang sedang dipitching.
+- Teleprompter menampilkan skenario bicara dan auto-scroll sesuai durasi slide.
+- Timer, progress bar, start/pause/reset, prev/next, fullscreen, dan speed control.
+- Timing otomatis mengikuti pilihan durasi pitch: 3, 5, 8, 10, 15, atau 20 menit.
+- File ZIP output sekarang menyertakan HTML prompter mandiri: `*-pitch-prompter.html`, sehingga latihan bisa dilakukan offline di browser.

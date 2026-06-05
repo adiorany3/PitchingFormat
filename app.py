@@ -10,6 +10,7 @@ from io import BytesIO
 from typing import Any
 
 import streamlit as st
+import streamlit.components.v1 as components
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
@@ -30,7 +31,7 @@ from reportlab.platypus import (
 )
 
 DEVELOPER = "Developed by Galuh Adi Insani"
-APP_VERSION = "v9.2 - Adaptive Font No Ellipsis"
+APP_VERSION = "v10 - Auto Rehearsal Prompter"
 
 st.set_page_config(
     page_title="Seed Investor Pitch Deck Generator",
@@ -298,6 +299,16 @@ def hide_streamlit_emblems() -> None:
                 word-break: normal !important;
                 white-space: normal !important;
                 text-overflow: clip !important;
+            }
+
+            .prompter-frame-note {
+                padding: 12px 14px;
+                border: 1px solid var(--deck-border);
+                border-radius: 14px;
+                background: var(--deck-surface);
+                color: var(--deck-text);
+                margin-bottom: 12px;
+                line-height: 1.55;
             }
         </style>
         """,
@@ -1589,6 +1600,304 @@ def make_rl_table(rows, widths=None):
     return table
 
 
+
+def talk_track_for_slide(item: dict[str, Any], data: dict[str, Any], insights: dict[str, Any] | None = None) -> str:
+    """Create the same practical speaking guidance used by the PDF and prompter."""
+    insights = insights or generate_investor_insights(data)
+    key = item.get("key", "")
+    if key == "cover":
+        return f"Perkenalkan {data.get('company')} dalam satu kalimat: {data.get('one_liner')}. Sebutkan {data.get('round')} dan ask {money(data.get('ask'), data.get('currency'))} secara ringkas."
+    if "problem" in key:
+        return f"Mulai dari pain point customer: {truncate(data.get('problem'), 260)} Evidence: {truncate(data.get('problem_evidence'), 180)}"
+    if "solution" in key or key == "product":
+        return f"Jelaskan solusi dan flow produk: {truncate(data.get('solution'), 240)} Product flow: {truncate(data.get('product_flow'), 180)}"
+    if "market" in key:
+        return f"Sebutkan TAM {data.get('tam')}, SAM {data.get('sam')}, SOM {data.get('som')}. Jelaskan wedge awal: {truncate(data.get('market_notes'), 220)}"
+    if "business" in key or "model" in key:
+        model = business_model_template(data)
+        metrics = ", ".join([a + ": " + b for a, b in get_model_metrics(data)])
+        return f"Model bisnis: {data.get('business_model_type')}. Formula utama: {model['formula']}. Metrik utama: {metrics}."
+    if "traction" in key:
+        return f"Bukti demand: users {data.get('users')}, revenue {data.get('revenue')}, growth {data.get('growth')}, retention {data.get('retention')}. {truncate(data.get('traction_notes'), 240)}"
+    if key == "gtm":
+        return f"ICP: {data.get('icp')}. Channel utama: {data.get('channel')}. GTM: {truncate(data.get('gtm'), 240)}"
+    if key == "competition":
+        competitors = data.get("competitors", []) or []
+        comp_names = ", ".join([str(c.get("name", "")) for c in competitors[:4] if c.get("name")])
+        return f"Jelaskan alternatif customer saat ini ({comp_names or 'status quo dan alternatif utama'}) dan narrative advantage: {data.get('competition_summary')}"
+    if key == "milestones":
+        milestones = data.get("milestones", []) or []
+        details = "; ".join([f"{m.get('period')}: {m.get('target')} ({m.get('metric')})" for m in milestones[:4]])
+        return f"Hubungkan dana dengan milestone berikut: {details or data.get('milestone')}. Tekankan apa yang akan terbukti sebelum round berikutnya."
+    if "financial" in key or "fundraising" in key:
+        return f"Ask {money(data.get('ask'), data.get('currency'))}, runway {data.get('runway')} bulan, use of funds: {truncate(data.get('use_of_funds'), 240)}. Next round logic: {truncate(data.get('next_round'), 160)}"
+    if "team" in key:
+        return f"Kenapa tim ini tepat: {truncate(data.get('team'), 240)} Founder-market fit: {truncate(data.get('founder_fit'), 180)}"
+    if key == "readiness":
+        return insights.get("headline", "Ringkas kesiapan deck, kekuatan, dan risiko utama.")
+    return data.get("closing", "Tutup dengan visi dan next step yang jelas.")
+
+
+def screen_summary_for_slide(item: dict[str, Any], data: dict[str, Any]) -> str:
+    key = item.get("key", "")
+    if key == "cover":
+        return f"{data.get('company')}\n{data.get('one_liner')}\n{data.get('round')} • {money(data.get('ask'), data.get('currency'))}"
+    if "problem" in key and "solution" in key:
+        return f"Problem:\n{data.get('problem')}\n\nSolution:\n{data.get('solution')}"
+    if key == "problem":
+        return f"{data.get('problem')}\n\nProof: {data.get('problem_evidence')}"
+    if "solution" in key or key == "product":
+        return f"{data.get('solution')}\n\nFlow: {data.get('product_flow')}\n\nBenefit: {data.get('product_benefit')}"
+    if "market" in key:
+        return f"TAM: {data.get('tam')} | SAM: {data.get('sam')} | SOM: {data.get('som')}\n\n{data.get('market_notes')}"
+    if "business" in key or "model" in key:
+        metrics = "\n".join([f"{a}: {b}" for a, b in get_model_metrics(data)])
+        return f"{data.get('business_model_type')}\n{data.get('business_model')}\n\n{metrics}"
+    if "traction" in key:
+        return f"Users: {data.get('users')} | Revenue: {data.get('revenue')} | Growth: {data.get('growth')} | Retention: {data.get('retention')}\n\n{data.get('traction_notes')}"
+    if key == "gtm":
+        return f"ICP: {data.get('icp')}\nChannel: {data.get('channel')}\n\n{data.get('gtm')}"
+    if key == "competition":
+        competitors = data.get("competitors", []) or []
+        rows = [f"• {c.get('name')} — {c.get('advantage')}" for c in competitors[:5]]
+        return "\n".join(rows) + f"\n\nTakeaway: {data.get('competition_summary')}"
+    if key == "milestones":
+        milestones = data.get("milestones", []) or []
+        return "\n".join([f"• {m.get('period')}: {m.get('target')} — {m.get('metric')}" for m in milestones[:5]])
+    if "financial" in key or "fundraising" in key:
+        return f"Ask: {money(data.get('ask'), data.get('currency'))}\nRunway: {data.get('runway')} bulan\nMilestone: {data.get('milestone')}\n\nUse of funds:\n{data.get('use_of_funds')}"
+    if "team" in key:
+        return f"{data.get('team')}\n\nFounder-market fit: {data.get('founder_fit')}"
+    if key == "readiness":
+        insights = generate_investor_insights(data)
+        return f"Score: {insights.get('score')}/100\n{insights.get('headline')}"
+    return data.get("closing", "Thank you")
+
+
+def build_rehearsal_items(data: dict[str, Any]) -> list[dict[str, Any]]:
+    plan = build_slide_plan(data)
+    timings = timing_for_plan(plan, int(data.get("pitch_duration_minutes", 10)))
+    insights = generate_investor_insights(data)
+    items: list[dict[str, Any]] = []
+    for idx, item in enumerate(plan):
+        items.append({
+            "slide": idx + 1,
+            "title": str(item.get("title", f"Slide {idx + 1}")),
+            "key": str(item.get("key", "")),
+            "duration": int(timings[idx]),
+            "purpose": str(item.get("purpose", "")),
+            "talk": talk_track_for_slide(item, data, insights),
+            "screen": screen_summary_for_slide(item, data),
+            "transition": "Hubungkan poin ini ke slide berikutnya; jangan membaca semua teks, tekankan bukti dan keputusan yang ingin investor ingat.",
+        })
+    return items
+
+
+def build_rehearsal_html(data: dict[str, Any], *, standalone: bool = True) -> str:
+    items = build_rehearsal_items(data)
+    payload = json.dumps({
+        "company": data.get("company", "Startup"),
+        "duration": int(data.get("pitch_duration_minutes", 10)),
+        "pitchType": data.get("pitch_type", "Investor Seed Round"),
+        "businessModel": data.get("business_model_type", ""),
+        "developer": DEVELOPER,
+        "items": items,
+    }, ensure_ascii=False)
+    return f"""
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pitch Rehearsal Prompter</title>
+<style>
+:root {{
+  --bg: #0f172a;
+  --panel: #111827;
+  --panel2: #1e293b;
+  --text: #f8fafc;
+  --muted: #cbd5e1;
+  --accent: #60a5fa;
+  --line: rgba(255,255,255,.16);
+  --ok: #22c55e;
+  --warn: #f59e0b;
+}}
+* {{ box-sizing: border-box; }}
+body {{
+  margin: 0;
+  font-family: Inter, Aptos, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, rgba(96,165,250,.24), transparent 36%), var(--bg);
+  color: var(--text);
+}}
+.app {{ min-height: 100vh; padding: 18px; }}
+.topbar {{
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 18px;
+  background: rgba(15,23,42,.72); backdrop-filter: blur(12px);
+}}
+.brand h1 {{ margin: 0; font-size: 18px; line-height: 1.25; }}
+.brand p {{ margin: 4px 0 0; color: var(--muted); font-size: 12px; }}
+.controls {{ display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }}
+button, select {{
+  border: 1px solid var(--line); background: #f8fafc; color: #0f172a;
+  border-radius: 12px; padding: 9px 12px; font-weight: 800; cursor: pointer;
+}}
+button.secondary {{ background: transparent; color: var(--text); }}
+button.danger {{ background: #fee2e2; color: #991b1b; }}
+.grid {{ display: grid; grid-template-columns: 1.05fr .95fr; gap: 16px; margin-top: 16px; }}
+.card {{ border: 1px solid var(--line); border-radius: 22px; background: rgba(15,23,42,.78); overflow: hidden; }}
+.card-header {{ padding: 14px 16px; border-bottom: 1px solid var(--line); display:flex; justify-content:space-between; gap:12px; align-items:center; }}
+.eyebrow {{ color: var(--accent); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; font-weight: 900; }}
+.slide-title {{ font-size: clamp(28px, 4vw, 54px); line-height: 1.05; font-weight: 950; margin: 0; }}
+.slide-screen {{ min-height: 475px; padding: 28px; display: flex; flex-direction: column; justify-content: center; gap: 18px; }}
+.screen-body {{ white-space: pre-wrap; font-size: clamp(18px, 2.0vw, 30px); line-height: 1.35; color: var(--text); }}
+.meta-row {{ display:flex; gap:8px; flex-wrap: wrap; margin-top: 8px; }}
+.pill {{ border:1px solid var(--line); border-radius:999px; padding:5px 9px; color:var(--muted); font-size:12px; }}
+.timer {{ font-size: clamp(38px, 7vw, 88px); font-weight: 950; letter-spacing: -.04em; }}
+.timer.warn {{ color: var(--warn); }}
+.timer.ok {{ color: var(--ok); }}
+.progress-wrap {{ height: 10px; background: rgba(255,255,255,.10); border-radius: 999px; overflow: hidden; }}
+.progress {{ height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--ok)); }}
+.prompter {{ height: 420px; overflow: hidden; position: relative; padding: 20px 24px; }}
+.prompt-scroll {{ position: absolute; left: 24px; right: 24px; top: 20px; transition: transform .12s linear; }}
+.prompt-text {{ font-size: clamp(25px, 3.5vw, 44px); line-height: 1.42; font-weight: 800; white-space: pre-wrap; }}
+.purpose {{ padding: 0 24px 18px; color: var(--muted); font-size: 14px; line-height: 1.55; }}
+.next {{ padding: 14px 16px; color: var(--muted); border-top:1px solid var(--line); font-size: 14px; line-height:1.45; }}
+.timeline {{ display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-top:16px; }}
+.step {{ border:1px solid var(--line); border-radius: 14px; padding:8px; color: var(--muted); font-size:11px; min-height:54px; }}
+.step.active {{ background: rgba(96,165,250,.20); color: var(--text); border-color: rgba(96,165,250,.65); }}
+.footer {{ text-align:center; color:var(--muted); font-size:12px; padding: 14px 0 4px; }}
+@media (max-width: 920px) {{ .grid {{ grid-template-columns: 1fr; }} .slide-screen {{ min-height: 360px; }} .prompter {{ height: 350px; }} }}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="brand">
+      <h1 id="company"></h1>
+      <p id="subtitle"></p>
+    </div>
+    <div class="controls">
+      <button id="startBtn">▶ Start</button>
+      <button id="pauseBtn" class="secondary">⏸ Pause</button>
+      <button id="prevBtn" class="secondary">‹ Prev</button>
+      <button id="nextBtn" class="secondary">Next ›</button>
+      <button id="resetBtn" class="danger">Reset</button>
+      <button id="fullBtn" class="secondary">Fullscreen</button>
+      <select id="speed"><option value="0.85">0.85x</option><option value="1" selected>1x</option><option value="1.15">1.15x</option><option value="1.3">1.3x</option></select>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="card-header">
+        <div><div class="eyebrow">Presentation view</div><h2 class="slide-title" id="slideTitle"></h2></div>
+        <div class="timer" id="timer">00:00</div>
+      </div>
+      <div class="slide-screen">
+        <div class="screen-body" id="screenBody"></div>
+        <div class="meta-row"><span class="pill" id="slideCount"></span><span class="pill" id="slidePurposeShort"></span></div>
+        <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><div><div class="eyebrow">Teleprompter</div><h2 class="slide-title" style="font-size:28px">Skenario bicara</h2></div></div>
+      <div class="prompter" id="prompter"><div class="prompt-scroll" id="promptScroll"><div class="prompt-text" id="promptText"></div></div></div>
+      <div class="purpose" id="purpose"></div>
+      <div class="next" id="nextSlide"></div>
+    </section>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+  <div class="footer" id="footer"></div>
+</div>
+<script>
+const data = {payload};
+let idx = 0;
+let elapsed = 0;
+let running = false;
+let last = null;
+let raf = null;
+const $ = (id) => document.getElementById(id);
+function fmt(sec) {{ sec=Math.max(0, Math.ceil(sec)); return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0'); }}
+function currentDuration() {{ return Math.max(1, data.items[idx].duration / parseFloat($('speed').value || '1')); }}
+function render() {{
+  const item = data.items[idx];
+  const dur = currentDuration();
+  const remain = dur - elapsed;
+  $('company').textContent = data.company + ' — Pitch Rehearsal';
+  $('subtitle').textContent = data.pitchType + ' • ' + data.duration + ' menit • ' + data.businessModel;
+  $('slideTitle').textContent = item.title;
+  $('screenBody').textContent = item.screen || '';
+  $('slideCount').textContent = 'Slide ' + item.slide + ' / ' + data.items.length;
+  $('slidePurposeShort').textContent = item.key;
+  $('purpose').textContent = 'Tujuan slide: ' + item.purpose + ' Transisi: ' + item.transition;
+  $('promptText').textContent = item.talk || '';
+  $('timer').textContent = fmt(remain);
+  $('timer').className = 'timer' + (remain <= 10 ? ' warn' : remain > dur * .55 ? ' ok' : '');
+  $('progress').style.width = Math.min(100, Math.max(0, elapsed / dur * 100)) + '%';
+  const next = data.items[idx + 1];
+  $('nextSlide').textContent = next ? 'Berikutnya: ' + next.title + ' — ' + next.purpose : 'Slide terakhir. Tutup dengan next step dan ajakan follow-up.';
+  const prompter = $('prompter');
+  const scroll = $('promptScroll');
+  const maxScroll = Math.max(0, scroll.scrollHeight - prompter.clientHeight + 45);
+  scroll.style.transform = 'translateY(' + (-maxScroll * Math.min(1, elapsed / dur)) + 'px)';
+  document.querySelectorAll('.step').forEach((el, i) => el.classList.toggle('active', i === idx));
+}}
+function buildTimeline() {{
+  $('timeline').innerHTML = data.items.map((it, i) => '<div class="step" data-i="'+i+'"><b>' + it.slide + '. ' + it.title + '</b><br>' + it.duration + ' detik</div>').join('');
+  document.querySelectorAll('.step').forEach(el => el.onclick = () => {{ idx = Number(el.dataset.i); elapsed = 0; render(); }});
+}}
+function tick(ts) {{
+  if (!last) last = ts;
+  const delta = (ts - last) / 1000;
+  last = ts;
+  if (running) {{
+    elapsed += delta;
+    if (elapsed >= currentDuration()) {{
+      if (idx < data.items.length - 1) {{ idx += 1; elapsed = 0; }}
+      else {{ elapsed = currentDuration(); running = false; }}
+    }}
+    render();
+  }}
+  raf = requestAnimationFrame(tick);
+}}
+$('startBtn').onclick = () => {{ running = true; last = null; }};
+$('pauseBtn').onclick = () => {{ running = false; }};
+$('resetBtn').onclick = () => {{ running = false; idx = 0; elapsed = 0; render(); }};
+$('prevBtn').onclick = () => {{ idx = Math.max(0, idx - 1); elapsed = 0; render(); }};
+$('nextBtn').onclick = () => {{ idx = Math.min(data.items.length - 1, idx + 1); elapsed = 0; render(); }};
+$('fullBtn').onclick = () => {{ document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }};
+$('speed').onchange = () => {{ elapsed = Math.min(elapsed, currentDuration()); render(); }};
+document.addEventListener('keydown', (e) => {{
+  if (e.code === 'Space') {{ running = !running; e.preventDefault(); }}
+  if (e.code === 'ArrowRight') {{ idx = Math.min(data.items.length - 1, idx + 1); elapsed = 0; render(); }}
+  if (e.code === 'ArrowLeft') {{ idx = Math.max(0, idx - 1); elapsed = 0; render(); }}
+}});
+$('footer').textContent = data.developer + ' • Space: start/pause • Arrow keys: prev/next';
+buildTimeline(); render(); raf = requestAnimationFrame(tick);
+</script>
+</body>
+</html>
+"""
+
+
+def render_rehearsal_section(data: dict[str, Any]) -> None:
+    guide(
+        "Simulasi pitching otomatis",
+        "Gunakan mode ini untuk latihan seperti teleprompter. Presentation view menampilkan ringkasan slide, sementara panel kanan menjalankan skenario bicara otomatis sesuai timing pitch.",
+    )
+    st.markdown(
+        """
+        <div class="prompter-frame-note">
+            <strong>Kontrol latihan:</strong> klik Start untuk mulai, Pause untuk berhenti, Prev/Next untuk pindah slide, Reset untuk mengulang, dan Fullscreen untuk mode layar penuh. Di keyboard, gunakan Space untuk start/pause dan tombol panah untuk pindah slide.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    components.html(build_rehearsal_html(data, standalone=False), height=900, scrolling=False)
+
 def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     out = BytesIO()
     doc = SimpleDocTemplate(out, pagesize=A4, rightMargin=1.4 * cm, leftMargin=1.4 * cm, topMargin=1.2 * cm, bottomMargin=1.2 * cm)
@@ -1675,7 +1984,7 @@ def build_scenario_pdf(data: dict[str, Any]) -> BytesIO:
     return out
 
 
-def build_download_zip(company_name: str, pptx_file: BytesIO, pdf_file: BytesIO, project_json: BytesIO) -> BytesIO:
+def build_download_zip(company_name: str, pptx_file: BytesIO, pdf_file: BytesIO, project_json: BytesIO, prompter_html: str | None = None) -> BytesIO:
     base = filename(company_name)
     out = BytesIO()
     pptx_file.seek(0); pdf_file.seek(0); project_json.seek(0)
@@ -1683,7 +1992,9 @@ def build_download_zip(company_name: str, pptx_file: BytesIO, pdf_file: BytesIO,
         archive.writestr(f"{base}-seed-investor-pitch-deck.pptx", pptx_file.read())
         archive.writestr(f"{base}-pitch-scenario-guide.pdf", pdf_file.read())
         archive.writestr(f"{base}-project-data.json", project_json.read())
-        archive.writestr("README.txt", f"Generated by {APP_VERSION}\n{DEVELOPER}\n\nIsi ZIP:\n- PPTX investor pitch deck\n- PDF pitch scenario guide\n- JSON project data untuk diedit ulang\n")
+        if prompter_html:
+            archive.writestr(f"{base}-pitch-prompter.html", prompter_html.encode("utf-8"))
+        archive.writestr("README.txt", f"Generated by {APP_VERSION}\n{DEVELOPER}\n\nIsi ZIP:\n- PPTX investor pitch deck\n- PDF pitch scenario guide\n- HTML pitch prompter untuk simulasi otomatis/offline\n- JSON project data untuk diedit ulang\n")
     out.seek(0)
     return out
 
@@ -1928,7 +2239,7 @@ def main() -> None:
     initialize_defaults()
     st.title("📊 Seed Investor Pitch Deck Generator")
     st.caption(f"{APP_VERSION} • {DEVELOPER}")
-    st.markdown("Membuat paket pitching sekali download: PPTX investor deck, PDF scenario guide, dan JSON project data.")
+    st.markdown("Membuat paket pitching sekali download: PPTX investor deck, PDF scenario guide, HTML prompter simulasi otomatis, dan JSON project data.")
     current_data = collect_data_preview_only()
     render_save_load(current_data)
     with st.sidebar:
@@ -1938,7 +2249,7 @@ def main() -> None:
         st.caption(f"Jenis pitch: {st.session_state.pitch_type}")
         st.caption(f"Bahasa: {st.session_state.output_language}")
     update_model_defaults_if_needed()
-    section_names = ["Identitas", "Brand", "Story", "Market & Model", "Traction & GTM", "Financial & Milestone", "Competition & Team", "Kalkulator", "Analisa", "Istilah", "Preview"]
+    section_names = ["Identitas", "Brand", "Story", "Market & Model", "Traction & GTM", "Financial & Milestone", "Competition & Team", "Kalkulator", "Analisa", "Istilah", "Simulasi", "Preview"]
     if st.session_state.ui_mode == "Wizard":
         chosen = st.selectbox("Langkah pengisian", section_names, help="Gunakan Wizard untuk mengisi bertahap.")
         tabs = None
@@ -1987,6 +2298,9 @@ def main() -> None:
     with section_container("Istilah"):
         if "Istilah" in active_sections:
             render_glossary()
+    with section_container("Simulasi"):
+        if "Simulasi" in active_sections:
+            render_rehearsal_section(data)
     with section_container("Preview"):
         if "Preview" in active_sections:
             render_preview_section(data)
@@ -1996,7 +2310,7 @@ def main() -> None:
     with col_generate:
         generate = st.button("Generate Pitching Package", type="primary", use_container_width=True)
     with col_hint:
-        st.caption("Output hanya satu ZIP berisi PPTX, PDF Scenario Guide, dan JSON project data. Gunakan tab Preview dan Analisa sebelum generate.")
+        st.caption("Output satu ZIP berisi PPTX, PDF Scenario Guide, HTML Prompter, dan JSON project data. Gunakan tab Simulasi untuk latihan sebelum pitching.")
     if generate:
         if not str(final_data.get("company", "")).strip():
             st.error("Nama startup wajib diisi.")
@@ -2006,11 +2320,12 @@ def main() -> None:
         pptx = build_deck(final_data, image_buffer)
         pdf = build_scenario_pdf(final_data)
         project_json = build_project_json(final_data)
-        package = build_download_zip(final_data.get("company", "startup"), pptx, pdf, project_json)
-        st.success("Paket pitching berhasil dibuat dalam satu file ZIP.")
+        prompter_html = build_rehearsal_html(final_data)
+        package = build_download_zip(final_data.get("company", "startup"), pptx, pdf, project_json, prompter_html)
+        st.success("Paket pitching berhasil dibuat dalam satu file ZIP, termasuk HTML prompter untuk simulasi otomatis.")
         render_scorecards(generate_investor_insights(final_data))
         st.download_button(
-            "📦 Download PPTX + PDF + JSON (.zip)",
+            "📦 Download PPTX + PDF + Prompter + JSON (.zip)",
             data=package,
             file_name=f"{filename(final_data.get('company', 'startup'))}-pitching-package.zip",
             mime="application/zip",
